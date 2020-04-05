@@ -11,7 +11,8 @@ import {
 
 // Import the CSS
 import '../css/widget.css'
-
+//@ts-ignore
+import vtkFullScreenRenderWindow from 'vtk.js/Sources/Rendering/Misc/FullScreenRenderWindow';
 
 export
 class ExampleModel extends DOMWidgetModel {
@@ -44,6 +45,7 @@ class ExampleModel extends DOMWidgetModel {
 export
 class ExampleView extends DOMWidgetView {
   render() {
+    
     this.el.classList.add('custom-widget');
 
     this.value_changed();
