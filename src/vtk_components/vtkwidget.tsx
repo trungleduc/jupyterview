@@ -236,6 +236,7 @@ export default class VtkWidget extends React.Component<{}, {colorOption : any}> 
               
           }
           </select>
+          <button onClick = {()=>{window.dispatchEvent(new Event('resize'));}}>Resize</button>
         </div>
       </div>
     );

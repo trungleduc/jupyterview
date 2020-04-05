@@ -52,6 +52,24 @@ export class VtkModel extends BoxModel {
   static view_module_version = MODULE_VERSION;
 }
 
+
+class WrapperWidget extends ReactWidget {
+  lastUpdate : number
+  constructor() {
+    super();
+    this.lastUpdate = Date.now()
+  }
+  
+  onResize = (msg : any) => {
+    window.dispatchEvent(new Event('resize'))
+  }
+  
+  render() {
+    return <VtkWidget/>
+  }
+}
+
+
 export class VtkView extends VBoxView {
   static tracker: INotebookTracker;
   static shell: ILabShell;
@@ -86,16 +104,16 @@ export class VtkView extends VBoxView {
   }
 
   render() {
+
     super.render();
     if (VtkView.shell) {
       const w = this.pWidget;
 
-      const content = ReactWidget.create(
-        <VtkWidget/>
-      );
+      const content = new WrapperWidget();
+
       w.addWidget(content);
       w.addClass("vtk");
-
+      
       w.title.label = "Jupyter Vtk";
       w.title.closable = true;
 
