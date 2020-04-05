@@ -10,11 +10,11 @@ const rules = [
 ].concat(vtkRules);
 
 // Packages that shouldn't be bundled but loaded at runtime
-const externals = ['@jupyter-widgets/base'];
+const externals = ['@jupyter-widgets/base', "@jupyterlab/apputils", "react", "@jupyterlab/application", "@jupyterlab/notebook", "@jupyter-widgets/controls", "@jupyterlab/services", "@phosphor/coreutils"];
 
 const resolve = {
   // Add '.ts' and '.tsx' as resolvable extensions.
-  extensions: [".webpack.js", ".web.js", ".ts", ".js"]
+  extensions: [".webpack.js", ".web.js", ".ts",  ".tsx", ".js"]
 };
 
 module.exports = [

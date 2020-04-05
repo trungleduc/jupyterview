@@ -1,46 +1,53 @@
 // Copyright (c) Trung Le
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Application, IPlugin
-} from '@phosphor/application';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { IJupyterWidgetRegistry } from "@jupyter-widgets/base";
+import { 
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
+  ILabShell
+} from "@jupyterlab/application";
+import { INotebookTracker } from "@jupyterlab/notebook";
 
-import {
-  IJupyterWidgetRegistry
- } from '@jupyter-widgets/base';
 
-import * as widgetExports from './widget';
+import * as widgetExports from "./widget";
 
-import {
-  MODULE_NAME, MODULE_VERSION
-} from './version';
+import { MODULE_NAME, MODULE_VERSION } from "./version";
 
-const EXTENSION_ID = 'jupyter_vtk:plugin';
+
+const EXTENSION_ID = "jupyter_vtk:plugin";
 
 /**
  * The example plugin.
  */
-const examplePlugin: IPlugin<Application<Widget>, void> = {
+const examplePlugin: JupyterFrontEndPlugin<void> = {
   id: EXTENSION_ID,
-  requires: [IJupyterWidgetRegistry],
+  //@ts-ignore
+  requires: [IJupyterWidgetRegistry, ILabShell],
+  optional: [INotebookTracker],
   activate: activateWidgetExtension,
-  autoStart: true
+  autoStart: true,
 };
 
 export default examplePlugin;
 
-
 /**
  * Activate the widget extension.
  */
-function activateWidgetExtension(app: Application<Widget>, registry: IJupyterWidgetRegistry): void {
+function activateWidgetExtension(
+  app: JupyterFrontEnd,
+  registry: IJupyterWidgetRegistry,
+  shell: ILabShell,
+  tracker: INotebookTracker
+): void {
+
+  widgetExports.VtkView.shell = shell;
+  widgetExports.VtkView.tracker = tracker;
+
   registry.registerWidget({
     name: MODULE_NAME,
     version: MODULE_VERSION,
-    exports: widgetExports,
+    exports: widgetExports as any,
   });
 }

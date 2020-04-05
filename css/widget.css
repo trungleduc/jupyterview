@@ -1,3 +1,7 @@
 .custom-widget {
   background-color: blue;
 }
+
+.vtk > .p-Widget {
+  height: 100%;
+}
