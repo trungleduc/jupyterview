@@ -23,4 +23,4 @@ class ExampleWidget(DOMWidget):
     _view_module = Unicode(module_name).tag(sync=True)
     _view_module_version = Unicode(module_version).tag(sync=True)
 
-    value = Unicode('Hello World 111').tag(sync=True)
+    value = Unicode('Hello World 55111').tag(sync=True)
