@@ -1,5 +1,5 @@
 
-let _public_path__ = '/static/lab/';
+let _public_path__ = '/nbextensions/jupyter_vtk/';
 console.log(_public_path__);
 
 const itkConfig = {

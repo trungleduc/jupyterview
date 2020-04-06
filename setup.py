@@ -84,6 +84,25 @@ setup_args = dict(
         'Programming Language :: Python :: 3.7',
         'Framework :: Jupyter',
     ],
+    data_files = [
+        ('share/jupyter/nbextensions/jupyter_vtk/itk/WebWorkers', [
+            pjoin(nb_path, 'itk', 'WebWorkers', 'Pipeline.worker.js'),
+            pjoin(nb_path, 'itk', 'WebWorkers', 'MeshIO.worker.js'),
+            pjoin(nb_path, 'itk','WebWorkers','ImageIO.worker.js' ), 
+        ]),
+        ('share/jupyter/nbextensions/jupyter_vtk/itk/PolyDataIOs', [
+            # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKExodusFileReader.js'),
+            # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKExodusFileReaderWasm.js'),
+            # pjoin(nb_path, 'itk','PolyDataIOs','VTKExodusFileReaderWasm.wasm' ), 
+            # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKLegacyFileReader.js'),
+            # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKLegacyFileReaderWasm.js'),
+            # pjoin(nb_path, 'itk','PolyDataIOs','VTKLegacyFileReaderWasm.wasm' ), 
+            pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKXMLFileReader.js'),
+            pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKXMLFileReaderWasm.js'),
+            pjoin(nb_path, 'itk','PolyDataIOs','VTKXMLFileReaderWasm.wasm' ), 
+        ]),
+    ],
+
     include_package_data = True,
     install_requires = [
         'ipywidgets>=7.0.0',

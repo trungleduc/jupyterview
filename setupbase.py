@@ -68,7 +68,7 @@ if "--skip-npm" in sys.argv:
     skip_npm = True
     sys.argv.remove("--skip-npm")
 else:
-    skip_npm = True
+    skip_npm = False
 
 
 # ---------------------------------------------------------------------------

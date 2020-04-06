@@ -72,16 +72,12 @@ module.exports = [
       new CopyPlugin([
         {
         from: path.join(__dirname, 'node_modules', 'itk', 'WebWorkers'),
-        to: path.join(__dirname, 'dist', 'itk', 'WebWorkers'),
-        },
-        {
-        from: path.join(__dirname, 'node_modules', 'itk', 'MeshIOs'),
-        to: path.join(__dirname, 'dist', 'itk', 'MeshIOs'),
+        to: path.join(__dirname, 'jupyter_vtk', 'nbextension', 'static','itk', 'WebWorkers'),
         },
         {
           from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs'),
-          to: path.join(__dirname, 'dist', 'itk', 'PolyDataIOs'),
-          },
+          to: path.join(__dirname, 'jupyter_vtk', 'nbextension' , 'static','itk', 'PolyDataIOs'),
+        },
         
       ]),
     ],
