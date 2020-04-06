@@ -1,5 +1,6 @@
 const path = require('path');
 const version = require('./package.json').version;
+const CopyPlugin = require('copy-webpack-plugin')
 
 // Custom webpack rules
 var vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core.rules;
@@ -14,7 +15,10 @@ const externals = ['@jupyter-widgets/base', "@jupyterlab/apputils", "react", "@j
 
 const resolve = {
   // Add '.ts' and '.tsx' as resolvable extensions.
-  extensions: [".webpack.js", ".web.js", ".ts",  ".tsx", ".js"]
+  extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
+  alias: {
+    './itkConfig$': path.resolve(__dirname, 'lib', 'itkConfigJupyter.js'),
+  },
 };
 
 module.exports = [
@@ -64,6 +68,26 @@ module.exports = [
     },
     externals,
     resolve,
+    plugins: [
+      new CopyPlugin([
+        {
+        from: path.join(__dirname, 'node_modules', 'itk', 'WebWorkers'),
+        to: path.join(__dirname, 'dist', 'itk', 'WebWorkers'),
+        },
+        {
+        from: path.join(__dirname, 'node_modules', 'itk', 'MeshIOs'),
+        to: path.join(__dirname, 'dist', 'itk', 'MeshIOs'),
+        },
+        {
+          from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs'),
+          to: path.join(__dirname, 'dist', 'itk', 'PolyDataIOs'),
+          },
+        
+      ]),
+    ],
+    performance: {
+        maxAssetSize: 10000000
+    }
   },
 
 
@@ -86,6 +110,8 @@ module.exports = [
     devtool: 'source-map',
     externals,
     resolve,
-  }
+  },
+
+
 
 ];
