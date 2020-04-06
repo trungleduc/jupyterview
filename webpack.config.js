@@ -75,8 +75,16 @@ module.exports = [
         to: path.join(__dirname, 'jupyter_vtk', 'nbextension', 'static','itk', 'WebWorkers'),
         },
         {
-          from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs'),
-          to: path.join(__dirname, 'jupyter_vtk', 'nbextension' , 'static','itk', 'PolyDataIOs'),
+          from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs', 'VTKXMLFileReader.js'),
+          to: path.join(__dirname, 'jupyter_vtk', 'nbextension' , 'static','itk', 'PolyDataIOs','VTKXMLFileReader.js'),
+        },
+        {
+          from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs', 'VTKXMLFileReaderWasm.js'),
+          to: path.join(__dirname, 'jupyter_vtk', 'nbextension' , 'static','itk', 'PolyDataIOs','VTKXMLFileReaderWasm.js'),
+        },
+        {
+          from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs', 'VTKXMLFileReaderWasm.wasm'),
+          to: path.join(__dirname, 'jupyter_vtk', 'nbextension' , 'static','itk', 'PolyDataIOs','VTKXMLFileReaderWasm.wasm'),
         },
         
       ]),

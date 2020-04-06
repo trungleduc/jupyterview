@@ -65,7 +65,16 @@ const getFileExt = (fileName: string) => {
   }
 }
 
-export default class VtkWidget extends React.Component<{}, {colorOption : any}> {
+async function parserFile (fileName: string, fileContents: any) {
+  let data =  await readPolyDataArrayBuffer(null, fileContents, fileName).then(resultPreprocessor)
+    .then((polyData: any) => polyData )
+  return data
+}
+
+
+interface StateInterface  { colorOption: Array<{}>, fileList: Array<string> }
+
+export default class VtkWidget extends React.Component<{}, StateInterface> {
 
   fullScreenRenderer: any;
   renderer: any;
@@ -77,7 +86,12 @@ export default class VtkWidget extends React.Component<{}, {colorOption : any}> 
   activeArray: any;
   lookupTable: any;
   actor: any;
-  SUPPORTED_FILE :any
+  inputOpenFileRef: any;
+  SUPPORTED_FILE: any
+  allSource: {}
+  fileData: any
+  playing: boolean
+  playInterval : any
   constructor(props :any) {
     super(props);
     this.fullScreenRenderer = null;
@@ -86,87 +100,102 @@ export default class VtkWidget extends React.Component<{}, {colorOption : any}> 
     this.renderWindow = null;
     this.mapper = null
     this.container = React.createRef();
-    this.state = { colorOption: [] };
+    this.inputOpenFileRef = React.createRef()
+    this.state = { colorOption: [], fileList : [] };
     this.dataRange = null
     this.activeArray = null
     this.lookupTable = null
     this.actor = null
     this.SUPPORTED_FILE = ["vtp", "vtu"]
+    this.allSource = {}
+    this.fileData = {}
+    this.playing = false
+    this.playInterval = null
   }
 
-  createPipeline = (fileName: string, fileContents :any) => {
-    // Create UI
 
-    // VTK pipeline
+
+  createPipeline = (fileName: string, fileContents :any) => {
 
     this.lookupTable = vtkColorTransferFunction.newInstance();
+    this.mapper = vtkMapper.newInstance({
+      interpolateScalarsBeforeMapping: false,
+      useLookupTableScalarRange: true,
+      lookupTable: this.lookupTable,
+      scalarVisibility: false
+    });
     
+    this.actor = vtkActor.newInstance();
+    this.actor.setMapper(this.mapper);
+    
+    this.lookupTable.onModified(() => {
+      this.renderWindow.render();
+    });
+
     readPolyDataArrayBuffer(null, fileContents, fileName).then(resultPreprocessor)
     .then((polyData :any) => {
       this.source = vtk(polyData);
-      this.mapper = vtkMapper.newInstance({
-        interpolateScalarsBeforeMapping: false,
-        useLookupTableScalarRange: true,
-        lookupTable: this.lookupTable,
-        scalarVisibility: false
-      });
-      const actor = vtkActor.newInstance();
-      this.actor = actor
+
       const scalars = this.source.getPointData().getScalars();
       this.dataRange = [].concat(scalars ? scalars.getRange() : [0, 1]);
       this.activeArray = vtkDataArray;
-  
-      const colorByOptions = [{ value: ":", label: "Solid color" }].concat(
-        this.source
-          .getPointData()
-          .getArrays()
-          .map((a:any) => ({
-            label: `(p) ${a.getName()}`,
-            value: `PointData:${a.getName()}`
-          })),
-          this.source
-          .getCellData()
-          .getArrays()
-          .map((a:any) => ({
-            label: `(c) ${a.getName()}`,
-            value: `CellData:${a.getName()}`
-          }))
-      );
-  
-  
-      this.setState(state => {
-        return { colorOption: colorByOptions };
-      });
-  
-      // --------------------------------------------------------------------
-      // Pipeline handling
-      // --------------------------------------------------------------------
-  
-      actor.setMapper(this.mapper);
+      if (this.state.colorOption.length === 0) {
+        const colorByOptions = this.createComponentSelector()
+        this.setState((state : StateInterface) => {
+          return {...state,  colorOption: colorByOptions };
+        });
+      }
       this.mapper.setInputData(this.source);
-      this.renderer.addActor(actor);
-  
-      // Manage update when lookupTable change
-      this.lookupTable.onModified(() => {
-        this.renderWindow.render();
-      });
-  
-      // First render
+      this.renderer.addActor(this.actor);
       this.renderer.resetCamera();
       this.renderWindow.render();
-
-
-
     });
-  
 
   };
 
+
+  createComponentSelector = () => {
+    const pointDataArray = this.source.getPointData().getArrays()
+    let option: Array<{}> = [{ value: ":", label: "Solid color" }]
+    pointDataArray.forEach((a: any) => {
+      let name = a.getName()
+      let numberComp = a.getNumberOfComponents()
+      option.push({
+        label: `(p) ${name} magnitude` ,
+        value: `PointData:${name}:-1`
+      })
+      for (let index = 0; index < numberComp; index++) {
+        option.push({
+          label: `(p) ${name} ${index}` ,
+          value: `PointData:${name}:${index}`
+        })
+        
+      }
+    })
+    const cellDataArray = this.source.getCellData().getArrays()
+
+    cellDataArray.forEach((a: any) => {
+      let name = a.getName()
+      let numberComp = a.getNumberOfComponents()
+      option.push({
+        label: `(p) ${name} magnitude` ,
+        value: `CellData:${name}:-1`
+      })
+      for (let index = 0; index < numberComp; index++) {
+        option.push({
+          label: `(p) ${name} ${index}` ,
+          value: `CellData:${name}:${index}`
+        })
+        
+      }
+    })
+    return option
+  }
+
   updateColorBy = (event: any) => {
     
-     
+    const [location, colorByArrayName, indexValue] = event.target.value.split(':');    
     
-    const [location, colorByArrayName] = event.target.value.split(':');
     const interpolateScalarsBeforeMapping = location === 'PointData';
     let colorMode = ColorMode.DEFAULT;
     let scalarMode = ScalarMode.DEFAULT;
@@ -176,23 +205,29 @@ export default class VtkWidget extends React.Component<{}, {colorOption : any}> 
         colorByArrayName
       );
       
+      const selectedComp = parseInt(indexValue);
       this.activeArray = newArray;
-      const newDataRange = this.activeArray.getRange();
+      
+      const newDataRange: Array<number> = this.activeArray.getRange(selectedComp);
       this.dataRange[0] = newDataRange[0];
       this.dataRange[1] = newDataRange[1];
+ 
       colorMode = ColorMode.MAP_SCALARS;
       scalarMode =
         location === 'PointData'
           ? ScalarMode.USE_POINT_FIELD_DATA
           : ScalarMode.USE_CELL_FIELD_DATA;
 
-      const numberOfComponents = this.activeArray.getNumberOfComponents();
-      if (numberOfComponents > 1) {
-        // always start on magnitude setting
-        if (this.mapper.getLookupTable()) {
-          const lut = this.mapper.getLookupTable();
+      
+      if (this.mapper.getLookupTable()) {
+        const lut = this.mapper.getLookupTable();          
+        if (selectedComp === -1) { 
           lut.setVectorModeToMagnitude();
+        } else {
+          lut.setVectorModeToComponent()
+          lut.setVectorComponent(selectedComp)
         }
+      
       } 
     } 
     this.mapper.set({
@@ -213,7 +248,7 @@ export default class VtkWidget extends React.Component<{}, {colorOption : any}> 
     }
   
   componentDidMount() {
-    console.log("call render");
+
     setTimeout(() => {
       
       this.fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
@@ -286,35 +321,63 @@ export default class VtkWidget extends React.Component<{}, {colorOption : any}> 
     }, 500);
   }
 
-
-  readDataSet = (fileName: string, result: any) => {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(result,"text/xml");
-    const collection = xmlDoc.getElementsByTagName("Collection")
-    console.log(collection);
+  handlePlay = () => {
+    if (this.playing) {
+      clearInterval(this.playInterval)
+      this.playing = false
+    } else {
+      this.playing = true
+      let index = 0
+      this.playInterval = setInterval(() => {
+        if (index === this.state.fileList.length) {
+          index = 0
+        }
+        const selectedFile = this.state.fileList[index]
+        this.source = vtk(this.fileData[selectedFile])
+        this.mapper.setInputData(this.source);
+        this.renderWindow.render();
+        index += 1
+      }, 250)
+    }
+    
   }
 
-  loadFile = (file:any) => {
+  handleFileChange = (e : React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedFile = e.target.value
+    
+    this.source = vtk(this.fileData[selectedFile])
+    this.mapper.setInputData(this.source);
+    this.renderWindow.render();
+  }
+
+  loadFile = (fileList: Array<any>) => {
+    const fileArray = Array.from(fileList)
+    this.setState((state : StateInterface) => {
+      return {...state,  fileList: fileArray.map(e => e.name) };
+    });
+    //@ts-ignore
+    global.b = this.fileData
+    const file = fileList[0]
+    
+    fileArray.forEach((item) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        parserFile(item.name as string, reader.result).then((data) => { 
+          this.fileData[item.name as string] = data;
+        })
+      };
+    reader.readAsArrayBuffer(item);
+    })
+
 
     const reader = new FileReader();
-    const ext = getFileExt(file.name)
-    let mode: number
+
     reader.onload = e => {
-      console.log(file);
-      
-      if (mode === 1) {
+
         this.createPipeline(file.name, reader.result);
-      } else if (mode === 0) {
-        this.readDataSet(file.name, reader.result);
-      }
+  
     };
-    if (this.SUPPORTED_FILE.includes(ext)) {
-      reader.readAsArrayBuffer(file);
-      mode = 1
-    } else if (ext === "pvd") {
-      reader.readAsText(file)
-      mode = 0
-    }
+    reader.readAsArrayBuffer(file);
   };
 
   updateRepresentation = (event:any) =>{
@@ -336,18 +399,29 @@ export default class VtkWidget extends React.Component<{}, {colorOption : any}> 
         <div style={{ height: "95%", width: "100%" }} ref={this.container} />
         <div style={{ height: "5%", width: "100%" }}>
           <input
+            ref = {this.inputOpenFileRef}
             type="file"
+            multiple
             //@ts-ignore
-            onChange={e => this.loadFile(e.target.files[0])}
+            onChange={e => this.loadFile(e.target.files)}
+            style={{display: "none"}}
           ></input>
-          <select onChange = {e => this.updateColorBy(e)}>
+          <button onClick  = {()=>{this.inputOpenFileRef.current.click()}}>Open</button>
+          <select  style={{width:"15%"}} onChange = {e => this.handleFileChange(e)}>
+          {this.state.fileList.map((option: any) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}    
+          </select >
+          <select onChange = {e => this.updateColorBy(e)}  style={{width:"15%"}}>
             {this.state.colorOption.map((option: any) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
-          <select onChange = {e => this.updateRepresentation(e)} >
+          <select onChange = {e => this.updateRepresentation(e)}  style={{width:"15%"}}>
             { [
               {label:'Surface',value:"1:2:0"},
               {label: 'Hidden',value: "0:-1:0"},
@@ -362,7 +436,7 @@ export default class VtkWidget extends React.Component<{}, {colorOption : any}> 
               
           }
           </select>
-          <button onClick = {()=>{}}>Play</button>
+          <button onClick = {this.handlePlay}>Play</button>
         </div>
       </div>
     );
