@@ -14,6 +14,17 @@ import {
   Colors,
 } from "@blueprintjs/core";
 
+import VtkWidget from "./vtkwidget"
+
+import { Resizable } from "re-resizable";
+const style = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'solid 1px #ddd',
+  background: '#f0f0f0',
+};
+
 interface PropsInterface {}
 
 interface StateInterface {}
@@ -29,15 +40,43 @@ export default class Main extends React.Component<
   render() {
     const alignRight = true;
     return (
-      <div className={"bp3-dark"}>
+      <div className={"bp3-dark"} style={{height: "100%", display:"flex", flexDirection: "column"
+      }}>
         <Navbar>
           <NavbarGroup align={alignRight ? Alignment.RIGHT : Alignment.LEFT}>
-            <NavbarHeading>Jupyter vtk</NavbarHeading>
+            <NavbarHeading>JupyterView</NavbarHeading>
             <NavbarDivider />
             <Button className={Classes.MINIMAL} icon="home" text="Home" />
             <Button className={Classes.MINIMAL} icon="document" text="Files" />
           </NavbarGroup>
         </Navbar>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            overflow: "hidden",
+            flexGrow : 1
+          }}
+        >
+          <Resizable
+            style={style}
+            defaultSize={{
+              width: "25%",
+              height: "100%",
+            }}
+            maxWidth="70%"
+            minWidth="10%"
+            enable={{ top: false, right: true, bottom: false, left: false, topRight: false, bottomRight: false, bottomLeft: false, topLeft: false }}
+            onResize = {() => {
+              window.dispatchEvent(new Event('resize'))
+            }}
+          >
+            001
+          </Resizable>
+          <div style={{ ...style, width: "100%", minWidth: "1px" }}>
+            <VtkWidget/>
+          </div>
+        </div>
       </div>
     );
   }
