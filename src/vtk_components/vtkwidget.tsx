@@ -252,7 +252,7 @@ export default class VtkWidget extends React.Component<{}, StateInterface> {
     setTimeout(() => {
       
       this.fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({
-        background: [0.2, 0.3, 0.4],
+        background: [0, 0, 0, 0],
         container: this.container.current,
         rootContainer  : this.container.current
       });
@@ -396,7 +396,7 @@ export default class VtkWidget extends React.Component<{}, StateInterface> {
   render() {
     return (
       <div style={{ height: "100%", width: "100%" }}>
-        <div style={{ height: "95%", width: "100%" }} ref={this.container} />
+        <div style={{ height: "95%", width: "100%", background : "linear-gradient(rgb(0, 0, 42), rgb(82, 87, 110))" }} ref={this.container} />
         <div style={{ height: "5%", width: "100%" }}>
           <input
             ref = {this.inputOpenFileRef}

@@ -24,3 +24,8 @@ class VtkWidget(DOMWidget):
     _view_module_version = Unicode(module_version).tag(sync=True)
 
     value = Unicode('Hello World 55111').tag(sync=True)
+    position = Unicode('split-right').tag(sync=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.position = kwargs.get("position", 'split-right' )

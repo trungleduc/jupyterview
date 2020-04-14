@@ -28,6 +28,7 @@ export class VtkModel extends BoxModel {
       _view_module: VtkModel.view_module,
       _view_module_version: VtkModel.view_module_version,
       value: "Hello World",
+      position: "split-right"
     };
   }
 
@@ -123,12 +124,12 @@ export class VtkView extends VBoxView {
         }
       );
       w.id = UUID.uuid4();
-      let anchor = this.model.get("anchor");
+      let anchor = this.model.get("position");
       if (anchor === "right") {
         VtkView.shell.add(w, "right");
         VtkView.shell.expandRight();
       } else {
-        VtkView.shell.add(w, "main", { mode: "split-right" });
+        VtkView.shell.add(w, "main", { mode: anchor });
       }
     }
   }
