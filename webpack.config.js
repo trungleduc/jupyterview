@@ -7,7 +7,9 @@ var vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core.rul
 const rules = [
   { test: /\.ts$/, loader: 'ts-loader' },
   { test: /\.js$/, loader: 'source-map-loader' },
-  { test: /\.css$/, use: ['style-loader', 'css-loader']}
+  { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+  {test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+    loader: 'url-loader?limit=100000'}
 ].concat(vtkRules);
 
 // Packages that shouldn't be bundled but loaded at runtime

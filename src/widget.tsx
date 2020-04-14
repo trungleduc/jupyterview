@@ -15,7 +15,7 @@ import { ReactWidget } from "@jupyterlab/apputils";
 import * as React from "react";
 
 import VtkWidget from "./vtk_components/vtkwidget"
-
+import Main from "./vtk_components/main"
 
 export class VtkModel extends BoxModel {
   defaults() {
@@ -65,7 +65,7 @@ class WrapperWidget extends ReactWidget {
   }
   
   render() {
-    return <VtkWidget/>
+    return <Main/>
   }
 }
 
