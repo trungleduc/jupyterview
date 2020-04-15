@@ -9,7 +9,7 @@ import "../css/widget.css";
 import { ILabShell } from "@jupyterlab/application";
 import { INotebookTracker } from "@jupyterlab/notebook";
 import { Kernel } from "@jupyterlab/services";
-import { UUID } from "@phosphor/coreutils";
+import { UUID } from "@lumino/coreutils";
 
 import { ReactWidget } from "@jupyterlab/apputils";
 import * as React from "react";
