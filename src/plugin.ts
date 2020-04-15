@@ -23,7 +23,6 @@ const EXTENSION_ID = "jupyter_vtk:plugin";
  */
 const examplePlugin: JupyterFrontEndPlugin<void> = {
   id: EXTENSION_ID,
-  //@ts-ignore
   requires: [IJupyterWidgetRegistry, ILabShell],
   optional: [INotebookTracker],
   activate: activateWidgetExtension,

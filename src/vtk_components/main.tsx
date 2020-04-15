@@ -15,7 +15,7 @@ import {
 } from "@blueprintjs/core";
 
 import VtkWidget from "./vtkwidget"
-
+import LeftPanel from "./panel"
 import { Resizable } from "re-resizable";
 const style = {
   display: 'flex',
@@ -40,14 +40,14 @@ export default class Main extends React.Component<
   render() {
     const alignRight = true;
     return (
-      <div className={"bp3-dark"} style={{height: "100%", display:"flex", flexDirection: "column"
+      <div  style={{height: "100%", display:"flex", flexDirection: "column"
       }}>
-        <Navbar>
+        <Navbar className={"bp3-dark"} >
           <NavbarGroup align={alignRight ? Alignment.RIGHT : Alignment.LEFT}>
             <NavbarHeading>JupyterView</NavbarHeading>
             <NavbarDivider />
-            <Button className={Classes.MINIMAL} icon="home" text="Home" />
-            <Button className={Classes.MINIMAL} icon="document" text="Files" />
+            <Button  className={Classes.MINIMAL} icon="document" text="Files" />
+            <Button  className={Classes.MINIMAL} icon="cog" text="Setting" />
           </NavbarGroup>
         </Navbar>
         <div
@@ -64,14 +64,14 @@ export default class Main extends React.Component<
               width: "25%",
               height: "100%",
             }}
-            maxWidth="70%"
-            minWidth="10%"
+            maxWidth={"70%"}
+            minWidth= {220}
             enable={{ top: false, right: true, bottom: false, left: false, topRight: false, bottomRight: false, bottomLeft: false, topLeft: false }}
             onResize = {() => {
               window.dispatchEvent(new Event('resize'))
             }}
           >
-            001
+            <LeftPanel/>
           </Resizable>
           <div style={{ ...style, width: "100%", minWidth: "1px" }}>
             <VtkWidget/>
