@@ -73,8 +73,8 @@ async function parserFile (fileName: string, fileContents: any) {
 
 
 interface StateInterface  { colorOption: Array<{}>, fileList: Array<string> }
-
-export default class VtkWidget extends React.Component<{}, StateInterface> {
+interface PropsInterface { inputOpenFileRef: React.RefObject<any>}
+export default class VtkWidget extends React.Component<PropsInterface, StateInterface> {
 
   fullScreenRenderer: any;
   renderer: any;
@@ -86,7 +86,6 @@ export default class VtkWidget extends React.Component<{}, StateInterface> {
   activeArray: any;
   lookupTable: any;
   actor: any;
-  inputOpenFileRef: any;
   SUPPORTED_FILE: any
   allSource: {}
   fileData: any
@@ -100,7 +99,6 @@ export default class VtkWidget extends React.Component<{}, StateInterface> {
     this.renderWindow = null;
     this.mapper = null
     this.container = React.createRef();
-    this.inputOpenFileRef = React.createRef()
     this.state = { colorOption: [], fileList : [] };
     this.dataRange = null
     this.activeArray = null
@@ -398,14 +396,13 @@ export default class VtkWidget extends React.Component<{}, StateInterface> {
         <div style={{ height: "95%", width: "100%", background : "linear-gradient(rgb(116, 120, 190), rgb(193, 195, 202))" }} ref={this.container} />
         <div style={{ height: "5%", width: "100%" }}>
           <input
-            ref = {this.inputOpenFileRef}
+            ref = {this.props.inputOpenFileRef}
             type="file"
             multiple
             //@ts-ignore
             onChange={e => this.loadFile(e.target.files)}
             style={{display: "none"}}
           ></input>
-          <button onClick  = {()=>{this.inputOpenFileRef.current.click()}}>Open</button>
           <select  style={{width:"15%"}} onChange = {e => this.handleFileChange(e)}>
           {this.state.fileList.map((option: any) => (
               <option key={option} value={option}>

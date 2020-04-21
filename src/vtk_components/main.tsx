@@ -61,13 +61,7 @@ export default class Main extends React.Component<
           <NavbarGroup align={alignRight ? Alignment.RIGHT : Alignment.LEFT}>
             <NavbarHeading>JupyterView</NavbarHeading>
             <NavbarDivider />
-            <input
-            ref = {this.inputOpenFileRef}
-            type="file"
-            multiple
-            onChange={e => this.loadFile(e)}
-            style={{display: "none"}}
-          ></input>
+
             <Button onClick  = {()=>{this.inputOpenFileRef.current.click()}}  className={Classes.MINIMAL} icon="document" text="Files" />
             <Button  className={Classes.MINIMAL} icon="cog" text="Setting" />
           </NavbarGroup>
@@ -96,7 +90,7 @@ export default class Main extends React.Component<
             <LeftPanel/>
           </Resizable>
           <div style={{ ...style, width: "100%", minWidth: "1px" }}>
-            <VtkWidget/>
+            <VtkWidget inputOpenFileRef = {this.inputOpenFileRef} />
           </div>
         </div>
       </div>
