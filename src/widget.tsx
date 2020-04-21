@@ -13,10 +13,30 @@ import { UUID } from "@lumino/coreutils";
 
 import { ReactWidget } from "@jupyterlab/apputils";
 import * as React from "react";
+import Main from "./vtk_components/main";
+import { createStore, compose, applyMiddleware } from "redux";
+import thunk from "redux-thunk";
+import { Provider } from "react-redux";
+import { rootReducer } from "./redux/reducers";
+import { StateInterface } from "./redux/types";
+import { initialState } from "./redux/reducers";
 
-import VtkWidget from "./vtk_components/vtkwidget"
-import Main from "./vtk_components/main"
+const getEnhancers = () => {
+  let enhancers = applyMiddleware(thunk);
+  if (
+    (window as any).__REDUX_DEVTOOLS_EXTENSION__ &&
+    process.env.NODE_ENV === "development"
+  ) {
+    enhancers = compose(
+      enhancers,
+      (window as any).__REDUX_DEVTOOLS_EXTENSION__()
+    );
+  }
+  return enhancers;
+};
 
+export type SendMsgInterface = (content: {}, buffers?: ArrayBuffer[] | ArrayBufferView[] | undefined) => void
+  
 export class VtkModel extends BoxModel {
   defaults() {
     return {
@@ -28,7 +48,7 @@ export class VtkModel extends BoxModel {
       _view_module: VtkModel.view_module,
       _view_module_version: VtkModel.view_module_version,
       value: "Hello World",
-      position: "split-right"
+      position: "split-right",
     };
   }
 
@@ -43,7 +63,6 @@ export class VtkModel extends BoxModel {
     super.initialize(attributes, options);
     this.widget_manager.display_model(undefined as any, this, {});
   }
-  
 
   static model_name = "VtkModel";
   static model_module = MODULE_NAME;
@@ -53,23 +72,29 @@ export class VtkModel extends BoxModel {
   static view_module_version = MODULE_VERSION;
 }
 
-
 class WrapperWidget extends ReactWidget {
-  lastUpdate : number
-  constructor() {
+  lastUpdate: number;
+  store: any
+  send_msg: SendMsgInterface
+  model: VtkModel
+  constructor(initialState : StateInterface, send_msg: SendMsgInterface, model: VtkModel ) {
     super();
-    this.lastUpdate = Date.now()
+    this.lastUpdate = Date.now();
+    this.store = createStore(rootReducer, initialState,  (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__());
+    this.send_msg = send_msg
+    this.model = model
   }
-  
-  onResize = (msg : any) => {
-    window.dispatchEvent(new Event('resize'))
-  }
-  
+
+  onResize = (msg: any) => {
+    window.dispatchEvent(new Event("resize"));
+  };
+
   render() {
-    return <Main/>
+    return <Provider store={this.store}>
+              <Main send_msg={this.send_msg} model={this.model} />
+          </Provider>
   }
 }
-
 
 export class VtkView extends VBoxView {
   static tracker: INotebookTracker;
@@ -86,10 +111,9 @@ export class VtkView extends VBoxView {
   //   }
   // }
 
- /**
+  /**
    * Public constructor
    */
-
 
   /**
    * Handle dispose of the parent
@@ -104,17 +128,32 @@ export class VtkView extends VBoxView {
     }
   }
 
-  render() {
+  getStore(): StateInterface {
+    
+    let store = {...initialState};    
+    let newStore: StateInterface = {
+      ...store,
+    }
 
+    let savedStore = this.model.get("initial_store");
+    for (const key in savedStore) {
+      if (savedStore.hasOwnProperty(key) && newStore.hasOwnProperty(key) ) {
+        newStore[key as keyof StateInterface] = savedStore[key]
+      }
+    }
+    return newStore;
+  }
+
+  render() {
     super.render();
     if (VtkView.shell) {
       const w = this.pWidget;
 
-      const content = new WrapperWidget();
+      const content = new WrapperWidget(this.getStore(), this.send.bind(this), this.model);
 
       w.addWidget(content);
       w.addClass("vtk");
-      
+
       w.title.label = "JupyterView";
       w.title.closable = true;
 

@@ -355,8 +355,7 @@ export default class VtkWidget extends React.Component<{}, StateInterface> {
     this.setState((state : StateInterface) => {
       return {...state,  fileList: fileArray.map(e => e.name) };
     });
-    //@ts-ignore
-    global.b = this.fileData
+
     const file = fileList[0]
     
     fileArray.forEach((item) => {

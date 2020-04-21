@@ -25,16 +25,31 @@ const style = {
   background: '#f0f0f0',
 };
 
-interface PropsInterface {}
+import { SendMsgInterface, VtkModel } from "../widget"
+
+interface PropsInterface {
+  send_msg: SendMsgInterface
+  model : VtkModel
+}
 
 interface StateInterface {}
 
 export default class Main extends React.Component<
   PropsInterface,
   StateInterface
-> {
+  > {
+  inputOpenFileRef : React.RefObject<any>
   constructor(props: PropsInterface) {
     super(props);
+    this.inputOpenFileRef = React.createRef()
+  }
+
+  loadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      console.log(files);
+      
+    }
   }
 
   render() {
@@ -46,7 +61,14 @@ export default class Main extends React.Component<
           <NavbarGroup align={alignRight ? Alignment.RIGHT : Alignment.LEFT}>
             <NavbarHeading>JupyterView</NavbarHeading>
             <NavbarDivider />
-            <Button  className={Classes.MINIMAL} icon="document" text="Files" />
+            <input
+            ref = {this.inputOpenFileRef}
+            type="file"
+            multiple
+            onChange={e => this.loadFile(e)}
+            style={{display: "none"}}
+          ></input>
+            <Button onClick  = {()=>{this.inputOpenFileRef.current.click()}}  className={Classes.MINIMAL} icon="document" text="Files" />
             <Button  className={Classes.MINIMAL} icon="cog" text="Setting" />
           </NavbarGroup>
         </Navbar>
