@@ -26,7 +26,7 @@ prune tests/build
 
 # Javascript files
 graft jupyter_vtk/nbextension
-graft src
+#graft src
 prune **/node_modules
 prune coverage
 prune lib

@@ -10,6 +10,10 @@
   ],
   "files": [
     "dist/*.js",
+    "dist/*.woff",
+    "dist/*.svg",
+    "dist/*.eot",
+    "dist/*.ttf",
     "css/*.css",
     "dist/itk/**"
   ],
@@ -33,6 +37,7 @@
     "build:lib": "tsc",
     "build:nbextension": "webpack --mode development",
     "build:all": "npm run build:labextension && npm run build:nbextension",
+    "build:release": "npm version",
     "clean": "npm run clean:lib && npm run clean:nbextension",
     "clean:lib": "rimraf lib",
     "clean:labextension": "rimraf jupyter_vtk/labextension",
@@ -48,13 +53,14 @@
     "watch:nbextension": "webpack --watch"
   },
   "dependencies": {
+
+  },
+  "devDependencies": {
     "@blueprintjs/core": "^3.25.0",
     "itk": "^12.0.0",
     "re-resizable": "^6.3.2",
     "semantic-ui-react": "^0.88.2",
-    "vtk.js": "^13.12.3"
-  },
-  "devDependencies": {
+    "vtk.js": "^13.12.3",
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
     "@jupyter-widgets/base": "^3.0.0",
