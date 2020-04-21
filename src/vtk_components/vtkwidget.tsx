@@ -90,7 +90,8 @@ export default class VtkWidget extends React.Component<PropsInterface, StateInte
   allSource: {}
   fileData: any
   playing: boolean
-  playInterval : any
+  playInterval: any
+  interator :any
   constructor(props :any) {
     super(props);
     this.fullScreenRenderer = null;
@@ -109,6 +110,7 @@ export default class VtkWidget extends React.Component<PropsInterface, StateInte
     this.fileData = {}
     this.playing = false
     this.playInterval = null
+    this.interator = null
   }
 
 
@@ -256,7 +258,7 @@ export default class VtkWidget extends React.Component<PropsInterface, StateInte
       });
       this.renderer = this.fullScreenRenderer.getRenderer();
       this.renderWindow = this.fullScreenRenderer.getRenderWindow();
-  
+
       const axes = vtkAxesActor.newInstance();
       const orientationWidget = vtkOrientationMarkerWidget.newInstance({
         actor: axes,
@@ -315,6 +317,10 @@ export default class VtkWidget extends React.Component<PropsInterface, StateInte
       this.renderer.resetCamera();
       widgetManager.enablePicking();
       this.renderWindow.render();
+      const interactor = this.fullScreenRenderer.getInteractor()
+      document.querySelector('body')!.removeEventListener('keypress',interactor.handleKeyPress)
+      document.querySelector('body')!.removeEventListener('keydown',interactor.handleKeyDown)
+      document.querySelector('body')!.removeEventListener('keyup',interactor.handleKeyUp)      
 
     }, 500);
   }
