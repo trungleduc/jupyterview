@@ -10,6 +10,7 @@ TODO: Add module docstring
 
 from ipywidgets import DOMWidget
 from traitlets import Unicode, observe
+from traitlets import List as TList
 from traitlets import Dict as TDict
 from ._frontend import module_name, module_version
 from typing import Dict
@@ -26,6 +27,7 @@ class VtkWidget(DOMWidget):
     _view_module_version = Unicode(module_version).tag(sync=True)
 
     rootPath = Unicode('').tag(sync=True)
+    root_data = TList([]).tag(sync=True)
     position = Unicode('split-right').tag(sync=True)
 
     def __init__(self, **kwargs):
@@ -35,14 +37,16 @@ class VtkWidget(DOMWidget):
     
     @observe("rootPath")
     def __get_file_structure(self, data) -> Dict:
+        new_data = []
         for root, dirs, files in os.walk(self.rootPath):
             dirs[:] = [d for d in dirs if (not d.startswith('.') and not "node_modules" in d and not "__pycache__" in d) ]
             for file_name  in files:
                 rel_dir = os.path.relpath(root, self.rootPath)
                 rel_file = os.path.join(rel_dir, file_name)
                 p = pathlib.PurePath(rel_file) 
-                self.root_data.append({"key": p.as_posix()})
-            
+                new_data.append({"key": p.as_posix()})
+        
+        self.root_data = new_data    
 
     def test(self):
         pass

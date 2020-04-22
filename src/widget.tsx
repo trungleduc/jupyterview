@@ -49,6 +49,7 @@ export class VtkModel extends BoxModel {
       _view_module_version: VtkModel.view_module_version,
       rootPath: "",
       position: "split-right",
+      root_data : []
     };
   }
 
@@ -149,7 +150,7 @@ export class VtkView extends VBoxView {
     if (VtkView.shell) {
       const rootPath = PageConfig.getOption('serverRoot')
       this.model.set("rootPath", rootPath)
-      this.model.save_changes();
+      this.model.save_changes();      
       const w = this.pWidget;
 
       const content = new WrapperWidget(this.getStore(), this.send.bind(this), this.model);
