@@ -10,7 +10,7 @@ import { ILabShell } from "@jupyterlab/application";
 import { INotebookTracker } from "@jupyterlab/notebook";
 import { Kernel } from "@jupyterlab/services";
 import { UUID } from "@lumino/coreutils";
-
+import {PageConfig} from "./tools/getOption";
 import { ReactWidget } from "@jupyterlab/apputils";
 import * as React from "react";
 import Main from "./vtk_components/main";
@@ -47,7 +47,7 @@ export class VtkModel extends BoxModel {
       _view_name: VtkModel.view_name,
       _view_module: VtkModel.view_module,
       _view_module_version: VtkModel.view_module_version,
-      value: "Hello World",
+      rootPath: "",
       position: "split-right",
     };
   }
@@ -147,6 +147,9 @@ export class VtkView extends VBoxView {
   render() {
     super.render();
     if (VtkView.shell) {
+      const rootPath = PageConfig.getOption('serverRoot')
+      this.model.set("rootPath", rootPath)
+      this.model.save_changes();
       const w = this.pWidget;
 
       const content = new WrapperWidget(this.getStore(), this.send.bind(this), this.model);
