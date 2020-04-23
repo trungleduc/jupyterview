@@ -10,7 +10,7 @@ import { ILabShell } from "@jupyterlab/application";
 import { INotebookTracker } from "@jupyterlab/notebook";
 import { Kernel } from "@jupyterlab/services";
 import { UUID } from "@lumino/coreutils";
-import {PageConfig} from "./tools/getOption";
+import { PageConfig } from "./tools/getOption";
 import { ReactWidget } from "@jupyterlab/apputils";
 import * as React from "react";
 import Main from "./vtk_components/main";
@@ -35,8 +35,11 @@ const getEnhancers = () => {
   return enhancers;
 };
 
-export type SendMsgInterface = (content: {}, buffers?: ArrayBuffer[] | ArrayBufferView[] | undefined) => void
-  
+export type SendMsgInterface = (
+  content: {},
+  buffers?: ArrayBuffer[] | ArrayBufferView[] | undefined
+) => void;
+
 export class VtkModel extends BoxModel {
   defaults() {
     return {
@@ -49,7 +52,7 @@ export class VtkModel extends BoxModel {
       _view_module_version: VtkModel.view_module_version,
       rootPath: "",
       position: "split-right",
-      root_data : []
+      root_data: [],
     };
   }
 
@@ -75,15 +78,24 @@ export class VtkModel extends BoxModel {
 
 class WrapperWidget extends ReactWidget {
   lastUpdate: number;
-  store: any
-  send_msg: SendMsgInterface
-  model: VtkModel
-  constructor(initialState : StateInterface, send_msg: SendMsgInterface, model: VtkModel ) {
+  store: any;
+  send_msg: SendMsgInterface;
+  model: VtkModel;
+  constructor(
+    initialState: StateInterface,
+    send_msg: SendMsgInterface,
+    model: VtkModel
+  ) {
     super();
     this.lastUpdate = Date.now();
-    this.store = createStore(rootReducer, initialState,  (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__());
-    this.send_msg = send_msg
-    this.model = model
+    this.store = createStore(
+      rootReducer,
+      initialState,
+      (window as any).__REDUX_DEVTOOLS_EXTENSION__ &&
+        (window as any).__REDUX_DEVTOOLS_EXTENSION__()
+    );
+    this.send_msg = send_msg;
+    this.model = model;
   }
 
   onResize = (msg: any) => {
@@ -91,9 +103,11 @@ class WrapperWidget extends ReactWidget {
   };
 
   render() {
-    return <Provider store={this.store}>
-              <Main send_msg={this.send_msg} model={this.model} />
-          </Provider>
+    return (
+      <Provider store={this.store}>
+        <Main send_msg={this.send_msg} model={this.model} />
+      </Provider>
+    );
   }
 }
 
@@ -130,16 +144,15 @@ export class VtkView extends VBoxView {
   }
 
   getStore(): StateInterface {
-    
-    let store = {...initialState};    
+    let store = { ...initialState };
     let newStore: StateInterface = {
       ...store,
-    }
+    };
 
     let savedStore = this.model.get("initial_store");
     for (const key in savedStore) {
-      if (savedStore.hasOwnProperty(key) && newStore.hasOwnProperty(key) ) {
-        newStore[key as keyof StateInterface] = savedStore[key]
+      if (savedStore.hasOwnProperty(key) && newStore.hasOwnProperty(key)) {
+        newStore[key as keyof StateInterface] = savedStore[key];
       }
     }
     return newStore;
@@ -148,12 +161,16 @@ export class VtkView extends VBoxView {
   render() {
     super.render();
     if (VtkView.shell) {
-      const rootPath = PageConfig.getOption('serverRoot')
-      this.model.set("rootPath", rootPath)
-      this.model.save_changes();      
+      const rootPath = PageConfig.getOption("serverRoot");
+      this.model.set("rootPath", rootPath);
+      this.model.save_changes();
       const w = this.pWidget;
 
-      const content = new WrapperWidget(this.getStore(), this.send.bind(this), this.model);
+      const content = new WrapperWidget(
+        this.getStore(),
+        this.send.bind(this),
+        this.model
+      );
 
       w.addWidget(content);
       w.addClass("vtk");

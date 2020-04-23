@@ -35,7 +35,6 @@ export default class LeftPanel extends React.Component<ITabsProps, ITabsState> {
 
   render() {
     return (
-
       <Tabs
         animate={this.state.animate}
         id="TabsExample"
@@ -46,10 +45,20 @@ export default class LeftPanel extends React.Component<ITabsProps, ITabsState> {
         className={"left-panel"}
         defaultSelectedTabId={"rx"}
       >
-        <Tab className ={"left-panel-tab"} id="rx" title="SOURCE" panel={<SourcePanel />} />
-        <Tab className ={"left-panel-tab"} id="ng" title="TOOLS" panel={<ToolsPanel />} />
         <Tab
-          className ={"left-panel-tab"}
+          className={"left-panel-tab"}
+          id="rx"
+          title="SOURCE"
+          panel={<SourcePanel />}
+        />
+        <Tab
+          className={"left-panel-tab"}
+          id="ng"
+          title="TOOLS"
+          panel={<ToolsPanel />}
+        />
+        <Tab
+          className={"left-panel-tab"}
           id="mb"
           title="INFO"
           panel={<InfoPanel />}

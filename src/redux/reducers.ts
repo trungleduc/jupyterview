@@ -5,7 +5,7 @@ export const initialState: StateInterface = {
   mainState: "",
 };
 
-export function rootReducer (
+export function rootReducer(
   state: StateInterface = initialState,
   action: ActionType
 ): StateInterface {
