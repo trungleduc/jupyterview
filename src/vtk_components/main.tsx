@@ -47,9 +47,12 @@ export default class Main extends React.Component<
   StateInterface
 > {
   inputOpenFileRef: React.RefObject<any>;
+  browserRef: React.RefObject<any>;
   constructor(props: PropsInterface) {
     super(props);
     this.inputOpenFileRef = React.createRef();
+    this.browserRef = React.createRef();
+
     this.state = { isOpen: false };
   }
 
@@ -57,8 +60,15 @@ export default class Main extends React.Component<
     this.setState((oldState) => {
       return { ...oldState, isOpen: true };
     });
+
   private handleClose = () =>
     this.setState((oldState) => ({ ...oldState, isOpen: false }));
+
+  private handleOpenRemoteFile = () => {
+    console.log(this.browserRef.current.child.state.selection);
+    this.setState((oldState) => ({ ...oldState, isOpen: false }));
+  };
+
   render() {
     const alignRight = true;
     return (
@@ -126,17 +136,24 @@ export default class Main extends React.Component<
           onClose={this.handleClose}
           title="Open remote files"
           isOpen={this.state.isOpen}
+          style={{ width: "50vw" }}
         >
           <div className={Classes.DIALOG_BODY}>
             <RemoteFileBrowser
               send_msg={this.props.send_msg}
               model={this.props.model}
+              browserRef={this.browserRef}
             />
           </div>
           <div className={Classes.DIALOG_FOOTER}>
             <div className={Classes.DIALOG_FOOTER_ACTIONS}>
               <Button onClick={this.handleClose}>Close</Button>
-              <AnchorButton intent={Intent.PRIMARY}>Open</AnchorButton>
+              <AnchorButton
+                intent={Intent.PRIMARY}
+                onClick={this.handleOpenRemoteFile}
+              >
+                Open
+              </AnchorButton>
             </div>
           </div>
         </Dialog>

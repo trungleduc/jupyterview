@@ -39,3 +39,7 @@
   margin-top: 0;
   background: aliceblue;
 }
+
+.file-browser a {
+  color: black !important;
+}

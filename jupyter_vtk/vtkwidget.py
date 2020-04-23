@@ -15,6 +15,8 @@ from traitlets import Dict as TDict
 from ._frontend import module_name, module_version
 from typing import Dict
 import os
+import time
+
 import pathlib
 class VtkWidget(DOMWidget):
     """TODO: Add docstring here
@@ -43,8 +45,11 @@ class VtkWidget(DOMWidget):
             for file_name  in files:
                 rel_dir = os.path.relpath(root, self.rootPath)
                 rel_file = os.path.join(rel_dir, file_name)
-                p = pathlib.PurePath(rel_file) 
-                new_data.append({"key": p.as_posix()})
+                p = pathlib.PurePath(rel_file)
+                abs_dir = os.path.join(root, file_name)
+                file_size = os.path.getsize(abs_dir)
+                file_time = os.path.getmtime(abs_dir)*1000
+                new_data.append({"key": p.as_posix(), "size": file_size, "modified": file_time })
         
         self.root_data = new_data    
 
