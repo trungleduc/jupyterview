@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, AriaAttributes } from "react";
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
 import {
@@ -32,6 +32,7 @@ const style = {
 };
 
 import { SendMsgInterface, VtkModel } from "../widget";
+import { throws } from "assert";
 
 interface PropsInterface {
   send_msg: SendMsgInterface;
@@ -65,7 +66,38 @@ export default class Main extends React.Component<
     this.setState((oldState) => ({ ...oldState, isOpen: false }));
 
   private handleOpenRemoteFile = () => {
-    console.log(this.browserRef.current.child.state.selection);
+    const data: Array<string> = this.browserRef.current.child.state.selection;
+    let selectedMode = -1;
+    let selectedFile = [];
+    let selectedFolder = [];
+    let payload;
+    for (let item of data) {
+      if (item.endsWith("/")) {
+        selectedFolder.push(item);
+      } else {
+        selectedFile.push(item);
+      }
+    }
+    if (selectedFolder.length > 0 && selectedFile.length > 0) {
+      //Select both folders and files -> only files are selected
+      selectedMode = 1;
+      payload = { selectedMode, data: selectedFile };
+    } else if (selectedFolder.length > 0 && selectedFile.length === 0) {
+      //Select multiple folders and not file -> only first folder is selected
+      selectedMode = 0;
+      payload = { selectedMode, data: [selectedFolder[0]] };
+    } else if (selectedFolder.length === 0 && selectedFile.length > 0) {
+      //Select multiple files and not folder -> all files are selected
+      selectedMode = 1;
+      payload = { selectedMode, data: selectedFile };
+    }
+
+    if (selectedMode > -1) {
+      this.props.send_msg({
+        action: "open_file",
+        payload,
+      });
+    }
     this.setState((oldState) => ({ ...oldState, isOpen: false }));
   };
 
@@ -128,7 +160,11 @@ export default class Main extends React.Component<
             <LeftPanel />
           </Resizable>
           <div style={{ ...style, width: "100%", minWidth: "1px" }}>
-            <VtkWidget inputOpenFileRef={this.inputOpenFileRef} />
+            <VtkWidget
+              inputOpenFileRef={this.inputOpenFileRef}
+              model={this.props.model}
+              send_msg={this.props.send_msg}
+            />
           </div>
         </div>
         <Dialog

@@ -1,5 +1,5 @@
 import React from "react";
-
+import { SendMsgInterface, VtkModel } from "../widget";
 //@ts-ignore
 import vtkFullScreenRenderWindow from "vtk.js/Sources/Rendering/Misc/FullScreenRenderWindow";
 //@ts-ignore
@@ -75,6 +75,8 @@ interface StateInterface {
 }
 interface PropsInterface {
   inputOpenFileRef: React.RefObject<any>;
+  send_msg: SendMsgInterface;
+  model: VtkModel;
 }
 export default class VtkWidget extends React.Component<
   PropsInterface,
@@ -115,7 +117,15 @@ export default class VtkWidget extends React.Component<
     this.playing = false;
     this.playInterval = null;
     this.interator = null;
+    this.props.model.listenTo(this.props.model,"msg:custom", this.handleMsg)
   }
+
+  private handleMsg = (content, data) => {
+    console.log(content, data[0]);
+    console.log(content[0][0], data[0].buffer,"done");
+    this.createPipeline(content[0][0], data[0].buffer);
+    
+  };
 
   createPipeline = (fileName: string, fileContents: any) => {
     this.lookupTable = vtkColorTransferFunction.newInstance();

@@ -154,3 +154,5 @@ jupyter_vtk/labextension/*.tgz
 
 # Packed lab extensions
 jupyter_vtk/labextension
+
+VTK/
