@@ -44,6 +44,7 @@ interface PropsInterface {
   inputOpenFileRef: React.RefObject<any>;
   send_msg: SendMsgInterface;
   model: VtkModel;
+  updateProgress: (open: boolean, value: number) => void
 }
 export default class VtkWidget extends React.Component<
   PropsInterface,
@@ -360,13 +361,14 @@ export default class VtkWidget extends React.Component<
     this.setState((state: StateInterface) => {
       return { ...state, fileList: fileArray.map((e) => e.name) };
     });
-
+    this.props.updateProgress(true, 0)
     let firstName = fileArray[0].name;
     let counter = fileArray.length;
     for (let index = 0; index < fileArray.length; index++) {
       const element = fileArray[index];
       processFile(element).then((data) => {
         --counter;
+        this.props.updateProgress(true, 100 - 100*counter/fileArray.length)
         this.fileData[element.name] = data;
         if (counter === 0) {
           this.createPipeline(this.fileData[firstName]);

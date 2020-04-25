@@ -22,6 +22,7 @@ import {
 import VtkWidget from "./vtkwidget";
 import LeftPanel from "./panel";
 import RemoteFileBrowser from "./filebrowser";
+import ProgressNotification from "./progress"
 import { Resizable } from "re-resizable";
 const style = {
   display: "flex",
@@ -41,6 +42,8 @@ interface PropsInterface {
 
 interface StateInterface {
   isOpen: boolean;
+  openProgressBar: boolean;
+  progressValue : number
 }
 
 export default class Main extends React.Component<
@@ -54,9 +57,14 @@ export default class Main extends React.Component<
     this.inputOpenFileRef = React.createRef();
     this.browserRef = React.createRef();
 
-    this.state = { isOpen: false };
+    this.state = { isOpen: false,   openProgressBar: false,
+      progressValue : 0 };
   }
 
+  private updateProgress = (openProgressBar :boolean, progressValue: number) => {
+    this.setState((oldState) => ({
+      ...oldState, openProgressBar, progressValue }))
+  }
   private handleOpen = () =>
     this.setState((oldState) => {
       return { ...oldState, isOpen: true };
@@ -164,6 +172,7 @@ export default class Main extends React.Component<
               inputOpenFileRef={this.inputOpenFileRef}
               model={this.props.model}
               send_msg={this.props.send_msg}
+              updateProgress = {this.updateProgress}
             />
           </div>
         </div>
@@ -193,6 +202,7 @@ export default class Main extends React.Component<
             </div>
           </div>
         </Dialog>
+        <ProgressNotification open={this.state.openProgressBar} value={this.state.progressValue}/>
       </div>
     );
   }
