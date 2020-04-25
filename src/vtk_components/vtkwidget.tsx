@@ -33,41 +33,8 @@ import vtkInteractiveOrientationWidget from "vtk.js/Sources/Widgets/Widgets3D/In
 import vtkWidgetManager from "vtk.js/Sources/Widgets/Core/WidgetManager";
 //@ts-ignore
 import * as vtkMath from "vtk.js/Sources/Common/Core/Math";
-//@ts-ignore
-import readPolyDataArrayBuffer from "itk/readPolyDataArrayBuffer";
 
-function majorAxis(vec3: Array<number>, idxA: number, idxB: number) {
-  const axis = [0, 0, 0];
-  const idx = Math.abs(vec3[idxA]) > Math.abs(vec3[idxB]) ? idxA : idxB;
-  const value = vec3[idx] > 0 ? 1 : -1;
-  axis[idx] = value;
-  return axis;
-}
-
-const resultPreprocessor = ({ webWorker, polyData }: any) => {
-  webWorker.terminate();
-  return polyData;
-};
-
-const getFileExt = (fileName: string) => {
-  let a = fileName.split(".");
-  if (a.length === 1 || (a[0] === "" && a.length === 2)) {
-    return "";
-  }
-  const ext = a.pop();
-  if (ext) {
-    return ext.toLowerCase();
-  } else {
-    return "";
-  }
-};
-
-async function parserFile(fileName: string, fileContents: any) {
-  let data = await readPolyDataArrayBuffer(null, fileContents, fileName)
-    .then(resultPreprocessor)
-    .then((polyData: any) => polyData);
-  return data;
-}
+import { majorAxis, getFileExt, parserFile, processFile } from "../tools/utils";
 
 interface StateInterface {
   colorOption: Array<{}>;
@@ -98,6 +65,7 @@ export default class VtkWidget extends React.Component<
   playing: boolean;
   playInterval: any;
   interator: any;
+  progress: number;
   constructor(props: any) {
     super(props);
     this.fullScreenRenderer = null;
@@ -117,39 +85,44 @@ export default class VtkWidget extends React.Component<
     this.playing = false;
     this.playInterval = null;
     this.interator = null;
-    this.props.model.listenTo(this.props.model, "msg:custom", this.handleMsg)
-    this.props.model.listenTo(this.props.model, "change:request_file_list", this.loadRemoteFile);
+    this.progress = 0;
+    this.loadFile.bind(this);
+    this.props.model.listenTo(this.props.model, "msg:custom", this.handleMsg);
+    this.props.model.listenTo(
+      this.props.model,
+      "change:request_file_list",
+      this.loadRemoteFile
+    );
   }
 
   private loadRemoteFile = (model, value: Array<Object>) => {
     if (value.length > 0) {
-      this.props.send_msg( {action: "open_file",
-      payload: {index : 0}})
+      this.props.send_msg({ action: "open_file", payload: { index: 0 } });
     }
-  }
+  };
 
   private handleMsg = (content, data) => {
-    const type = content["type"]
+    const type = content["type"];
     if (type === "vtkData") {
-      const { file_name, pvd, current_index, next_index } = content["response"]
+      const { file_name, pvd, current_index, next_index } = content["response"];
 
       parserFile(file_name, data[0].buffer).then((parsedData) => {
         this.fileData[file_name] = parsedData;
-        
+
         if (next_index === -1) {
           console.log(this.fileData);
-          this.createPipeline( this.fileData[file_name] )
+          this.createPipeline(this.fileData[file_name]);
         } else {
-          this.props.send_msg( {action: "open_file",
-          payload: {index : next_index}})
+          this.props.send_msg({
+            action: "open_file",
+            payload: { index: next_index },
+          });
         }
       });
-      
     }
-    
   };
 
-  createPipeline = ( polyData: any) => {
+  createPipeline = (polyData: any) => {
     this.lookupTable = vtkColorTransferFunction.newInstance();
     this.mapper = vtkMapper.newInstance({
       interpolateScalarsBeforeMapping: false,
@@ -382,33 +355,26 @@ export default class VtkWidget extends React.Component<
     this.renderWindow.render();
   };
 
-  loadFile = (fileList: Array<any>) => {
+  loadFile(fileList: FileList) {
     const fileArray = Array.from(fileList);
     this.setState((state: StateInterface) => {
       return { ...state, fileList: fileArray.map((e) => e.name) };
     });
 
-    const file = fileList[0];
-
-    fileArray.forEach((item, index) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        parserFile(item.name as string, reader.result).then((data) => {
-          this.fileData[item.name as string] = data;
-          if (index === 0 ) {
-            this.createPipeline(data);
-          }
-        });
-      };
-      reader.readAsArrayBuffer(item); 
-
-    })
-
-    // for (let index = 0; index < fileArray.length; index++) {
-    //   const item = fileArray[index];
-    // }
-
-  };
+    let firstName = fileArray[0].name;
+    let counter = fileArray.length;
+    for (let index = 0; index < fileArray.length; index++) {
+      const element = fileArray[index];
+      processFile(element).then((data) => {
+        --counter;
+        this.fileData[element.name] = data;
+        if (counter === 0) {
+          this.createPipeline(this.fileData[firstName]);
+          this.props.inputOpenFileRef.current.value = "";
+        }
+      });
+    }
+  }
 
   updateRepresentation = (event: any) => {
     const [
