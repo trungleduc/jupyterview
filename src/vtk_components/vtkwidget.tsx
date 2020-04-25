@@ -117,17 +117,39 @@ export default class VtkWidget extends React.Component<
     this.playing = false;
     this.playInterval = null;
     this.interator = null;
-    this.props.model.listenTo(this.props.model,"msg:custom", this.handleMsg)
+    this.props.model.listenTo(this.props.model, "msg:custom", this.handleMsg)
+    this.props.model.listenTo(this.props.model, "change:request_file_list", this.loadRemoteFile);
+  }
+
+  private loadRemoteFile = (model, value: Array<Object>) => {
+    if (value.length > 0) {
+      this.props.send_msg( {action: "open_file",
+      payload: {index : 0}})
+    }
   }
 
   private handleMsg = (content, data) => {
-    console.log(content, data[0]);
-    console.log(content[0][0], data[0].buffer,"done");
-    this.createPipeline(content[0][0], data[0].buffer);
+    const type = content["type"]
+    if (type === "vtkData") {
+      const { file_name, pvd, current_index, next_index } = content["response"]
+
+      parserFile(file_name, data[0].buffer).then((parsedData) => {
+        this.fileData[file_name] = parsedData;
+        
+        if (next_index === -1) {
+          console.log(this.fileData);
+          this.createPipeline( this.fileData[file_name] )
+        } else {
+          this.props.send_msg( {action: "open_file",
+          payload: {index : next_index}})
+        }
+      });
+      
+    }
     
   };
 
-  createPipeline = (fileName: string, fileContents: any) => {
+  createPipeline = ( polyData: any) => {
     this.lookupTable = vtkColorTransferFunction.newInstance();
     this.mapper = vtkMapper.newInstance({
       interpolateScalarsBeforeMapping: false,
@@ -143,25 +165,21 @@ export default class VtkWidget extends React.Component<
       this.renderWindow.render();
     });
 
-    readPolyDataArrayBuffer(null, fileContents, fileName)
-      .then(resultPreprocessor)
-      .then((polyData: any) => {
-        this.source = vtk(polyData);
+    this.source = vtk(polyData);
 
-        const scalars = this.source.getPointData().getScalars();
-        this.dataRange = [].concat(scalars ? scalars.getRange() : [0, 1]);
-        this.activeArray = vtkDataArray;
-        if (this.state.colorOption.length === 0) {
-          const colorByOptions = this.createComponentSelector();
-          this.setState((state: StateInterface) => {
-            return { ...state, colorOption: colorByOptions };
-          });
-        }
-        this.mapper.setInputData(this.source);
-        this.renderer.addActor(this.actor);
-        this.renderer.resetCamera();
-        this.renderWindow.render();
+    const scalars = this.source.getPointData().getScalars();
+    this.dataRange = [].concat(scalars ? scalars.getRange() : [0, 1]);
+    this.activeArray = vtkDataArray;
+    if (this.state.colorOption.length === 0) {
+      const colorByOptions = this.createComponentSelector();
+      this.setState((state: StateInterface) => {
+        return { ...state, colorOption: colorByOptions };
       });
+    }
+    this.mapper.setInputData(this.source);
+    this.renderer.addActor(this.actor);
+    this.renderer.resetCamera();
+    this.renderWindow.render();
   };
 
   createComponentSelector = () => {
@@ -372,22 +390,24 @@ export default class VtkWidget extends React.Component<
 
     const file = fileList[0];
 
-    fileArray.forEach((item) => {
+    fileArray.forEach((item, index) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         parserFile(item.name as string, reader.result).then((data) => {
           this.fileData[item.name as string] = data;
+          if (index === 0 ) {
+            this.createPipeline(data);
+          }
         });
       };
-      reader.readAsArrayBuffer(item);
-    });
+      reader.readAsArrayBuffer(item); 
 
-    const reader = new FileReader();
+    })
 
-    reader.onload = (e) => {
-      this.createPipeline(file.name, reader.result);
-    };
-    reader.readAsArrayBuffer(file);
+    // for (let index = 0; index < fileArray.length; index++) {
+    //   const item = fileArray[index];
+    // }
+
   };
 
   updateRepresentation = (event: any) => {

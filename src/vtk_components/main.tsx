@@ -94,7 +94,7 @@ export default class Main extends React.Component<
 
     if (selectedMode > -1) {
       this.props.send_msg({
-        action: "open_file",
+        action: "request_open",
         payload,
       });
     }

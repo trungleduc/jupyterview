@@ -13,7 +13,7 @@ from traitlets import Unicode, observe
 from traitlets import List as TList
 from traitlets import Dict as TDict
 from ._frontend import module_name, module_version
-from typing import Dict
+from typing import Dict, List
 import os
 import time
 
@@ -33,13 +33,15 @@ class VtkWidget(DOMWidget):
   rootPath = Unicode('').tag(sync=True)
   root_data = TList([]).tag(sync=True)
   position = Unicode('split-right').tag(sync=True)
-
+  request_file_list = TList([]).tag(sync=True)
+  
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
     self.position = kwargs.get("position", 'split-right')
     self.root_data = []
+    self.request_file_list = []
     self.on_msg(self.__handle_client_msg)
-
+    self.handle_dict = {"open_file": self.handle_open_file, "request_open": self.handle_request_open}
   @observe("rootPath")
   def __get_file_structure(self, data) -> Dict:
     new_data = []
@@ -58,17 +60,36 @@ class VtkWidget(DOMWidget):
     self.root_data = new_data
 
   def __handle_client_msg(self, widget, content, buffer):
-    mode = content["payload"]["selectedMode"]
-    data_path = content["payload"]["data"]
+    action = content["action"]
+    self.handle_dict[action](content["payload"])
 
-    if mode == 1:  # Open file
+  def handle_request_open(self, payload : List[str])-> None:
+    mode = payload["selectedMode"]
+    data_path = payload["data"]
+    update_data= []
+    if mode == 1:
       for file_path in data_path:
-        if file_path[-3:] == "vtu": #Load vtu file
+        if file_path[-3:] == "vtu":
           full_path = os.path.join(self.rootPath, file_path)
           file_name = file_path.split("/")[-1]
-          with open(full_path, 'rb') as f:
-            data = f.read()
-            print(type(data))
-            self.send({ 0 : [file_name, file_path]}, buffers = [data])
+          update_data.append({'file_name': file_name, "full_path": full_path, "pvd": "None"})
+    self.request_file_list = update_data
+
+  def handle_open_file(self, payload):
+
+    print(payload)
+    index = payload["index"]
+    full_path = self.request_file_list[index]["full_path"]
+    file_name = self.request_file_list[index]["file_name"]
+    pvd = self.request_file_list[index]["pvd"]
+    if index < len(self.request_file_list) -1:
+      next_index = index + 1
+    else:
+      next_index = -1
+      self.request_file_list = []
+    with open(full_path, 'rb') as f:
+      data = f.read()
+      self.send({"type": "vtkData","response": {"pvd": pvd, "file_name": file_name, "current_index": index , "next_index": next_index}}, buffers=[data])
 
 
+    
