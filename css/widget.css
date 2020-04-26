@@ -12,7 +12,7 @@
   flex-direction: column;
   height: 100%;
   padding: 5px;
-
+  width: 100%;
 }
 
 .bp3-tab-indicator-wrapper{

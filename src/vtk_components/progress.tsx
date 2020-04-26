@@ -52,11 +52,13 @@ export default class ProgressNotification extends React.Component<
   }
 
   componentDidUpdate(prevProps: PropsInterface, prevState: IToasterProps) {
-    if (this.props.open) {
-      if (this.key) {
-        this.appToaster.show(this.renderProgress(), this.key)
-      } else {
-        this.key = this.appToaster.show(this.renderProgress())
+    if (prevProps.open !== this.props.open || prevProps.value !== this.props.value) {
+      if (this.props.open) {
+        if (this.key) {
+          this.appToaster.show(this.renderProgress(), this.key)
+        } else {
+          this.key = this.appToaster.show(this.renderProgress())
+        }
       }
     }
   }

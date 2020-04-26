@@ -61,7 +61,8 @@ export default class Main extends React.Component<
       progressValue : 0 };
   }
 
-  private updateProgress = (openProgressBar :boolean, progressValue: number) => {
+  private updateProgress = (openProgressBar: boolean, progressValue: number) => {
+    
     this.setState((oldState) => ({
       ...oldState, openProgressBar, progressValue }))
   }

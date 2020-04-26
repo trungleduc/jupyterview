@@ -39,6 +39,8 @@ import { majorAxis, getFileExt, parserFile, processFile } from "../tools/utils";
 interface StateInterface {
   colorOption: Array<{}>;
   fileList: Array<string>;
+  dataRangeOption: { [key: string]: any }
+  selectedFile: string 
 }
 interface PropsInterface {
   inputOpenFileRef: React.RefObject<any>;
@@ -50,23 +52,23 @@ export default class VtkWidget extends React.Component<
   PropsInterface,
   StateInterface
 > {
-  fullScreenRenderer: any;
-  renderer: any;
-  source: any;
-  renderWindow: any;
-  mapper: any;
-  container: any;
-  dataRange: any;
-  activeArray: any;
-  lookupTable: any;
-  actor: any;
-  SUPPORTED_FILE: any;
-  allSource: {};
-  fileData: any;
-  playing: boolean;
-  playInterval: any;
-  interator: any;
-  progress: number;
+  private fullScreenRenderer: any;
+  private renderer: any;
+  private source: any;
+  private renderWindow: any;
+  private mapper: any;
+  private container: any;
+  private dataRange: any;
+  private activeArray: any;
+  private lookupTable: any;
+  private actor: any;
+  private SUPPORTED_FILE: any;
+  private allSource: {};
+  private fileData: any;
+  private playing: boolean;
+  private playInterval: any;
+  private interator: any;
+  private progress: number;
   constructor(props: any) {
     super(props);
     this.fullScreenRenderer = null;
@@ -75,7 +77,7 @@ export default class VtkWidget extends React.Component<
     this.renderWindow = null;
     this.mapper = null;
     this.container = React.createRef();
-    this.state = { colorOption: [], fileList: [] };
+    this.state = { colorOption: [], fileList: [] , dataRangeOption : {}, selectedFile : ""};
     this.dataRange = null;
     this.activeArray = null;
     this.lookupTable = null;
@@ -105,20 +107,25 @@ export default class VtkWidget extends React.Component<
   private handleMsg = (content, data) => {
     const type = content["type"];
     if (type === "vtkData") {
-      const { file_name, pvd, current_index, next_index } = content["response"];
+      const { file_name, pvd, progress, next_index } = content["response"];
 
       parserFile(file_name, data[0].buffer).then((parsedData) => {
         this.fileData[file_name] = parsedData;
 
         if (next_index === -1) {
-          console.log(this.fileData);
-          this.createPipeline(this.fileData[file_name]);
+
+          const fileList = Object.keys(this.fileData).sort();
+          this.createPipeline(this.fileData[fileList[0]]);
+          this.setState((state: StateInterface) => {
+            return { ...state, fileList };
+          });          
         } else {
           this.props.send_msg({
             action: "open_file",
             payload: { index: next_index },
           });
         }
+        this.props.updateProgress(true, progress)
       });
     }
   };
@@ -196,7 +203,8 @@ export default class VtkWidget extends React.Component<
     const [location, colorByArrayName, indexValue] = event.target.value.split(
       ":"
     );
-
+    
+    const selectedFile = this.state.selectedFile
     const interpolateScalarsBeforeMapping = location === "PointData";
     let colorMode = ColorMode.DEFAULT;
     let scalarMode = ScalarMode.DEFAULT;
@@ -214,7 +222,10 @@ export default class VtkWidget extends React.Component<
       );
       this.dataRange[0] = newDataRange[0];
       this.dataRange[1] = newDataRange[1];
-
+      if (this.dataRange[0] === this.dataRange[1]) {
+        this.dataRange[1] = this.dataRange[0]  + 0.0000000001
+      }
+      
       colorMode = ColorMode.MAP_SCALARS;
       scalarMode =
         location === "PointData"
@@ -244,6 +255,7 @@ export default class VtkWidget extends React.Component<
   applyPreset = () => {
     const preset = vtkColorMaps.getPresetByName("rainbow");
     this.lookupTable.applyColorMap(preset);
+
     this.lookupTable.setMappingRange(this.dataRange[0], this.dataRange[1]);
     this.lookupTable.updateRange();
   };
@@ -350,7 +362,7 @@ export default class VtkWidget extends React.Component<
 
   handleFileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedFile = e.target.value;
-
+    this.setState((oldState)=>({...oldState, selectedFile}))
     this.source = vtk(this.fileData[selectedFile]);
     this.mapper.setInputData(this.source);
     this.renderWindow.render();
@@ -368,12 +380,13 @@ export default class VtkWidget extends React.Component<
       const element = fileArray[index];
       processFile(element).then((data) => {
         --counter;
-        this.props.updateProgress(true, 100 - 100*counter/fileArray.length)
         this.fileData[element.name] = data;
         if (counter === 0) {
           this.createPipeline(this.fileData[firstName]);
           this.props.inputOpenFileRef.current.value = "";
+          this.props.updateProgress(false, 0)
         }
+        this.props.updateProgress(true, 100 - 100*counter/fileArray.length)
       });
     }
   }
@@ -415,6 +428,7 @@ export default class VtkWidget extends React.Component<
           <select
             style={{ width: "15%" }}
             onChange={(e) => this.handleFileChange(e)}
+            value = {this.state.selectedFile}
           >
             {this.state.fileList.map((option: any) => (
               <option key={option} value={option}>
