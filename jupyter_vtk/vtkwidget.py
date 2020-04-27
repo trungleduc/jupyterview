@@ -87,7 +87,6 @@ class VtkWidget(DOMWidget):
 
   def handle_open_file(self, payload):
 
-
     index = payload["index"]
     full_path = self.request_file_list[index]["full_path"]
     file_name = self.request_file_list[index]["file_name"]

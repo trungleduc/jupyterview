@@ -27,8 +27,8 @@ export const getFileExt = (fileName: string) => {
   }
 };
 
-export async function parserFile(fileName: string, fileContents: any) {
-  let data = await readPolyDataArrayBuffer(null, fileContents, fileName)
+export  function parserFile(fileName: string, fileContents: any) {
+  let data =  readPolyDataArrayBuffer(null, fileContents, fileName)
     .then(resultPreprocessor)
     .then((polyData: any) => polyData);
   return data;

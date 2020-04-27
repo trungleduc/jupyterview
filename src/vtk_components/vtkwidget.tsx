@@ -67,7 +67,7 @@ export default class VtkWidget extends React.Component<
   private fileData: any;
   private playing: boolean;
   private playInterval: any;
-  private interator: any;
+  private remoteFileList: Array<string>;
   private progress: number;
   constructor(props: any) {
     super(props);
@@ -87,7 +87,7 @@ export default class VtkWidget extends React.Component<
     this.fileData = {};
     this.playing = false;
     this.playInterval = null;
-    this.interator = null;
+    this.remoteFileList = [];
     this.progress = 0;
     this.loadFile.bind(this);
     this.props.model.listenTo(this.props.model, "msg:custom", this.handleMsg);
@@ -100,7 +100,11 @@ export default class VtkWidget extends React.Component<
 
   private loadRemoteFile = (model, value: Array<Object>) => {
     if (value.length > 0) {
-      this.props.send_msg({ action: "open_file", payload: { index: 0 } });
+      this.remoteFileList = Object.keys(value)
+      this.progress = value.length
+      value.forEach((value, index) => {
+        this.props.send_msg({ action: "open_file", payload: { index } })
+      })
     }
   };
 
@@ -110,22 +114,22 @@ export default class VtkWidget extends React.Component<
       const { file_name, pvd, progress, next_index } = content["response"];
 
       parserFile(file_name, data[0].buffer).then((parsedData) => {
+        --this.progress
+        const progressVal = 100*(1 - this.progress/this.remoteFileList.length)
+        
         this.fileData[file_name] = parsedData;
 
-        if (next_index === -1) {
+        if (this.progress === 0) {
 
           const fileList = Object.keys(this.fileData).sort();
           this.createPipeline(this.fileData[fileList[0]]);
           this.setState((state: StateInterface) => {
             return { ...state, fileList };
-          });          
-        } else {
-          this.props.send_msg({
-            action: "open_file",
-            payload: { index: next_index },
-          });
-        }
-        this.props.updateProgress(true, progress)
+          });   
+          this.props.updateProgress(false, 0.)
+        }  
+        this.props.updateProgress(true, progressVal)
+        
       });
     }
   };

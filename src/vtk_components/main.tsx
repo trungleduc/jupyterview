@@ -106,6 +106,7 @@ export default class Main extends React.Component<
         action: "request_open",
         payload,
       });
+      this.updateProgress(true, 0.)
     }
     this.setState((oldState) => ({ ...oldState, isOpen: false }));
   };
