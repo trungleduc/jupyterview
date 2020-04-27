@@ -167,7 +167,44 @@ export default class Main extends React.Component<
               window.dispatchEvent(new Event("resize"));
             }}
           >
+            <div
+              style={{
+                height: "100%",
+                width :"100%",
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+              }}
+            >
+              <Resizable
+              style = {style}
+              defaultSize={{
+                width: "100%",
+                height: "25%",
+              }}
+              enable={{
+                top: false,
+                right: false,
+                bottom: true,
+                left: false,
+                topRight: false,
+                bottomRight: false,
+                bottomLeft: false,
+                topLeft: false,
+                }}
+                onResizeStop = {(event, direction, elementRef, delta)=>{console.log(event, direction, elementRef, delta);
+                }}
+              >
+                
+            </Resizable>
+              
+            <div style = {style}>
             <LeftPanel />
+                
+            </div>
+
+            </div>
+            
           </Resizable>
           <div style={{ ...style, width: "100%", minWidth: "1px" }}>
             <VtkWidget

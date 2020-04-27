@@ -416,11 +416,13 @@ export default class VtkWidget extends React.Component<
             height: "95%",
             width: "100%",
             background:
-              "linear-gradient(rgb(116, 120, 190), rgb(193, 195, 202))",
+              // "linear-gradient(rgb(116, 120, 190), rgb(193, 195, 202))",
+              "linear-gradient(#000028, #ffffff)"
           }}
           ref={this.container}
         />
-        <div style={{ height: "5%", width: "100%" }}>
+        
+        <div style={{ height: "5%", width: "100%", background: "aliceblue" }}>
           <input
             ref={this.props.inputOpenFileRef}
             type="file"
