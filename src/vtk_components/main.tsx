@@ -17,12 +17,14 @@ import {
   Dialog,
   Intent,
   Tooltip,
+  Card,
+  Elevation,
 } from "@blueprintjs/core";
 
 import VtkWidget from "./vtkwidget";
 import LeftPanel from "./panel";
 import RemoteFileBrowser from "./filebrowser";
-import ProgressNotification from "./progress"
+import ProgressNotification from "./progress";
 import { Resizable } from "re-resizable";
 const style = {
   display: "flex",
@@ -43,29 +45,40 @@ interface PropsInterface {
 interface StateInterface {
   isOpen: boolean;
   openProgressBar: boolean;
-  progressValue : number
+  progressValue: number;
+  leftPanelId: number
 }
 
 export default class Main extends React.Component<
   PropsInterface,
   StateInterface
 > {
-  inputOpenFileRef: React.RefObject<any>;
-  browserRef: React.RefObject<any>;
+  private inputOpenFileRef: React.RefObject<any>;
+  private browserRef: React.RefObject<any>;
+  private treewindowRef: React.RefObject<HTMLDivElement>;
+  private toolwindowRef: React.RefObject<HTMLDivElement>;
+  private panelRef: React.RefObject<HTMLDivElement>;
+
   constructor(props: PropsInterface) {
     super(props);
     this.inputOpenFileRef = React.createRef();
     this.browserRef = React.createRef();
-
-    this.state = { isOpen: false,   openProgressBar: false,
-      progressValue : 0 };
+    this.treewindowRef = React.createRef();
+    this.toolwindowRef = React.createRef();
+    this.panelRef = React.createRef();
+    this.state = { isOpen: false, openProgressBar: false, progressValue: 0, leftPanelId : 0 };
   }
 
-  private updateProgress = (openProgressBar: boolean, progressValue: number) => {
-    
+  private updateProgress = (
+    openProgressBar: boolean,
+    progressValue: number
+  ) => {
     this.setState((oldState) => ({
-      ...oldState, openProgressBar, progressValue }))
-  }
+      ...oldState,
+      openProgressBar,
+      progressValue,
+    }));
+  };
   private handleOpen = () =>
     this.setState((oldState) => {
       return { ...oldState, isOpen: true };
@@ -106,7 +119,7 @@ export default class Main extends React.Component<
         action: "request_open",
         payload,
       });
-      this.updateProgress(true, 0.)
+      this.updateProgress(true, 0);
     }
     this.setState((oldState) => ({ ...oldState, isOpen: false }));
   };
@@ -146,7 +159,6 @@ export default class Main extends React.Component<
           }}
         >
           <Resizable
-            style={style}
             defaultSize={{
               width: "25%",
               height: "100%",
@@ -166,53 +178,120 @@ export default class Main extends React.Component<
             onResize={() => {
               window.dispatchEvent(new Event("resize"));
             }}
+            onResizeStop={(event, direction, elementRef, delta) => {
+              this.setState(old => ({...old, leftPanelId : old.leftPanelId + 1})) 
+            }}
           >
             <div
+              ref={this.panelRef}
               style={{
                 height: "100%",
-                width :"100%",
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
+                width: "100%",
+                overflow: "hidden",
               }}
             >
               <Resizable
-              style = {style}
-              defaultSize={{
-                width: "100%",
-                height: "25%",
-              }}
-              enable={{
-                top: false,
-                right: false,
-                bottom: true,
-                left: false,
-                topRight: false,
-                bottomRight: false,
-                bottomLeft: false,
-                topLeft: false,
+                defaultSize={{
+                  width: "100%",
+                  height: "25%",
                 }}
-                onResizeStop = {(event, direction, elementRef, delta)=>{console.log(event, direction, elementRef, delta);
+                enable={{
+                  top: false,
+                  right: false,
+                  bottom: true,
+                  left: false,
+                  topRight: false,
+                  bottomRight: false,
+                  bottomLeft: false,
+                  topLeft: false,
+                }}
+                onResizeStop={(event, direction, elementRef, delta) => {
+                  const topHeight = elementRef.getBoundingClientRect().height;
+                  const totalHeight = this.panelRef.current.getBoundingClientRect()
+                    .height;
+                  const bottomHeight = totalHeight - topHeight;
+                  this.toolwindowRef.current.style.height = bottomHeight + "px";
                 }}
               >
-                
-            </Resizable>
-              
-            <div style = {style}>
-            <LeftPanel />
-                
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    padding: "5px 0px 5px 5px",
+                  }}
+                  ref={this.treewindowRef}
+                >
+                  <Card
+                    style={{
+                      height: "100%",
+                      padding: "0px",
+                      overflow: "auto",
+                      background: "aliceblue",
+                      border: "solid grey 1px",
+                      borderBottom: "solid #106ba3",
+                      borderRadius: "5px",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                    interactive={false}
+                    elevation={Elevation.ONE}
+                  >
+                    <div
+                      style={{
+                        height: "25px",
+                        width: "100%",
+                        background: "rgb(16, 107, 163)",
+                        color: "aliceblue",
+                        padding: "2px",
+                      }}
+                    >
+                      PIPELINES
+                    </div>
+                    <div style={{ flexGrow: 1 }}></div>
+                  </Card>
+                </div>
+              </Resizable>
+              <div
+                ref={this.toolwindowRef}
+                style={{ height: "75%", padding: "5px 0px 5px 5px" }}
+              >
+                <Card
+                  style={{
+                    height: "100%",
+                    padding: "0px",
+                    overflow: "auto",
+                    background: "aliceblue",
+                    border: "solid grey 1px",
+                    borderRadius: "5px",
+                  }}
+                  interactive={false}
+                  elevation={Elevation.ONE}
+                >
+                  <LeftPanel selectedId={this.state.leftPanelId}/>
+                </Card>
+              </div>
             </div>
-
-            </div>
-            
           </Resizable>
-          <div style={{ ...style, width: "100%", minWidth: "1px" }}>
-            <VtkWidget
-              inputOpenFileRef={this.inputOpenFileRef}
-              model={this.props.model}
-              send_msg={this.props.send_msg}
-              updateProgress = {this.updateProgress}
-            />
+          <div style={{ padding: "5px", height: "100%", width: "100%" }}>
+            <Card
+              style={{
+                height: "100%",
+                width: "100%",
+                padding: "5px",
+                overflow: "auto",
+                background: "aliceblue",
+                border: "solid grey 1px",
+              }}
+              interactive={false}
+              elevation={Elevation.ONE}
+            >
+              <VtkWidget
+                inputOpenFileRef={this.inputOpenFileRef}
+                model={this.props.model}
+                send_msg={this.props.send_msg}
+                updateProgress={this.updateProgress}
+              />
+            </Card>
           </div>
         </div>
         <Dialog
@@ -241,7 +320,10 @@ export default class Main extends React.Component<
             </div>
           </div>
         </Dialog>
-        <ProgressNotification open={this.state.openProgressBar} value={this.state.progressValue}/>
+        <ProgressNotification
+          open={this.state.openProgressBar}
+          value={this.state.progressValue}
+        />
       </div>
     );
   }

@@ -422,7 +422,7 @@ export default class VtkWidget extends React.Component<
           ref={this.container}
         />
         
-        <div style={{ height: "5%", width: "100%", background: "aliceblue" }}>
+        <div style={{ height: "5%", width: "100%", background: "aliceblue", padding: "10px" }}>
           <input
             ref={this.props.inputOpenFileRef}
             type="file"

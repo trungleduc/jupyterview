@@ -18,9 +18,12 @@ interface ITabsState {
   animate: boolean;
   navbarTabId: TabId;
   vertical: boolean;
+  selectedId : string
 }
 
-interface ITabsProps {}
+interface ITabsProps {
+  selectedId ?: number
+}
 
 export default class LeftPanel extends React.Component<ITabsProps, ITabsState> {
   constructor(props: ITabsProps) {
@@ -30,7 +33,21 @@ export default class LeftPanel extends React.Component<ITabsProps, ITabsState> {
       animate: true,
       navbarTabId: "Home",
       vertical: false,
+      selectedId : "rx"
     };
+  }
+
+  componentDidUpdate(oldProps, oldState) {
+    const selectedId = this.props.selectedId
+    
+    if (selectedId !==oldProps.selectedId) {
+      this.setState(old => ({...old, selectedId: "rx"}))
+    }
+
+  }
+
+  handleChange = (e: string) => {
+    this.setState((old)=> ({...old, selectedId : e}));
   }
 
   render() {
@@ -41,9 +58,10 @@ export default class LeftPanel extends React.Component<ITabsProps, ITabsState> {
         key={this.state.vertical ? "vertical" : "horizontal"}
         renderActiveTabPanelOnly={this.state.activePanelOnly}
         vertical={this.state.vertical}
-        large={true}
+        large={false}
         className={"left-panel"}
-        defaultSelectedTabId={"rx"}
+        selectedTabId= {this.state.selectedId}
+        onChange = {this.handleChange}
       >
         <Tab
           className={"left-panel-tab"}
