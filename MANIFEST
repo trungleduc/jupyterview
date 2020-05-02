@@ -34,7 +34,7 @@ jupyter_vtk\__init__.py
 jupyter_vtk\_frontend.py
 jupyter_vtk\_version.py
 jupyter_vtk\vtkwidget.py
-jupyter_vtk\labextension\jupyter_vtk-0.1.0.tgz
+jupyter_vtk\labextension\jupyter_vtk-0.3.1.tgz
 jupyter_vtk\nbextension\__init__.py
 jupyter_vtk\nbextension\static\index.js
 jupyter_vtk\nbextension\static\index.js.map
@@ -48,6 +48,8 @@ jupyter_vtk\tests\__init__.py
 jupyter_vtk\tests\conftest.py
 jupyter_vtk\tests\test_example.py
 jupyter_vtk\tests\test_nbextension_path.py
+jupyter_vtk\tools\__init__.py
+jupyter_vtk\tools\tools.py
 tests\karma.conf.js
 tests\tsconfig.json
 tests\src\index.spec.ts

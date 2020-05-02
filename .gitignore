@@ -156,3 +156,5 @@ jupyter_vtk/labextension/*.tgz
 jupyter_vtk/labextension
 
 VTK/
+
+deploy.txt
