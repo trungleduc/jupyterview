@@ -41,17 +41,25 @@ class VtkWidget(DOMWidget):
     self.root_data = []
     self.request_file_list = []
     self.on_msg(self.__handle_client_msg)
+    self.realRootPath = ""
     self.handle_dict = {"open_file": self.handle_open_file, "request_open": self.handle_request_open}
 
   @observe("rootPath")
   def __get_file_structure(self, data) -> Dict:
+    if "~" in self.rootPath:
+      self.realRootPath =  os.path.expanduser(self.rootPath)
+    else:
+      self.realRootPath = self.rootPath
     new_data = []
-    for root, dirs, files in os.walk(self.rootPath):
+
+    for root, dirs, files in os.walk(self.realRootPath):
+      print("go",root, dirs, files)
       dirs[:] = [d for d in dirs if (not d.startswith(
           '.') and not "node_modules" in d and not "__pycache__" in d)]
       # files = [ file for file in files if file.endswith( ('.vtu','.pvd') ) ]
       for file_name in files:
-        rel_dir = os.path.relpath(root, self.rootPath)
+ 
+        rel_dir = os.path.relpath(root, self.realRootPath)
         if file_name.endswith( ('.vtu','.pvd')):
           rel_file = os.path.join(rel_dir, file_name)
           p = pathlib.PurePath(rel_file)
@@ -69,13 +77,14 @@ class VtkWidget(DOMWidget):
     action = content["action"]
     self.handle_dict[action](content["payload"])
 
-  def handle_request_open(self, payload : List[str])-> None:
+  def handle_request_open(self, payload: List[str]) -> None:
+    
     mode = payload["selectedMode"]
     data_path = payload["data"]
     update_data= []
     if mode == 1:
       for file_path in data_path:
-        full_path = os.path.join(self.rootPath, file_path)
+        full_path = os.path.join(self.realRootPath, file_path)
         if file_path[-3:] == "vtu":
           file_name = file_path.split("/")[-1]
           update_data.append({'file_name': file_name, "full_path": full_path, "pvd": "None", "timestep": "None"})
