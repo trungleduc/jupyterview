@@ -9,4 +9,4 @@ Information about the frontend package of the widgets.
 """
 
 module_name = "jupyter_vtk"
-module_version = "^0.1.0"
+module_version = "^0.3.1"

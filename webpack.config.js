@@ -17,7 +17,7 @@ const externals = ['@jupyter-widgets/base', "@jupyterlab/apputils", "react", "@j
 
 const resolve = {
   // Add '.ts' and '.tsx' as resolvable extensions.
-  extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
+  extensions: [".webpack.js", ".web.js", ".js"],
   alias: {
     './itkConfig$': path.resolve(__dirname, 'lib', 'itkConfigJupyter.js'),
   },
@@ -31,7 +31,7 @@ module.exports = [
    * the notebook.
    */
   {
-    entry: './src/extension.ts',
+    entry: './lib/extension.js',
     output: {
       filename: 'index.js',
       path: path.resolve(__dirname, 'jupyter_vtk', 'nbextension', 'static'),
@@ -103,7 +103,7 @@ module.exports = [
    * This bundle is used to embed widgets in the package documentation.
    */
   {
-    entry: './src/index.ts',
+    entry: './lib/index.js',
     output: {
       filename: 'embed-bundle.js',
       path: path.resolve(__dirname, 'docs', 'source', '_static'),
