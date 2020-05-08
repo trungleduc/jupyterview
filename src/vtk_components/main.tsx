@@ -35,7 +35,7 @@ const style = {
 };
 
 import { SendMsgInterface, VtkModel } from "../widget";
-import { throws } from "assert";
+import  Pipelines  from "./pipelines";
 
 interface PropsInterface {
   send_msg: SendMsgInterface;
@@ -247,7 +247,7 @@ export default class Main extends React.Component<
                     >
                       PIPELINES
                     </div>
-                    <div style={{ flexGrow: 1 }}></div>
+                    <Pipelines model = {this.props.model} send_msg = {this.props.send_msg} />
                   </Card>
                 </div>
               </Resizable>
