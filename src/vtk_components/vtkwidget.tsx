@@ -50,20 +50,13 @@ interface PropsInterface {
   model: VtkModel;
   updateProgress: (open: boolean, value: number) => void
   updatePipeline: (data: Dict) => (f: any) => void
-  pipelines : Array<Dict>
 }
 
-const getPipelines = (state: ReduxStateInterface) => {
-  return {
-    pipelines: state.pipelines
-  };
-};
 
 
 
-const mapStateToProps = (state: ReduxStateInterface) => {
-  return getPipelines(state);
-};
+
+const mapStateToProps = (state: ReduxStateInterface) => ({});
 
 const mapDispatchToProps = (dispatch: (f: any) => void) => {
   return {
@@ -413,7 +406,7 @@ export class VtkWidget extends React.Component<
           this.createPipeline(this.fileData[firstName]);
           this.props.inputOpenFileRef.current.value = "";
           this.props.updateProgress(false, 0)
-          this.props.updatePipeline([{"hello": "world"}])
+          this.props.updatePipeline([{name: "hello" ,children: ["1","2","3"]}])
         }
         this.props.updateProgress(true, 100 - 100*counter/fileArray.length)
       });

@@ -11,14 +11,36 @@ import {
   Tree,
 } from "@blueprintjs/core";
 
+import * as ReduxAction from "../redux/actions";
+import { ReduxStateInterface, Dict } from "../redux/types";
+import { connect } from "react-redux";
+
 interface PropsInterface {
   send_msg: SendMsgInterface;
   model: VtkModel;
+  pipelines: Array<Dict>
 }
 
 interface StateInterface {
+  pipelines: Array<Dict>
   nodes: Array<ITreeNode>;
 }
+
+const getPipelines = (state: ReduxStateInterface) => {
+
+  return {
+    pipelines: state.pipelines
+  }
+}
+
+const mapStateToProps = (state: ReduxStateInterface) => {
+  return getPipelines(state);
+};
+
+const mapDispatchToProps = (dispatch: (f: any) => void) => {
+  return {
+  };
+};
 
 const INITIAL_STATE: ITreeNode[] = [
   {
@@ -94,13 +116,43 @@ const INITIAL_STATE: ITreeNode[] = [
   },
 ];
 
-export default class Pipelines extends React.Component<
+export class Pipelines extends React.Component<
   PropsInterface,
   StateInterface
 > {
   constructor(props: PropsInterface) {
     super(props);
-    this.state = { nodes: INITIAL_STATE };
+    this.state = { nodes: [] , pipelines : props.pipelines};
+  }
+
+  static getDerivedStateFromProps(nextProps: PropsInterface, prevState: StateInterface): StateInterface {
+    if (nextProps.pipelines !== prevState.pipelines) {
+      console.log('called');
+      let newPipeLines: Array<ITreeNode> = []
+      nextProps.pipelines.forEach((item, index) => {
+        let childNodes : Array<ITreeNode> = []
+        const {name, children} = item
+  
+        children.forEach((citem, cindex) => {
+          childNodes.push({
+            id: index + "." + cindex,
+            label: citem,
+            icon: "document",
+          })
+        })
+        newPipeLines.push({
+          id: index,
+          hasCaret: true,
+          icon: "folder-close",
+          label: name,
+          childNodes
+        })
+      })
+      return {...prevState, nodes : newPipeLines, pipelines : nextProps.pipelines}
+      
+    } else {
+      return null
+    }
   }
 
   private handleNodeClick = (
@@ -151,3 +203,5 @@ export default class Pipelines extends React.Component<
     );
   }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Pipelines)
