@@ -52,3 +52,7 @@
 .file-browser a {
   color: black !important;
 }
+
+.bp3-navbar, .bp3-navbar-group {
+  height: 40px!important;
+}

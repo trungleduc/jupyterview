@@ -1,14 +1,15 @@
-import { Action, ActionType, StateInterface } from "./types";
+import { Action, ActionType, ReduxStateInterface } from "./types";
 import * as ActionFunc from "./actions";
 
-export const initialState: StateInterface = {
+export const initialState: ReduxStateInterface = {
   mainState: "",
+  pipelines : []
 };
 
 export function rootReducer(
-  state: StateInterface = initialState,
+  state: ReduxStateInterface = initialState,
   action: ActionType
-): StateInterface {
+): ReduxStateInterface {
   switch (action.type) {
     case Action.RESET_STORE: {
       return initialState;
@@ -16,6 +17,10 @@ export function rootReducer(
 
     case Action.SAVE_STATE: {
       return ActionFunc.saveState_(state);
+    }
+      
+    case Action.UPDATE_PIPELINE: {
+      return ActionFunc._updatePipeline(state, action)
     }
     default:
       return state;

@@ -35,7 +35,9 @@ import vtkWidgetManager from "vtk.js/Sources/Widgets/Core/WidgetManager";
 import * as vtkMath from "vtk.js/Sources/Common/Core/Math";
 
 import { majorAxis, getFileExt, parserFile, processFile } from "../tools/utils";
-
+import * as ReduxAction from "../redux/actions";
+import { ReduxStateInterface, Dict } from "../redux/types";
+import { connect } from "react-redux";
 interface StateInterface {
   colorOption: Array<{}>;
   fileList: Array<string>;
@@ -47,8 +49,30 @@ interface PropsInterface {
   send_msg: SendMsgInterface;
   model: VtkModel;
   updateProgress: (open: boolean, value: number) => void
+  updatePipeline: (data: Dict) => (f: any) => void
+  pipelines : Array<Dict>
 }
-export default class VtkWidget extends React.Component<
+
+const getPipelines = (state: ReduxStateInterface) => {
+  return {
+    pipelines: state.pipelines
+  };
+};
+
+
+
+const mapStateToProps = (state: ReduxStateInterface) => {
+  return getPipelines(state);
+};
+
+const mapDispatchToProps = (dispatch: (f: any) => void) => {
+  return {
+    updatePipeline: (data: Array<Dict> ) => dispatch(ReduxAction.updatePipeline(data))
+  };
+};
+
+
+export class VtkWidget extends React.Component<
   PropsInterface,
   StateInterface
 > {
@@ -389,6 +413,7 @@ export default class VtkWidget extends React.Component<
           this.createPipeline(this.fileData[firstName]);
           this.props.inputOpenFileRef.current.value = "";
           this.props.updateProgress(false, 0)
+          this.props.updatePipeline([{"hello": "world"}])
         }
         this.props.updateProgress(true, 100 - 100*counter/fileArray.length)
       });
@@ -408,7 +433,7 @@ export default class VtkWidget extends React.Component<
 
   componentDidUpdate(prevProps: any) {}
 
-  render() {
+  render() {    
     return (
       <div style={{ height: "100%", width: "100%" }}>
         <div
@@ -474,3 +499,5 @@ export default class VtkWidget extends React.Component<
     );
   }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(VtkWidget)

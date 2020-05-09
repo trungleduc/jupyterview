@@ -1,8 +1,11 @@
 import {
   Action,
   ActionType,
-  StateInterface,
+  ReduxStateInterface,
+  Dict
 } from "./types";
+
+import * as Types from "./types";
 
 /**
  * Reset store to initial state
@@ -27,8 +30,34 @@ export function saveState(name: string): ActionType {
  * Action to update saveSignal of state
  * @param {StateInterface} state
  */
-export function saveState_(state: StateInterface) {
-  let newState: StateInterface = { ...state};
+export function saveState_(state: ReduxStateInterface) {
+  let newState: ReduxStateInterface = { ...state};
   return newState;
 }
 
+
+/**
+ *Action to update pipeline
+ *
+ * @export
+ * @param {{ [key: string]: any }} data
+ * @returns {ActionType}
+ */
+export function updatePipeline(data: Array<Dict>): ActionType {
+  return {type : Action.UPDATE_PIPELINE, data}
+}
+
+
+/**
+ * Update pipeline data of state, this function is called when
+ * `updatePipeline` is dispatched.
+ *
+ * @export
+ * @param {StateInterface} state
+ * @param {Types.UpdatePipeline} action
+ * @returns {StateInterface}
+ */
+export function _updatePipeline(state: ReduxStateInterface, action: Types.UpdatePipeline): ReduxStateInterface {
+  const newState: ReduxStateInterface = {...state, pipelines : action.data }
+  return { ...newState }  
+}

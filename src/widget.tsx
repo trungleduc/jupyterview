@@ -18,7 +18,7 @@ import { createStore, compose, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
 import { Provider } from "react-redux";
 import { rootReducer } from "./redux/reducers";
-import { StateInterface } from "./redux/types";
+import { ReduxStateInterface } from "./redux/types";
 import { initialState } from "./redux/reducers";
 
 const getEnhancers = () => {
@@ -82,7 +82,7 @@ class WrapperWidget extends ReactWidget {
   send_msg: SendMsgInterface;
   model: VtkModel;
   constructor(
-    initialState: StateInterface,
+    initialState: ReduxStateInterface,
     send_msg: SendMsgInterface,
     model: VtkModel
   ) {
@@ -143,16 +143,16 @@ export class VtkView extends VBoxView {
     }
   }
 
-  getStore(): StateInterface {
+  getStore(): ReduxStateInterface {
     let store = { ...initialState };
-    let newStore: StateInterface = {
+    let newStore: ReduxStateInterface = {
       ...store,
     };
 
     let savedStore = this.model.get("initial_store");
     for (const key in savedStore) {
       if (savedStore.hasOwnProperty(key) && newStore.hasOwnProperty(key)) {
-        newStore[key as keyof StateInterface] = savedStore[key];
+        newStore[key as keyof ReduxStateInterface] = savedStore[key];
       }
     }
     return newStore;

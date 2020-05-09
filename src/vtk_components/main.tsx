@@ -193,7 +193,7 @@ export default class Main extends React.Component<
               <Resizable
                 defaultSize={{
                   width: "100%",
-                  height: "25%",
+                  height: "40%",
                 }}
                 enable={{
                   top: false,
@@ -253,7 +253,7 @@ export default class Main extends React.Component<
               </Resizable>
               <div
                 ref={this.toolwindowRef}
-                style={{ height: "75%", padding: "5px 0px 5px 5px" }}
+                style={{ height: "60%", padding: "5px 0px 5px 5px" }}
               >
                 <Card
                   style={{
