@@ -3,7 +3,8 @@ import * as ActionFunc from "./actions";
 
 export const initialState: ReduxStateInterface = {
   mainState: "",
-  pipelines : []
+  pipelines: [],
+  selectedData: []
 };
 
 export function rootReducer(
@@ -21,6 +22,10 @@ export function rootReducer(
       
     case Action.UPDATE_PIPELINE: {
       return ActionFunc._updatePipeline(state, action)
+    }
+      
+    case Action.ADD_SELECTED_DATA: {
+      return ActionFunc._addSelectedData(state, action)
     }
     default:
       return state;

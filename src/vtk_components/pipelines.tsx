@@ -116,6 +116,25 @@ const INITIAL_STATE: ITreeNode[] = [
   },
 ];
 
+
+class ShowButton extends React.Component<{pipeline : string, name : string}, { status : boolean}>{
+  constructor(props) {
+    super(props)
+    this.state = {status : false}
+  }
+
+  private handleClick = (e) => {
+    this.setState((oldState) => ({ ...oldState, status: !oldState.status }))
+  }
+  render() {
+    return (
+      <Icon icon={this.state.status ? "eye-open" : "eye-off"} onClick={this.handleClick}
+      />
+    )
+  }
+}
+
+
 export class Pipelines extends React.Component<
   PropsInterface,
   StateInterface
@@ -125,11 +144,11 @@ export class Pipelines extends React.Component<
     this.state = { nodes: [] , pipelines : props.pipelines};
   }
 
-  static getDerivedStateFromProps(nextProps: PropsInterface, prevState: StateInterface): StateInterface {
-    if (nextProps.pipelines !== prevState.pipelines) {
-      console.log('called');
+  componentDidUpdate(prevProps: PropsInterface, prevState: StateInterface ) {
+    
+    if (this.props.pipelines !== prevProps.pipelines) {
       let newPipeLines: Array<ITreeNode> = []
-      nextProps.pipelines.forEach((item, index) => {
+      this.props.pipelines.forEach((item, index) => {
         let childNodes : Array<ITreeNode> = []
         const {name, children} = item
   
@@ -138,6 +157,8 @@ export class Pipelines extends React.Component<
             id: index + "." + cindex,
             label: citem,
             icon: "document",
+            secondaryLabel: <ShowButton pipeline = "local" name = {citem} />
+                
           })
         })
         newPipeLines.push({
@@ -145,15 +166,23 @@ export class Pipelines extends React.Component<
           hasCaret: true,
           icon: "folder-close",
           label: name,
+          isExpanded : true,
           childNodes
+          
         })
       })
-      return {...prevState, nodes : newPipeLines, pipelines : nextProps.pipelines}
-      
-    } else {
-      return null
+      this.setState( oldState => ({...oldState, nodes : newPipeLines}) ) 
     }
   }
+
+  // static getDerivedStateFromProps(nextProps: PropsInterface, prevState: StateInterface): StateInterface {
+  //   if (nextProps.pipelines !== prevState.pipelines) {
+
+      
+  //   } else {
+  //     return null
+  //   }
+  // }
 
   private handleNodeClick = (
     nodeData: ITreeNode,

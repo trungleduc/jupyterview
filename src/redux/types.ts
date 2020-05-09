@@ -8,13 +8,16 @@ export interface Dict {
 export interface ReduxStateInterface {
   /** State of activated panel */
   mainState: string;
-  pipelines : Array<Dict>
+  pipelines: Array<Dict>
+  selectedData : Array<Dict>
 }
 
 export enum Action {
   SAVE_STATE = "SAVE_STATE",
   RESET_STORE = "RESET_STORE",
-  UPDATE_PIPELINE = "UPDATE_PIPELINE"
+  UPDATE_PIPELINE = "UPDATE_PIPELINE",
+  ADD_SELECTED_DATA = "ADD_SELECTED_DATA",
+  REMOVE_SELECTED_DATA = "REMOVE_SELECTED_DATA"
 }
 
 export interface SaveState {
@@ -30,7 +33,19 @@ export interface UpdatePipeline {
   data: Array<Dict>
 }
 
+export interface AddSelectedData{
+  type: Action.ADD_SELECTED_DATA
+  data: Dict
+}
+
+export interface RemoveSelectedData{
+  type: Action.ADD_SELECTED_DATA
+  data: Dict
+}
+
 export type ActionType =
   | ResetStore
   | UpdatePipeline
+  | AddSelectedData
+  | RemoveSelectedData
   | SaveState;

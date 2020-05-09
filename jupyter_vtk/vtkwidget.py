@@ -53,7 +53,6 @@ class VtkWidget(DOMWidget):
     new_data = []
 
     for root, dirs, files in os.walk(self.realRootPath):
-      print("go",root, dirs, files)
       dirs[:] = [d for d in dirs if (not d.startswith(
           '.') and not "node_modules" in d and not "__pycache__" in d)]
       # files = [ file for file in files if file.endswith( ('.vtu','.pvd') ) ]

@@ -61,3 +61,31 @@ export function _updatePipeline(state: ReduxStateInterface, action: Types.Update
   const newState: ReduxStateInterface = {...state, pipelines : action.data }
   return { ...newState }  
 }
+
+
+/**
+ * Action to add selected data to store, this key is observed in
+ * vtkwidget in order to plot the corresponding vtk file
+ *
+ * @export
+ * @param {Dict} data
+ * @returns {ActionType}
+ */
+export function addSelectedData(data: Dict): ActionType {
+  return {type: Action.ADD_SELECTED_DATA, data}
+}
+
+/**
+ *  This function is called when `addSelectedData` is dispatched
+ *
+ * @export
+ * @param {ReduxStateInterface} state
+ * @param {Types.UpdatePipeline} action
+ * @returns {ReduxStateInterface}
+ */
+export function _addSelectedData(state: ReduxStateInterface, action: Types.AddSelectedData): ReduxStateInterface {
+  console.log(action);
+  const newData = [...state.selectedData, action.data]
+  const newState: ReduxStateInterface = {...state, selectedData : newData }
+  return { ...newState }  
+}
