@@ -8,7 +8,7 @@
 [![codecov](https://codecov.io/gh//jupyter_vtk/branch/master/graph/badge.svg)](https://codecov.io/gh//jupyter_vtk)
 
 
-VTK visualisation for jupyter lab
+VTK visualization for jupyterlab
 
 ## Installation
 
@@ -18,17 +18,55 @@ You can install using `pip`:
 pip install jupyter_vtk
 ```
 
-Or if you use jupyterlab:
+Install `jupyterlab-manager`, skip it if already installed
 
 ```bash
-pip install jupyter_vtk
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
+jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
 ```
 
-If you are using Jupyter Notebook 5.2 or earlier, you may also need to enable
-the nbextension:
+Rebuild jupyterlab to enable the front-end widget (nodejs required):
+
 ```bash
-jupyter nbextension enable --py [--sys-prefix|--user|--system] jupyter_vtk
+jupyter lab build
+```
+
+## Development
+
+### First time set up
+
+```bash
+# Create a new conda environment
+conda create -n jupyterview -c conda-forge jupyterlab ipywidgets nodejs
+
+# Activate the conda environment
+conda activate jupyterview
+
+# Install the jupyterview Python package
+python -m pip install -e .
+
+# Install front-end dependencies
+jlpm install
+
+# Build Typescript source
+jlpm build
+
+# Link your development version of the extension with JupyterLab
+jupyter labextension link .
+
+# Rebuild JupyterLab.
+jupyter lab build
+
+```
+
+### Auto-rebuild development mode
+
+```bash
+# Run jupyterlab in watch mode, this will cause the application to incrementally rebuild when one of the linked packages changes
+jupyter lab --watch
+
+# Rebuild Typescript source after making changes
+jlpm build
+
 ```
 
 ## Contributors ✨
