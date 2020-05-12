@@ -15,6 +15,17 @@
         "test",
         "code"
       ]
+    },
+    {
+      "login": "tridatngo",
+      "name": "tridatngo",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/21169541?v=4",
+      "profile": "https://github.com/tridatngo",
+      "contributions": [
+        "infra",
+        "test",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
