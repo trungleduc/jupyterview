@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 # jupyter_vtk
 
@@ -41,6 +41,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://github.com/trungleduc"><img src="https://avatars3.githubusercontent.com/u/4451292?v=4" width="100px;" alt=""/><br /><sub><b>Duc Trung LE</b></sub></a><br /><a href="#infra-trungleduc" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/trungleduc/jupyter_vtk/commits?author=trungleduc" title="Tests">⚠️</a> <a href="https://github.com/trungleduc/jupyter_vtk/commits?author=trungleduc" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/tridatngo"><img src="https://avatars1.githubusercontent.com/u/21169541?v=4" width="100px;" alt=""/><br /><sub><b>tridatngo</b></sub></a><br /><a href="#infra-tridatngo" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/trungleduc/jupyter_vtk/commits?author=tridatngo" title="Tests">⚠️</a> <a href="https://github.com/trungleduc/jupyter_vtk/commits?author=tridatngo" title="Code">💻</a></td>
   </tr>
 </table>
 
