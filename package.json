@@ -17,9 +17,9 @@
     "css/*.css",
     "dist/itk/**"
   ],
-  "homepage": "https://github.com//jupyterview",
+  "homepage": "https://github.com/trungleduc/jupyterview",
   "bugs": {
-    "url": "https://github.com//jupyterview/issues"
+    "url": "https://github.com/trungleduc/jupyterview/issues"
   },
   "license": "BSD-3-Clause",
   "author": {
@@ -29,7 +29,7 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com//jupyterview"
+    "url": "https://github.com/trungleduc/jupyterview"
   },
   "scripts": {
     "build": "npm run build:lib && npm run build:nbextension",
