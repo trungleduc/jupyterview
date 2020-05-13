@@ -11,7 +11,8 @@
 A data visualization widget for JupyterLab.
 
 
-![Preview](https://s4.gifyu.com/images/jupyterview.gif)
+![Screencast](https://s4.gifyu.com/images/jupyterview2.gif)
+
 
 ## Installation
 
