@@ -33,7 +33,7 @@
   },
   "scripts": {
     "build": "npm run build:lib && npm run build:nbextension",
-    "build:labextension": "tsc && webpack -p &&npm run clean:labextension && mkdirp jupyterview/labextension && cd jupyterview/labextension && npm pack ../..",
+    "build:labextension": "tsc && webpack -p && npm run clean:labextension && mkdirp jupyterview/labextension && cd jupyterview/labextension && npm pack ../..",
     "build:lib": "tsc",
     "build:nbextension": "webpack --mode development",
     "build:all": "npm run build:labextension && npm run build:nbextension",

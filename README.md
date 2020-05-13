@@ -8,7 +8,10 @@
 [![codecov](https://codecov.io/gh/trungleduc/jupyterview/branch/master/graph/badge.svg)](https://codecov.io/gh/trungleduc/jupyterview)
 
 
-Data visualization widget for JupyterLab
+A data visualization widget for JupyterLab.
+
+
+[![jupyterview.gif](https://s4.gifyu.com/images/jupyterview.gif)](https://gifyu.com/image/n9Vb)
 
 ## Installation
 
