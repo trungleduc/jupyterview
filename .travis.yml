@@ -17,10 +17,7 @@ matrix:
   include:
     - python: 3.5
       env: GROUP=js
-
-    - language: node_js
-      node_js:
-        - 10.13.0
+      
 cache:
   pip: true
   directories:
