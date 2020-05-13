@@ -4,7 +4,7 @@
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 # JupyterView
 
-[![Build Status](https://travis-ci.org//jupyterview.svg?branch=master)](https://travis-ci.org//jupyterview)
+[![Build Status](https://travis-ci.org/trungleduc/jupyterview.svg?branch=master)](https://travis-ci.org/trungleduc/jupyterview)
 [![codecov](https://codecov.io/gh//jupyterview/branch/master/graph/badge.svg)](https://codecov.io/gh//jupyterview)
 
 
