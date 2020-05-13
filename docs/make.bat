@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 set BUILDDIR=build
-set SPHINXPROJ=jupyter_vtk
+set SPHINXPROJ=jupyterview
 
 if "%1" == "" goto help
 

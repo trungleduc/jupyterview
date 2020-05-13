@@ -5,27 +5,27 @@ Installation
 ============
 
 
-The simplest way to install jupyter_vtk is via pip::
+The simplest way to install jupyterview is via pip::
 
-    pip install jupyter_vtk
+    pip install jupyterview
 
 or via conda::
 
-    conda install jupyter_vtk
+    conda install jupyterview
 
 
 If you installed via pip, and notebook version < 5.3, you will also have to
 install / configure the front-end extension as well. If you are using classic
 notebook (as opposed to Jupyterlab), run::
 
-    jupyter nbextension install [--sys-prefix / --user / --system] --py jupyter_vtk
+    jupyter nbextension install [--sys-prefix / --user / --system] --py jupyterview
 
-    jupyter nbextension enable [--sys-prefix / --user / --system] --py jupyter_vtk
+    jupyter nbextension enable [--sys-prefix / --user / --system] --py jupyterview
 
 with the `appropriate flag`_. If you are using Jupyterlab, install the extension
 with::
 
-    jupyter labextension install jupyter_vtk
+    jupyter labextension install jupyterview
 
 If you are installing using conda, these commands should be unnecessary, but If
 you need to run them the commands should be the same (just make sure you choose the

@@ -8,5 +8,5 @@
 Information about the frontend package of the widgets.
 """
 
-module_name = "jupyter_vtk"
+module_name = "jupyterview"
 module_version = "^0.3.1"

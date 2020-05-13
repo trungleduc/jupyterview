@@ -34,7 +34,7 @@ module.exports = [
     entry: './lib/extension.js',
     output: {
       filename: 'index.js',
-      path: path.resolve(__dirname, 'jupyter_vtk', 'nbextension', 'static'),
+      path: path.resolve(__dirname, 'jupyterview', 'nbextension', 'static'),
       libraryTarget: 'amd'
     },
     module: {
@@ -46,7 +46,7 @@ module.exports = [
   },
 
   /**
-   * Embeddable jupyter_vtk bundle
+   * Embeddable jupyterview bundle
    *
    * This bundle is almost identical to the notebook extension bundle. The only
    * difference is in the configuration of the webpack public path for the
@@ -61,8 +61,8 @@ module.exports = [
         filename: 'index.js',
         path: path.resolve(__dirname, 'dist'),
         libraryTarget: 'amd',
-        library: "jupyter_vtk",
-        publicPath: 'https://unpkg.com/jupyter_vtk@' + version + '/dist/'
+        library: "jupyterview",
+        publicPath: 'https://unpkg.com/jupyterview@' + version + '/dist/'
     },
     devtool: 'source-map',
     module: {
@@ -74,19 +74,19 @@ module.exports = [
       new CopyPlugin([
         {
         from: path.join(__dirname, 'node_modules', 'itk', 'WebWorkers'),
-        to: path.join(__dirname, 'jupyter_vtk', 'nbextension', 'static','itk', 'WebWorkers'),
+        to: path.join(__dirname, 'jupyterview', 'nbextension', 'static','itk', 'WebWorkers'),
         },
         {
           from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs', 'VTKXMLFileReader.js'),
-          to: path.join(__dirname, 'jupyter_vtk', 'nbextension' , 'static','itk', 'PolyDataIOs','VTKXMLFileReader.js'),
+          to: path.join(__dirname, 'jupyterview', 'nbextension' , 'static','itk', 'PolyDataIOs','VTKXMLFileReader.js'),
         },
         {
           from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs', 'VTKXMLFileReaderWasm.js'),
-          to: path.join(__dirname, 'jupyter_vtk', 'nbextension' , 'static','itk', 'PolyDataIOs','VTKXMLFileReaderWasm.js'),
+          to: path.join(__dirname, 'jupyterview', 'nbextension' , 'static','itk', 'PolyDataIOs','VTKXMLFileReaderWasm.js'),
         },
         {
           from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs', 'VTKXMLFileReaderWasm.wasm'),
-          to: path.join(__dirname, 'jupyter_vtk', 'nbextension' , 'static','itk', 'PolyDataIOs','VTKXMLFileReaderWasm.wasm'),
+          to: path.join(__dirname, 'jupyterview', 'nbextension' , 'static','itk', 'PolyDataIOs','VTKXMLFileReaderWasm.wasm'),
         },
         
       ]),
@@ -107,7 +107,7 @@ module.exports = [
     output: {
       filename: 'embed-bundle.js',
       path: path.resolve(__dirname, 'docs', 'source', '_static'),
-      library: "jupyter_vtk",
+      library: "jupyterview",
       libraryTarget: 'amd'
     },
     module: {

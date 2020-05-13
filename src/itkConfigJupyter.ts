@@ -1,4 +1,4 @@
-let _public_path__ = "/nbextensions/jupyter_vtk/";
+let _public_path__ = "/nbextensions/jupyterview/";
 console.log(_public_path__);
 
 const itkConfig = {

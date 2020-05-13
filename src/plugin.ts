@@ -13,7 +13,7 @@ import * as widgetExports from "./widget";
 
 import { MODULE_NAME, MODULE_VERSION } from "./version";
 
-const EXTENSION_ID = "jupyter_vtk:plugin";
+const EXTENSION_ID = "jupyterview:plugin";
 
 /**
  * The example plugin.

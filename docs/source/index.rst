@@ -1,5 +1,5 @@
 
-jupyter_vtk
+jupyterview
 =====================================
 
 Version: |release|
@@ -10,13 +10,13 @@ VTK visualisation for jupyter lab
 Quickstart
 ----------
 
-To get started with jupyter_vtk, install with pip::
+To get started with jupyterview, install with pip::
 
-    pip install jupyter_vtk
+    pip install jupyterview
 
 or with conda::
 
-    conda install jupyter_vtk
+    conda install jupyterview
 
 
 Contents

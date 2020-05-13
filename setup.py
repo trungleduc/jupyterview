@@ -19,7 +19,7 @@ from setuptools import setup
 
 
 # The name of the project
-name = 'jupyter_vtk'
+name = 'jupyterview'
 
 # Ensure a valid python version
 ensure_python('>=3.4')
@@ -44,10 +44,10 @@ package_data_spec = {
 }
 
 data_files_spec = [
-    ('share/jupyter/nbextensions/jupyter_vtk',
+    ('share/jupyter/nbextensions/jupyterview',
         nb_path, '*.js*'),
     ('share/jupyter/lab/extensions', lab_path, '*.tgz'),
-    ('etc/jupyter/nbconfig/notebook.d' , HERE, 'jupyter_vtk.json')
+    ('etc/jupyter/nbconfig/notebook.d' , HERE, 'jupyterview.json')
 ]
 
 
@@ -67,7 +67,7 @@ setup_args = dict(
     packages        = find_packages(),
     author          = 'Trung Le',
     author_email    = 'leductrungxf@gmail.com',
-    url             = 'https://github.com//jupyter_vtk',
+    url             = 'https://github.com//jupyterview',
     license         = 'BSD',
     platforms       = "Linux, Mac OS X, Windows",
     keywords        = ['Jupyter', 'Widgets', 'IPython'],
@@ -84,12 +84,12 @@ setup_args = dict(
         'Framework :: Jupyter',
     ],
     data_files = [
-        ('share/jupyter/nbextensions/jupyter_vtk/itk/WebWorkers', [
+        ('share/jupyter/nbextensions/jupyterview/itk/WebWorkers', [
             pjoin(nb_path, 'itk', 'WebWorkers', 'Pipeline.worker.js'),
             pjoin(nb_path, 'itk', 'WebWorkers', 'MeshIO.worker.js'),
             pjoin(nb_path, 'itk','WebWorkers','ImageIO.worker.js' ), 
         ]),
-        ('share/jupyter/nbextensions/jupyter_vtk/itk/PolyDataIOs', [
+        ('share/jupyter/nbextensions/jupyterview/itk/PolyDataIOs', [
             # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKExodusFileReader.js'),
             # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKExodusFileReaderWasm.js'),
             # pjoin(nb_path, 'itk','PolyDataIOs','VTKExodusFileReaderWasm.wasm' ), 

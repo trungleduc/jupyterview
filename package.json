@@ -1,5 +1,5 @@
 {
-  "name": "jupyter_vtk",
+  "name": "jupyterview",
   "version": "0.3.1",
   "description": "VTK visualisation for jupyter lab",
   "keywords": [
@@ -17,9 +17,9 @@
     "css/*.css",
     "dist/itk/**"
   ],
-  "homepage": "https://github.com//jupyter_vtk",
+  "homepage": "https://github.com//jupyterview",
   "bugs": {
-    "url": "https://github.com//jupyter_vtk/issues"
+    "url": "https://github.com//jupyterview/issues"
   },
   "license": "BSD-3-Clause",
   "author": {
@@ -29,11 +29,11 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com//jupyter_vtk"
+    "url": "https://github.com//jupyterview"
   },
   "scripts": {
     "build": "npm run build:lib && npm run build:nbextension",
-    "build:labextension": "tsc && webpack -p &&npm run clean:labextension && mkdirp jupyter_vtk/labextension && cd jupyter_vtk/labextension && npm pack ../..",
+    "build:labextension": "tsc && webpack -p &&npm run clean:labextension && mkdirp jupyterview/labextension && cd jupyterview/labextension && npm pack ../..",
     "build:lib": "tsc",
     "build:nbextension": "webpack --mode development",
     "build:all": "npm run build:labextension && npm run build:nbextension",
@@ -41,8 +41,8 @@
     "clean": "npm run clean:lib && npm run clean:dist && npm run clean:nbextension",
     "clean:lib": "rimraf lib",
     "clean:dist": "rimraf dist",
-    "clean:labextension": "rimraf jupyter_vtk/labextension",
-    "clean:nbextension": "rimraf jupyter_vtk/nbextension/static/index.js",
+    "clean:labextension": "rimraf jupyterview/labextension",
+    "clean:nbextension": "rimraf jupyterview/nbextension/static/index.js",
     "prepack": "npm run build:lib",
     "test": "npm run test:firefox",
     "test:chrome": "karma start --browsers=Chrome tests/karma.conf.js",

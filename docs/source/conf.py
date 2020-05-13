@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# jupyter_vtk documentation build configuration file
+# jupyterview documentation build configuration file
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'jupyter_vtk'
+project = 'jupyterview'
 copyright = '2020, Trung Le'
 author = 'Trung Le'
 
@@ -69,7 +69,7 @@ author = 'Trung Le'
 import os
 here = os.path.dirname(__file__)
 repo = os.path.join(here, '..', '..')
-_version_py = os.path.join(repo, 'jupyter_vtk', '_version.py')
+_version_py = os.path.join(repo, 'jupyterview', '_version.py')
 version_ns = {}
 with open(_version_py) as f:
     exec(f.read(), version_ns)
@@ -116,7 +116,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'jupyter_vtkdoc'
+htmlhelp_basename = 'jupyterviewdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -143,7 +143,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'jupyter_vtk.tex', 'jupyter_vtk Documentation',
+    (master_doc, 'jupyterview.tex', 'jupyterview Documentation',
      'Trung Le', 'manual'),
 ]
 
@@ -154,8 +154,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     (master_doc,
-    'jupyter_vtk',
-    'jupyter_vtk Documentation',
+    'jupyterview',
+    'jupyterview Documentation',
      [author], 1)
 ]
 
@@ -167,10 +167,10 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc,
-     'jupyter_vtk',
-     'jupyter_vtk Documentation',
+     'jupyterview',
+     'jupyterview Documentation',
      author,
-     'jupyter_vtk',
+     'jupyterview',
      'VTK visualisation for jupyter lab',
      'Miscellaneous'),
 ]
