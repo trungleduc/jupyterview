@@ -5,7 +5,7 @@
 # JupyterView
 
 [![Build Status](https://travis-ci.org/trungleduc/jupyterview.svg?branch=master)](https://travis-ci.org/trungleduc/jupyterview)
-[![codecov](https://codecov.io/gh//jupyterview/branch/master/graph/badge.svg)](https://codecov.io/gh//jupyterview)
+[![codecov](https://codecov.io/gh/trungleduc/jupyterview/branch/master/graph/badge.svg)](https://codecov.io/gh/trungleduc/jupyterview)
 
 
 Data visualization widget for JupyterLab
