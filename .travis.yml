@@ -17,13 +17,10 @@ matrix:
   include:
     - python: 3.5
       env: GROUP=js
-      
+
     - language: node_js
       node_js:
-        - node
-  include:
-    - python: 3.6
-      env: GROUP=docs
+        - 10.13.0
 cache:
   pip: true
   directories:
@@ -31,7 +28,7 @@ cache:
     - $HOME/.npm
 before_install:
   - pip install -U pip setuptools
-  - nvm install 8
+  - nvm install 12
   - |
     if [[ $GROUP == python ]]; then
       pip install codecov
