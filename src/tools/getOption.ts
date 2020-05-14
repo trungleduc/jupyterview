@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import minimist from "minimist";
 
 export namespace PageConfig {
@@ -31,8 +34,6 @@ export namespace PageConfig {
           fullPath = path.resolve(process.env["JUPYTER_CONFIG_DATA"]);
         }
         if (fullPath) {
-          // Force Webpack to ignore this require.
-          // eslint-disable-next-line
           configData = eval("require")(fullPath) as { [key: string]: string };
         }
       } catch (e) {

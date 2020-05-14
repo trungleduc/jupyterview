@@ -1,3 +1,6 @@
+// Copyright (c) Trung Le
+// Distributed under the terms of the Modified BSD License.
+
 import { Action, ActionType, ReduxStateInterface } from "./types";
 import * as ActionFunc from "./actions";
 
