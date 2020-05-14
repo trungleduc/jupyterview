@@ -67,7 +67,7 @@ setup_args = dict(
     packages        = find_packages(),
     author          = 'Trung Le',
     author_email    = 'leductrungxf@gmail.com',
-    url             = 'https://github.com//jupyterview',
+    url             = 'https://github.com/trungleduc/jupyterview',
     license         = 'BSD',
     platforms       = "Linux, Mac OS X, Windows",
     keywords        = ['Jupyter', 'Widgets', 'IPython'],
@@ -103,9 +103,6 @@ setup_args = dict(
     ],
 
     include_package_data = True,
-    install_requires = [
-        'ipywidgets>=7.0.0',
-    ],
     extras_require = {
         'test': [
             'pytest>=3.6',

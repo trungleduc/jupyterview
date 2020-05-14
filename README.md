@@ -13,6 +13,7 @@ A data visualization widget for JupyterLab.
 
 ![Screencast](https://s4.gifyu.com/images/jupyterview2.gif)
 
+This project is under active development, the interface and behavior may change at any time.
 
 ## Installation
 

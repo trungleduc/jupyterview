@@ -17,9 +17,7 @@ matrix:
   include:
     - python: 3.5
       env: GROUP=js
-  include:
-    - python: 3.6
-      env: GROUP=docs
+      
 cache:
   pip: true
   directories:
@@ -27,7 +25,7 @@ cache:
     - $HOME/.npm
 before_install:
   - pip install -U pip setuptools
-  - nvm install 8
+  - nvm install 12
   - |
     if [[ $GROUP == python ]]; then
       pip install codecov
@@ -59,8 +57,6 @@ script:
       py.test -l --cov-report xml:$TRAVIS_BUILD_DIR/coverage.xml --cov=jupyterview --pyargs jupyterview || EXIT_STATUS=$?
       popd
       (exit $EXIT_STATUS)
-    elif [[ $GROUP == js ]]; then
-      npm test
     elif [[ $GROUP == docs ]]; then
       EXIT_STATUS=0
       cd docs

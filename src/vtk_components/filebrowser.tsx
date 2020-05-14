@@ -1,3 +1,6 @@
+// Copyright (c) Trung Le
+// Distributed under the terms of the Modified BSD License.
+
 import React from "react";
 import ReactDOM from "react-dom";
 import Moment from "moment";

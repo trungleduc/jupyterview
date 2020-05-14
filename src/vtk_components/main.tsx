@@ -1,3 +1,6 @@
+// Copyright (c) Trung Le
+// Distributed under the terms of the Modified BSD License.
+
 import React, { Component, AriaAttributes } from "react";
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
