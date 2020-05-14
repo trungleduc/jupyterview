@@ -103,10 +103,6 @@ setup_args = dict(
     ],
 
     include_package_data = True,
-    install_requires=[
-        'jupyterlab>=2.0.0'
-        'ipywidgets>=7.0.0',
-    ],
     extras_require = {
         'test': [
             'pytest>=3.6',
