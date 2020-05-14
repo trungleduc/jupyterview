@@ -13,7 +13,7 @@ import {
 
 import {
   VtkModel, VtkView
-} from '../../src/'
+} from '../../src/widget'
 
 
 describe('Example', () => {
@@ -23,14 +23,11 @@ describe('Example', () => {
     it('should be createable', () => {
       let model = createTestModel(VtkModel);
       expect(model).to.be.an(VtkModel);
-      expect(model.get('value')).to.be('Hello World');
     });
 
     it('should be createable with a value', () => {
-      let state = { value: 'Foo Bar!' }
-      let model = createTestModel(VtkModel, state);
+      let model = createTestModel(VtkModel);
       expect(model).to.be.an(VtkModel);
-      expect(model.get('value')).to.be('Foo Bar!');
     });
 
   });
