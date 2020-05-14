@@ -1,12 +1,10 @@
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
 # JupyterView
 
 [![Build Status](https://travis-ci.org/trungleduc/jupyterview.svg?branch=master)](https://travis-ci.org/trungleduc/jupyterview)
 [![codecov](https://codecov.io/gh/trungleduc/jupyterview/branch/master/graph/badge.svg)](https://codecov.io/gh/trungleduc/jupyterview)
-
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 
 A data visualization widget for JupyterLab.
 
