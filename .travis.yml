@@ -16,7 +16,7 @@ env:
 matrix:
   include:
     - python: 3.5
-      env: GROUP=js
+
       
 cache:
   pip: true
