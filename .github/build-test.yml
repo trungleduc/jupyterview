@@ -1,0 +1,42 @@
+name: Build and test
+
+on: [push,pull_request]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 4
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-lastest]
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade setuptools wheel
+        pip install  pytest jupyterlab
+    - name: Install package and extension
+      run: |
+        python -m pip install .
+        jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
+        jupyter lab build
+    - name: Test with pytest
+      run: |
+        python -m pip install pytest
+        python -m pytest --tb=long --verbose 
+    - name: Test with jest
+      run: |
+        jlpm test
+    - name: Test package generation and installation
+      run: |
+        python setup.py sdist
+        python setup.py bdist_wheel
+        python -m pip install dist/*.whl
