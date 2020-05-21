@@ -16,9 +16,14 @@ module.exports = {
     // "^react-dnd-test-utils$": "react-dnd-test-utils/dist/cjs",
     // "^react-dnd$": "react-dnd/dist/ReactDnD.js",
 
-    "\\.(css|less|sass|scss)$": "<rootDir>/src/tests/style_mock.js",
-    "\\.(gif|ttf|eot|svg|glsl)$": "<rootDir>/src/tests/file_mock.js"
+    "\\.(css|less|sass|scss)$": "<rootDir>/src/test_setup/style_mock.js",
+    "\\.(gif|ttf|eot|svg|glsl)$": "<rootDir>/src/test_setup/file_mock.js"
   },
-  setupFiles: ["<rootDir>/src/tests/test_env.ts"],
-  verbose : true
+  setupFiles: ["<rootDir>/src/test_setup/test_env.ts"],
+  verbose : true,
+  collectCoverage: true,
+  collectCoverageFrom: [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+  ],
 };
