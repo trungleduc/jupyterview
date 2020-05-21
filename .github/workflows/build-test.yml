@@ -40,3 +40,19 @@ jobs:
         python setup.py sdist
         python setup.py bdist_wheel
         python -m pip install --find-links=./dist jupyterview
+  
+  coverage:
+    if: ${{ github.ref == 'master' }}
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7' 
+    - name: Upload report
+      run: |
+        pip install codecov
+        codecov
