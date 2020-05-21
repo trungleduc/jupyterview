@@ -2,7 +2,7 @@
 
 # JupyterView
 
-[![Build Status](https://travis-ci.org/trungleduc/jupyterview.svg?branch=master)](https://travis-ci.org/trungleduc/jupyterview)
+[![build](https://github.com/trungleduc/jupyterview/workflows/build/badge.svg)](https://github.com/trungleduc/jupyterview/actions)
 [![codecov](https://codecov.io/gh/trungleduc/jupyterview/branch/master/graph/badge.svg)](https://codecov.io/gh/trungleduc/jupyterview)
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 
