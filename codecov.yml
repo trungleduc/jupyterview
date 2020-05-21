@@ -1,3 +1,6 @@
+codecov:
+  token: e31d94e4-2b13-4ab2-89f8-87f861c54316
+
 comment: off
 # show coverage in CI status, but never consider it a failure
 coverage:
@@ -8,5 +11,3 @@ coverage:
     patch:
       default:
         target: 0%
-ignore:
-  - "jupyterview/tests"
