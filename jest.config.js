@@ -2,7 +2,7 @@ module.exports = {
   preset: "ts-jest/presets/js-with-babel",
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   transformIgnorePatterns: [
-    "node_modules/(?!(vtk.js|itk|@jupyter-widgets)/)"
+    "node_modules/(?!(vtk.js|itk|@jupyterlab|@jupyterlab/apputils|@jupyter-widgets)/)"
   ],
   globals: {
     "ts-jest": {
@@ -26,4 +26,5 @@ module.exports = {
     "src/**/*.ts",
     "src/**/*.tsx",
   ],
+  "snapshotSerializers": ["enzyme-to-json/serializer"]
 };
