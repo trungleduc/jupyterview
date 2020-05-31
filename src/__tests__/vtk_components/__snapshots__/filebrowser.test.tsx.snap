@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test RemoteFileBrowser component should render correctly with mock props 1`] = `
+<div
+  className="file-browser"
+  style={
+    Object {
+      "maxHeight": "50vh",
+      "overflow": "auto",
+      "width": "100%",
+    }
+  }
+>
+  <DragDropContext(t)
+    detailRenderer={[Function]}
+    files={Array []}
+    icons={
+      Object {
+        "Archive": <i
+          aria-hidden="true"
+          className="fa fa-file-archive-o"
+        />,
+        "Audio": <i
+          aria-hidden="true"
+          className="fa fa-file-audio-o"
+        />,
+        "Delete": <i
+          aria-hidden="true"
+          className="fa fa-trash-o"
+        />,
+        "Download": <i
+          aria-hidden="true"
+          className="fa fa-download"
+        />,
+        "Excel": <i
+          aria-hidden="true"
+          className="fa fa-file-excel-o"
+        />,
+        "File": <i
+          aria-hidden="true"
+          className="fa fa-file-o"
+        />,
+        "Folder": <i
+          aria-hidden="true"
+          className="fa fa-folder-o"
+        />,
+        "FolderOpen": <i
+          aria-hidden="true"
+          className="fa fa-folder-open-o"
+        />,
+        "Image": <i
+          aria-hidden="true"
+          className="fa fa-file-image-o"
+        />,
+        "Loading": <i
+          aria-hidden="true"
+          className="fa fa-circle-o-notch fa-spin"
+        />,
+        "PDF": <i
+          aria-hidden="true"
+          className="fa fa-file-pdf-o"
+        />,
+        "PowerPoint": <i
+          aria-hidden="true"
+          className="fa fa-file-powerpoint-o"
+        />,
+        "Rename": <i
+          aria-hidden="true"
+          className="fa fa-i-cursor"
+        />,
+        "Text": <i
+          aria-hidden="true"
+          className="fa fa-file-text-o"
+        />,
+        "Video": <i
+          aria-hidden="true"
+          className="fa fa-file-video-o"
+        />,
+        "Word": <i
+          aria-hidden="true"
+          className="fa fa-file-word-o"
+        />,
+      }
+    }
+  />
+</div>
+`;

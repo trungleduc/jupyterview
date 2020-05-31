@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test LeftPanel component should render correctly with mock props 1`] = `
+<Blueprint3.Tabs
+  animate={true}
+  className="left-panel"
+  id="TabsExample"
+  key="horizontal"
+  large={false}
+  onChange={[Function]}
+  renderActiveTabPanelOnly={false}
+  selectedTabId="rx"
+  vertical={false}
+>
+  <Blueprint3.Tab
+    className="left-panel-tab"
+    disabled={false}
+    id="rx"
+    panel={<SourcePanel />}
+    title="SOURCE"
+  />
+  <Blueprint3.Tab
+    className="left-panel-tab"
+    disabled={false}
+    id="ng"
+    panel={<ToolsPanel />}
+    title="TOOLS"
+  />
+  <Blueprint3.Tab
+    className="left-panel-tab"
+    disabled={false}
+    id="mb"
+    panel={<InfoPanel />}
+    title="INFO"
+  />
+</Blueprint3.Tabs>
+`;
