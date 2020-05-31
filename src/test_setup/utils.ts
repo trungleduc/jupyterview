@@ -148,6 +148,6 @@ export class MockModel {
   }
 
   public set(key: string, val: any) {
-    this._value[key] = { ...this._value, [key]: val };
+    this._value[key] =  val;
   }
 }

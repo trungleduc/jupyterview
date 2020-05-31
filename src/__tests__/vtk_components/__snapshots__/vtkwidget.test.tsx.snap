@@ -1,0 +1,104 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test VtkWidget component should render correctly with mock props 1`] = `
+<div
+  style={
+    Object {
+      "height": "100%",
+      "width": "100%",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "background": "linear-gradient(#000028, #ffffff)",
+        "height": "95%",
+        "width": "100%",
+      }
+    }
+  />
+  <div
+    style={
+      Object {
+        "background": "aliceblue",
+        "height": "5%",
+        "padding": "10px",
+        "width": "100%",
+      }
+    }
+  >
+    <input
+      multiple={true}
+      onChange={[Function]}
+      style={
+        Object {
+          "display": "none",
+        }
+      }
+      type="file"
+    />
+    <select
+      onChange={[Function]}
+      style={
+        Object {
+          "width": "15%",
+        }
+      }
+      value=""
+    />
+    <select
+      onChange={[Function]}
+      style={
+        Object {
+          "width": "15%",
+        }
+      }
+    />
+    <select
+      onChange={[Function]}
+      style={
+        Object {
+          "width": "15%",
+        }
+      }
+    >
+      <option
+        key="Surface"
+        value="1:2:0"
+      >
+        Surface
+      </option>
+      <option
+        key="Hidden"
+        value="0:-1:0"
+      >
+        Hidden
+      </option>
+      <option
+        key="Points"
+        value="1:0:0"
+      >
+        Points
+      </option>
+      <option
+        key="Wireframe"
+        value="1:1:0"
+      >
+        Wireframe
+      </option>
+      <option
+        key="Surface with Edge"
+        value="1:2:1"
+      >
+        Surface with Edge
+      </option>
+    </select>
+    <button
+      onClick={[Function]}
+    >
+      Play
+    </button>
+  </div>
+</div>
+`;
