@@ -1,0 +1,114 @@
+import * as ActionFunc from "../../redux/actions";
+import {
+  Action,
+  SaveState,
+  ReduxStateInterface,
+  UpdatePipeline,
+  Dict,
+} from "../../redux/types";
+
+describe("Test reset store action", () => {
+  it("should return correct signal", () => {
+    expect(ActionFunc.resetStore()).toEqual({ type: Action.RESET_STORE });
+  });
+});
+
+describe("Test save state action", () => {
+  let mockState: ReduxStateInterface;
+  beforeAll(() => {
+    mockState = {
+      mainState: "foo",
+      pipelines: [{ name: "local", children: ["bar", "bar1"] }],
+      selectedData: [],
+    };
+  });
+
+  it("should return correct signal", () => {
+    const signal = ActionFunc.saveState("foo") as SaveState;
+    expect(signal.name).toEqual("foo");
+    expect(signal.type).toEqual(Action.SAVE_STATE);
+  });
+
+  it("_saveState should return correct state", () => {
+    const state = ActionFunc.saveState_(mockState);
+    expect(state.mainState).toEqual("foo");
+    expect(state.pipelines).toEqual([
+      { name: "local", children: ["bar", "bar1"] },
+    ]);
+    expect(state.selectedData).toEqual([]);
+  });
+});
+
+describe("Test save state action", () => {
+  let mockState: ReduxStateInterface;
+  beforeAll(() => {
+    mockState = {
+      mainState: "foo",
+      pipelines: [{ name: "local", children: ["bar", "bar1"] }],
+      selectedData: [],
+    };
+  });
+
+  it("should return correct signal", () => {
+    const signal = ActionFunc.saveState("foo") as SaveState;
+    expect(signal.name).toEqual("foo");
+    expect(signal.type).toEqual(Action.SAVE_STATE);
+  });
+
+  it("_saveState should return correct state", () => {
+    const state = ActionFunc.saveState_(mockState);
+    expect(state.mainState).toEqual("foo");
+    expect(state.pipelines).toEqual([
+      { name: "local", children: ["bar", "bar1"] },
+    ]);
+    expect(state.selectedData).toEqual([]);
+  });
+});
+
+describe("Test update  pipelines action", () => {
+  let mockState: ReduxStateInterface;
+  beforeAll(() => {
+    mockState = {
+      mainState: "foo",
+      pipelines: [],
+      selectedData: [],
+    };
+  });
+
+  it("should return correct signal", () => {
+    const signal = ActionFunc.updatePipeline([
+      { foo: "bar" },
+    ]) as UpdatePipeline;
+    expect(signal.data).toEqual([{ foo: "bar" }]);
+    expect(signal.type).toEqual(Action.UPDATE_PIPELINE);
+  });
+
+  it.each`
+    old   | data                                              | newPipeline
+    ${[]} | ${[{ name: "local", children: ["bar", "bar1"] }]} | ${[{ name: "local", children: ["bar", "bar1"] }]}
+    ${[{ name: "local", children: ["bar", "bar1"] }]} | ${[{ name: "local", children: ["bar", "bar1"] }]} | ${[
+  { name: "local", children: ["bar", "bar1"] },
+  { name: "local(1)", children: ["bar", "bar1"] },
+]}
+  `(
+    "_updatePipeline should return correct state",
+    ({
+      old,
+      data,
+      newPipeline,
+    }: {
+      old: Array<Dict>;
+      data: Array<Dict>;
+      newPipeline: Array<Dict>;
+    }) => {
+      const mockState = {
+        mainState: "foo",
+        pipelines: old,
+        selectedData: [],
+      };
+      const action: UpdatePipeline = { type: Action.UPDATE_PIPELINE, data };
+      const newState = ActionFunc._updatePipeline(mockState, action);
+      expect(newState.pipelines).toEqual(newPipeline);
+    }
+  );
+});

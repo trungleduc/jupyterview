@@ -103,7 +103,6 @@ export function addSelectedData(data: Dict): ActionType {
  * @returns {ReduxStateInterface}
  */
 export function _addSelectedData(state: ReduxStateInterface, action: Types.AddSelectedData): ReduxStateInterface {
-  console.log(action);
   const newData = [...state.selectedData, action.data]
   const newState: ReduxStateInterface = {...state, selectedData : newData }
   return { ...newState }  
