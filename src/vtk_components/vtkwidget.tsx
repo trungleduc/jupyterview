@@ -406,10 +406,19 @@ export class VtkWidget extends React.Component<
         --counter;
         this.fileData[element.name] = data;
         if (counter === 0) {
-          this.createPipeline(this.fileData[firstName]);
-          this.props.inputOpenFileRef.current.value = "";
+          if (this.source) {
+            const selectedFile = firstName;
+            this.setState((oldState)=>({...oldState, selectedFile}))
+            this.source = vtk(this.fileData[selectedFile]);
+            this.mapper.setInputData(this.source);
+            this.renderWindow.render();
+          } else {
+            this.createPipeline(this.fileData[firstName]);
+            this.props.inputOpenFileRef.current.value = "";
+          }
           this.props.updateProgress(false, 0)
-          this.props.updatePipeline([{name: "local" ,children: fileArray.map((e) => e.name)}])
+          this.props.updatePipeline([{name: firstName.split(".")[0] ,children: fileArray.map((e) => e.name)}])   
+
         }
         this.props.updateProgress(true, 100 - 100*counter/fileArray.length)
       });

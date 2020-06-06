@@ -61,7 +61,23 @@ export function updatePipeline(data: Array<Dict>): ActionType {
  * @returns {StateInterface}
  */
 export function _updatePipeline(state: ReduxStateInterface, action: Types.UpdatePipeline): ReduxStateInterface {
-  const newState: ReduxStateInterface = {...state, pipelines : action.data }
+  const pipelinesList :Array<string> = state.pipelines.map(val => val.name)
+  const newPipelines = [...state.pipelines]
+  action.data.forEach(element => {
+    if (pipelinesList.includes(element.name)) {
+      let count = 0
+      pipelinesList.forEach(name => {
+        if (name.includes(element.name)) {
+          ++count
+        }
+      })
+      newPipelines.push({...element, name : element.name + `(${count})`})
+    } else {
+      newPipelines.push(element)
+    }
+  })
+  
+  const newState: ReduxStateInterface = {...state, pipelines : newPipelines }
   return { ...newState }  
 }
 
