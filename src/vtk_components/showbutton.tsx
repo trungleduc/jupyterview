@@ -46,14 +46,8 @@ class ShowButton extends React.Component<PropsInterface, StateInterface> {
     const pipelineName = this.props.pipeline;    
     const selectedPipeline = this.props.pipelineList.filter(value => (value.name === pipelineName))
     const item = selectedPipeline[0]["children"].filter(value => (value["name"] === this.props.name))    
-    
     if (item[0]["activated"] !== this.state.status) {
-      console.log("update state with", item);
-      this.setState((oldState) => ({ ...oldState, status: item[0]["activated"] }), () => {
-        console.log("callback", this.state);
-        
-      });
-      
+      this.setState((oldState) => ({ ...oldState, status: item[0]["activated"] })); 
     }
   }
   private handleClick = (e) => {
