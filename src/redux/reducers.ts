@@ -30,6 +30,10 @@ export function rootReducer(
     case Action.ADD_SELECTED_DATA: {
       return ActionFunc._addSelectedData(state, action)
     }
+      
+    case Action.SWITCH_PIPELINE: {
+      return ActionFunc._switchPipeline(state, action)
+    }
     default:
       return state;
   }

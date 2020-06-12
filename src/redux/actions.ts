@@ -107,3 +107,40 @@ export function _addSelectedData(state: ReduxStateInterface, action: Types.AddSe
   const newState: ReduxStateInterface = {...state, selectedData : newData }
   return { ...newState }  
 }
+
+/**
+ * Action to turn on or off a pipeline
+ *
+ * @export
+ * @param {Dict} data
+ * @returns {ActionType}
+ */
+export function switchPipeline(data: Dict): ActionType {
+  return {type: Action.SWITCH_PIPELINE, data}
+}
+
+/**
+ *  This function is called when `switchPipeline` is dispatched
+ *
+ * @export
+ * @param {ReduxStateInterface} state
+ * @param {Types.SwitchPipeline} action
+ * @returns {ReduxStateInterface}
+ */
+export function _switchPipeline(state: ReduxStateInterface, action: Types.SwitchPipeline): ReduxStateInterface {
+  let newPileLine = JSON.parse(JSON.stringify(state.pipelines)) 
+  console.log("action", action.data);
+  
+  for (let index = 0; index < newPileLine.length; index++) {
+    if (newPileLine[index].name === action.data.pipeline) {
+      for (let idx = 0; idx < newPileLine[index].children.length; idx++) {
+        if (newPileLine[index].children[idx].name === action.data.name) {
+          newPileLine[index].children[idx].activated = action.data.status
+        }
+      }
+    }   
+  }
+  console.log("new pipelines", newPileLine);
+  
+  return { ...state, pipelines : newPileLine }  
+}

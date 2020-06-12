@@ -44,7 +44,7 @@ describe("Test save state action", () => {
   beforeAll(() => {
     mockState = {
       mainState: "foo",
-      pipelines: [{ name: "local", children: ["bar", "bar1"] }],
+      pipelines: [{ name: "local", children: [{name:"bar", activated: false}, {name:"bar1", activated: false}] }],
       selectedData: [],
     };
   });
@@ -59,13 +59,62 @@ describe("Test save state action", () => {
     const state = ActionFunc.saveState_(mockState);
     expect(state.mainState).toEqual("foo");
     expect(state.pipelines).toEqual([
-      { name: "local", children: ["bar", "bar1"] },
+      { name: "local", children:[{name:"bar", activated: false}, {name:"bar1", activated: false}] },
     ]);
     expect(state.selectedData).toEqual([]);
   });
 });
 
 describe("Test update  pipelines action", () => {
+  let mockState: ReduxStateInterface;
+  beforeAll(() => {
+    mockState = {
+      mainState: "foo",
+      pipelines: [],
+      selectedData: [],
+    };
+  });
+
+  it("should return correct signal", () => {
+    const signal = ActionFunc.updatePipeline([
+      { foo: "bar" },
+    ]) as UpdatePipeline;
+    expect(signal.data).toEqual([{ foo: "bar" }]);
+    expect(signal.type).toEqual(Action.UPDATE_PIPELINE);
+  });
+
+  it.each`
+    old   | data                                              | newPipeline
+    ${[]} | ${[{ name: "local", children: [{name:"bar", activated: false}, {name:"bar1", activated: false}] }]} | ${[{ name: "local", children: [{name:"bar", activated: false}, {name:"bar1", activated: false}] }]}
+    ${[{ name: "local", children: [{name:"bar", activated: false}, {name:"bar1", activated: false}] }]} | ${[{ name: "local", children: [{name:"bar", activated: false}, {name:"bar1", activated: false}] }]} | ${[
+  { name: "local", children: [{name:"bar", activated: false}, {name:"bar1", activated: false}] },
+  { name: "local(1)", children: [{name:"bar", activated: false}, {name:"bar1", activated: false}] },
+]}
+  `(
+    "_updatePipeline should return correct state",
+    ({
+      old,
+      data,
+      newPipeline,
+    }: {
+      old: Array<Dict>;
+      data: Array<Dict>;
+      newPipeline: Array<Dict>;
+    }) => {
+      const mockState = {
+        mainState: "foo",
+        pipelines: old,
+        selectedData: [],
+      };
+      const action: UpdatePipeline = { type: Action.UPDATE_PIPELINE, data };
+      const newState = ActionFunc._updatePipeline(mockState, action);
+      expect(newState.pipelines).toEqual(newPipeline);
+    }
+  );
+});
+
+
+describe("Test switch  pipelines action", () => {
   let mockState: ReduxStateInterface;
   beforeAll(() => {
     mockState = {

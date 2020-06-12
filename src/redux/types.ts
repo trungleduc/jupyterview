@@ -20,7 +20,8 @@ export enum Action {
   RESET_STORE = "RESET_STORE",
   UPDATE_PIPELINE = "UPDATE_PIPELINE",
   ADD_SELECTED_DATA = "ADD_SELECTED_DATA",
-  REMOVE_SELECTED_DATA = "REMOVE_SELECTED_DATA"
+  REMOVE_SELECTED_DATA = "REMOVE_SELECTED_DATA",
+  SWITCH_PIPELINE = "SWITCH_PIPELINE"
 }
 
 export interface SaveState {
@@ -42,7 +43,12 @@ export interface AddSelectedData{
 }
 
 export interface RemoveSelectedData{
-  type: Action.ADD_SELECTED_DATA
+  type: Action.REMOVE_SELECTED_DATA
+  data: Dict
+}
+
+export interface SwitchPipeline{
+  type: Action.SWITCH_PIPELINE
   data: Dict
 }
 
@@ -51,4 +57,5 @@ export type ActionType =
   | UpdatePipeline
   | AddSelectedData
   | RemoveSelectedData
-  | SaveState;
+  | SaveState
+  | SwitchPipeline;

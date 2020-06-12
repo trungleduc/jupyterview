@@ -417,7 +417,7 @@ export class VtkWidget extends React.Component<
             this.props.inputOpenFileRef.current.value = "";
           }
           this.props.updateProgress(false, 0)
-          this.props.updatePipeline([{name: firstName.split(".")[0] ,children: fileArray.map((e) => e.name)}])   
+          this.props.updatePipeline([{name: firstName.split(".")[0] ,children: fileArray.map((e) => ({name: e.name, activated : false}))}])   
 
         }
         this.props.updateProgress(true, 100 - 100*counter/fileArray.length)
