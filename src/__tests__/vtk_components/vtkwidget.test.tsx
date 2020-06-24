@@ -7,7 +7,7 @@ describe("Test VtkWidget component", () => {
   let component: ShallowWrapper
   beforeAll(() => {
     const model = new MockModel()
-      component = shallow(<VtkWidget inputOpenFileRef={null} send_msg = {mock_send_msg} model = {model as any} updateProgress = {jest.fn()} updatePipeline = {jest.fn()}  />);
+      component = shallow(<VtkWidget inputOpenFileRef={null} send_msg = {mock_send_msg} model = {model as any} updateProgress = {jest.fn()} updatePipeline = {jest.fn()} pipelineList = {[]} />);
   })
 
   it("should render correctly with mock props", () => {

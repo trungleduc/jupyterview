@@ -61,7 +61,23 @@ export function updatePipeline(data: Array<Dict>): ActionType {
  * @returns {StateInterface}
  */
 export function _updatePipeline(state: ReduxStateInterface, action: Types.UpdatePipeline): ReduxStateInterface {
-  const newState: ReduxStateInterface = {...state, pipelines : action.data }
+  const pipelinesList :Array<string> = state.pipelines.map(val => val.name)
+  const newPipelines = [...state.pipelines]
+  action.data.forEach(element => {
+    if (pipelinesList.includes(element.name)) {
+      let count = 0
+      pipelinesList.forEach(name => {
+        if (name.includes(element.name)) {
+          ++count
+        }
+      })
+      newPipelines.push({...element, name : element.name + `(${count})`})
+    } else {
+      newPipelines.push(element)
+    }
+  })
+  
+  const newState: ReduxStateInterface = {...state, pipelines : newPipelines }
   return { ...newState }  
 }
 
@@ -87,8 +103,44 @@ export function addSelectedData(data: Dict): ActionType {
  * @returns {ReduxStateInterface}
  */
 export function _addSelectedData(state: ReduxStateInterface, action: Types.AddSelectedData): ReduxStateInterface {
-  console.log(action);
   const newData = [...state.selectedData, action.data]
   const newState: ReduxStateInterface = {...state, selectedData : newData }
   return { ...newState }  
+}
+
+/**
+ * Action to turn on or off a pipeline
+ *
+ * @export
+ * @param {Dict} data
+ * @returns {ActionType}
+ */
+export function switchPipeline(data: Dict): ActionType {
+  return {type: Action.SWITCH_PIPELINE, data}
+}
+
+/**
+ *  This function is called when `switchPipeline` is dispatched
+ *
+ * @export
+ * @param {ReduxStateInterface} state
+ * @param {Types.SwitchPipeline} action
+ * @returns {ReduxStateInterface}
+ */
+export function _switchPipeline(state: ReduxStateInterface, action: Types.SwitchPipeline): ReduxStateInterface {
+  let newPileLine = JSON.parse(JSON.stringify(state.pipelines)) 
+  console.log("action", action.data);
+  
+  for (let index = 0; index < newPileLine.length; index++) {
+    if (newPileLine[index].name === action.data.pipeline) {
+      for (let idx = 0; idx < newPileLine[index].children.length; idx++) {
+        if (newPileLine[index].children[idx].name === action.data.name) {
+          newPileLine[index].children[idx].activated = action.data.status
+        }
+      }
+    }   
+  }
+  console.log("new pipelines", newPileLine);
+  
+  return { ...state, pipelines : newPileLine }  
 }

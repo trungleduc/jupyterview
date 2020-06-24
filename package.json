@@ -1,6 +1,6 @@
 {
   "name": "jupyterview",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "VTK visualisation for jupyter lab",
   "keywords": [
     "jupyter",
@@ -44,7 +44,7 @@
     "clean:labextension": "rimraf jupyterview/labextension",
     "clean:nbextension": "rimraf jupyterview/nbextension/static/index.js",
     "prepack": "npm run build:lib",
-    "test": "jest src",
+    "test": "jest src --silent",
     "test:chrome": "karma start --browsers=Chrome tests/karma.conf.js",
     "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true tests/karma.conf.js",
     "test:firefox": "karma start --browsers=Firefox tests/karma.conf.js",
