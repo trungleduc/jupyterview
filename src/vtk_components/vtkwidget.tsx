@@ -41,37 +41,41 @@ import { majorAxis, getFileExt, parserFile, processFile } from "../tools/utils";
 import * as ReduxAction from "../redux/actions";
 import { ReduxStateInterface, Dict } from "../redux/types";
 import { connect } from "react-redux";
+
 interface StateInterface {
   colorOption: Array<{}>;
   fileList: Array<string>;
-  dataRangeOption: { [key: string]: any }
-  selectedFile: string 
+  dataRangeOption: { [key: string]: any };
+  selectedFile: string;
 }
 interface PropsInterface {
   inputOpenFileRef: React.RefObject<any>;
   send_msg: SendMsgInterface;
   model: VtkModel;
-  updateProgress: (open: boolean, value: number) => void
-  updatePipeline: (data: Dict) => (f: any) => void
+  updateProgress: (open: boolean, value: number) => void;
+  updatePipeline: (data: Dict) => (f: any) => void;
+  pipelineList : Array<Dict>
 }
 
-
-
-
-
-const mapStateToProps = (state: ReduxStateInterface) => ({});
-
-const mapDispatchToProps = (dispatch: (f: any) => void) => {
+const getPipelines = (state: ReduxStateInterface) => {
+  let pipelineList = state.pipelines
   return {
-    updatePipeline: (data: Array<Dict> ) => dispatch(ReduxAction.updatePipeline(data))
+    pipelineList
   };
 };
 
+const mapStateToProps = (state: ReduxStateInterface) => {
+  return getPipelines(state);
+};
 
-export class VtkWidget extends React.Component<
-  PropsInterface,
-  StateInterface
-> {
+const mapDispatchToProps = (dispatch: (f: any) => void) => {
+  return {
+    updatePipeline: (data: Array<Dict>) =>
+      dispatch(ReduxAction.updatePipeline(data)),
+  };
+};
+
+export class VtkWidget extends React.Component<PropsInterface, StateInterface> {
   private fullScreenRenderer: any;
   private renderer: any;
   private source: any;
@@ -97,7 +101,12 @@ export class VtkWidget extends React.Component<
     this.renderWindow = null;
     this.mapper = null;
     this.container = React.createRef();
-    this.state = { colorOption: [], fileList: [] , dataRangeOption : {}, selectedFile : ""};
+    this.state = {
+      colorOption: [],
+      fileList: [],
+      dataRangeOption: {},
+      selectedFile: "",
+    };
     this.dataRange = null;
     this.activeArray = null;
     this.lookupTable = null;
@@ -120,11 +129,11 @@ export class VtkWidget extends React.Component<
 
   private loadRemoteFile = (model, value: Array<Object>) => {
     if (value.length > 0) {
-      this.remoteFileList = Object.keys(value)
-      this.progress = value.length
+      this.remoteFileList = Object.keys(value);
+      this.progress = value.length;
       value.forEach((value, index) => {
-        this.props.send_msg({ action: "open_file", payload: { index } })
-      })
+        this.props.send_msg({ action: "open_file", payload: { index } });
+      });
     }
   };
 
@@ -134,22 +143,21 @@ export class VtkWidget extends React.Component<
       const { file_name, pvd, progress, next_index } = content["response"];
 
       parserFile(file_name, data[0].buffer).then((parsedData) => {
-        --this.progress
-        const progressVal = 100*(1 - this.progress/this.remoteFileList.length)
-        
+        --this.progress;
+        const progressVal =
+          100 * (1 - this.progress / this.remoteFileList.length);
+
         this.fileData[file_name] = parsedData;
 
         if (this.progress === 0) {
-
           const fileList = Object.keys(this.fileData).sort();
           this.createPipeline(this.fileData[fileList[0]]);
           this.setState((state: StateInterface) => {
             return { ...state, fileList };
-          });   
-          this.props.updateProgress(false, 0.)
-        }  
-        this.props.updateProgress(true, progressVal)
-        
+          });
+          this.props.updateProgress(false, 0);
+        }
+        this.props.updateProgress(true, progressVal);
       });
     }
   };
@@ -227,8 +235,8 @@ export class VtkWidget extends React.Component<
     const [location, colorByArrayName, indexValue] = event.target.value.split(
       ":"
     );
-    
-    const selectedFile = this.state.selectedFile
+
+    const selectedFile = this.state.selectedFile;
     const interpolateScalarsBeforeMapping = location === "PointData";
     let colorMode = ColorMode.DEFAULT;
     let scalarMode = ScalarMode.DEFAULT;
@@ -247,9 +255,9 @@ export class VtkWidget extends React.Component<
       this.dataRange[0] = newDataRange[0];
       this.dataRange[1] = newDataRange[1];
       if (this.dataRange[0] === this.dataRange[1]) {
-        this.dataRange[1] = this.dataRange[0]  + 0.0000000001
+        this.dataRange[1] = this.dataRange[0] + 0.0000000001;
       }
-      
+
       colorMode = ColorMode.MAP_SCALARS;
       scalarMode =
         location === "PointData"
@@ -386,7 +394,7 @@ export class VtkWidget extends React.Component<
 
   handleFileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedFile = e.target.value;
-    this.setState((oldState)=>({...oldState, selectedFile}))
+    this.setState((oldState) => ({ ...oldState, selectedFile }));
     this.source = vtk(this.fileData[selectedFile]);
     this.mapper.setInputData(this.source);
     this.renderWindow.render();
@@ -397,7 +405,7 @@ export class VtkWidget extends React.Component<
     this.setState((state: StateInterface) => {
       return { ...state, fileList: fileArray.map((e) => e.name) };
     });
-    this.props.updateProgress(true, 0)
+    this.props.updateProgress(true, 0);
     let firstName = fileArray[0].name;
     let counter = fileArray.length;
     for (let index = 0; index < fileArray.length; index++) {
@@ -408,7 +416,7 @@ export class VtkWidget extends React.Component<
         if (counter === 0) {
           if (this.source) {
             const selectedFile = firstName;
-            this.setState((oldState)=>({...oldState, selectedFile}))
+            this.setState((oldState) => ({ ...oldState, selectedFile }));
             this.source = vtk(this.fileData[selectedFile]);
             this.mapper.setInputData(this.source);
             this.renderWindow.render();
@@ -416,11 +424,21 @@ export class VtkWidget extends React.Component<
             this.createPipeline(this.fileData[firstName]);
             this.props.inputOpenFileRef.current.value = "";
           }
-          this.props.updateProgress(false, 0)
-          this.props.updatePipeline([{name: firstName.split(".")[0] ,children: fileArray.map((e) => ({name: e.name, activated : false}))}])   
-
+          this.props.updateProgress(false, 0);
+          this.props.updatePipeline([
+            {
+              name: firstName.split(".")[0],
+              children: fileArray.map((e) => ({
+                name: e.name,
+                activated: false,
+              })),
+            },
+          ]);
         }
-        this.props.updateProgress(true, 100 - 100*counter/fileArray.length)
+        this.props.updateProgress(
+          true,
+          100 - (100 * counter) / fileArray.length
+        );
       });
     }
   }
@@ -436,9 +454,14 @@ export class VtkWidget extends React.Component<
     this.renderWindow.render();
   };
 
-  componentDidUpdate(prevProps: any) {}
+  componentDidUpdate(prevProps: PropsInterface, prevState: StateInterface) {
+    const pipelineList = this.props.pipelineList
+    if (pipelineList !== prevProps.pipelineList) {
+      console.log("updated pipeline");     
+    }
+  }
 
-  render() {    
+  render() {
     return (
       <div style={{ height: "100%", width: "100%" }}>
         <div
@@ -447,12 +470,19 @@ export class VtkWidget extends React.Component<
             width: "100%",
             background:
               // "linear-gradient(rgb(116, 120, 190), rgb(193, 195, 202))",
-              "linear-gradient(#000028, #ffffff)"
+              "linear-gradient(#000028, #ffffff)",
           }}
           ref={this.container}
         />
-        
-        <div style={{ height: "5%", width: "100%", background: "aliceblue", padding: "10px" }}>
+
+        <div
+          style={{
+            height: "5%",
+            width: "100%",
+            background: "aliceblue",
+            padding: "10px",
+          }}
+        >
           <input
             ref={this.props.inputOpenFileRef}
             type="file"
@@ -464,7 +494,7 @@ export class VtkWidget extends React.Component<
           <select
             style={{ width: "15%" }}
             onChange={(e) => this.handleFileChange(e)}
-            value = {this.state.selectedFile}
+            value={this.state.selectedFile}
           >
             {this.state.fileList.map((option: any) => (
               <option key={option} value={option}>
@@ -505,4 +535,4 @@ export class VtkWidget extends React.Component<
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(VtkWidget)
+export default connect(mapStateToProps, mapDispatchToProps)(VtkWidget);

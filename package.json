@@ -1,6 +1,6 @@
 {
   "name": "jupyterview",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "VTK visualisation for jupyter lab",
   "keywords": [
     "jupyter",
