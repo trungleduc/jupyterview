@@ -41,11 +41,11 @@ self.onmessage = async (event: MessageEvent): Promise<void> => {
       break;
     }
     case WorkerAction.LOAD_FILE: {
-      const result = WorkerHandler[message.action](message.payload);
+      const result = await WorkerHandler[message.action](message.payload);
       sendToMain(
         {
           action: MainAction.DISPLAY_SHAPE,
-          payload: { faceList: result.faceList, edgeList: result.edgeList }
+          payload: result
         },
         id
       );

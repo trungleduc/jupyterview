@@ -24,6 +24,9 @@ import vtkInteractiveOrientationWidget from '@kitware/vtk.js/Widgets/Widgets3D/I
 import * as vtkMath from '@kitware/vtk.js/Common/Core/Math';
 import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
 import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
+import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
+import vtk from '@kitware/vtk.js/vtk';
+import vtkDataArray from '@kitware/vtk.js/Common/Core/DataArray';
 import vtkFullScreenRenderWindow from '@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow';
 import vtkOpenGLRenderWindow from '@kitware/vtk.js/Rendering/OpenGL/RenderWindow';
 import vtkRenderWindowInteractor from '@kitware/vtk.js/Rendering/Core/RenderWindowInteractor';
@@ -31,7 +34,8 @@ import vtkInteractorStyleTrackballCamera from '@kitware/vtk.js/Interaction/Style
 import vtkConeSource from '@kitware/vtk.js/Filters/Sources/ConeSource';
 import vtkCornerAnnotation from '@kitware/vtk.js/Interaction/UI/CornerAnnotation';
 import vtkSlider from '@kitware/vtk.js/Interaction/UI/Slider';
-
+import { readPolyDataArrayBuffer, ReadPolyDataResult } from 'itk-wasm/dist';
+import vtkPolyData from '@kitware/vtk.js/Common/DataModel/PolyData';
 type THEME_TYPE = 'JupyterLab Dark' | 'JupyterLab Light';
 const DARK_THEME: THEME_TYPE = 'JupyterLab Dark';
 const LIGHT_THEME: THEME_TYPE = 'JupyterLab Light';
@@ -51,13 +55,6 @@ interface IStates {
   theme: THEME_TYPE;
 }
 
-enum Corners {
-  TOP_LEFT,
-  TOP_RIGHT,
-  BOTTOM_LEFT,
-  BOTTOM_RIGHT
-}
-
 export class MainView extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
@@ -67,18 +64,6 @@ export class MainView extends React.Component<IProps, IStates> {
       loading: true
     };
     this._context = props.context;
-    this._context.ready.then(() => {
-      this._model = this._context.model as JupyterViewModel;
-      this._worker = this._model.getWorker();
-      this._messageChannel = new MessageChannel();
-      this._messageChannel.port1.onmessage = msgEvent => {
-        this.messageHandler(msgEvent.data);
-      };
-      this.postMessage(
-        { action: WorkerAction.REGISTER, payload: { id: this.state.id } },
-        this._messageChannel.port2
-      );
-    });
     this.container = React.createRef<HTMLDivElement>();
   }
 
@@ -160,35 +145,51 @@ export class MainView extends React.Component<IProps, IStates> {
       document
         .querySelector('body')!
         .removeEventListener('keyup', interactor.handleKeyUp);
+
+      this._context.ready.then(() => {
+        this._model = this._context.model as JupyterViewModel;
+        const fileContent = this._model!.toString();
+        const str = `data:application/octet-stream;base64,${fileContent}`;
+        fetch(str)
+          .then(b => b.arrayBuffer())
+          .then(buff => readPolyDataArrayBuffer(null, buff, 'temp.vtu', ''))
+          .then(polyResult => this.createPipeline(polyResult))
+          .catch(e => console.log(e));
+      });
     }, 500);
   }
 
-  messageHandler = (msg: IMainMessage): void => {
-    switch (msg.action) {
-      case MainAction.INITIALIZED: {
-        this.postMessage({
-          action: WorkerAction.LOAD_FILE,
-          payload: {
-            fileName: this._context.path,
-            content: this._model!.toString()
-          }
-        });
-      }
-    }
-  };
+  createPipeline = (polyResult: ReadPolyDataResult): void => {
+    polyResult.webWorker.terminate();
+    console.log(polyResult.polyData);
 
-  private postMessage = (
-    msg: Omit<IWorkerMessage, 'id'>,
-    port?: MessagePort
-  ) => {
-    if (this._worker) {
-      const newMsg = { ...msg, id: this.state.id };
-      if (port) {
-        this._worker.postMessage(newMsg, [port]);
-      } else {
-        this._worker.postMessage(newMsg);
-      }
-    }
+    this._lookupTable = vtkColorTransferFunction.newInstance();
+    this._mapper = vtkMapper.newInstance({
+      interpolateScalarsBeforeMapping: false,
+      useLookupTableScalarRange: true,
+      scalarVisibility: false
+    });
+    this._mapper.setLookupTable(this._lookupTable);
+    this._actor = vtkActor.newInstance();
+    this._actor.setMapper(this._mapper);
+
+    this._lookupTable.onModified(() => {
+      this._renderWindow.render();
+    });
+
+    this._source = vtk(polyResult.polyData);
+    console.log(this._source);
+
+    const scalars = this._source.getPointData().getScalars();
+    this._dataRange = scalars
+      ? [scalars.getRange().min, scalars.getRange().max]
+      : [0, 1];
+    this._activeArray = vtkDataArray;
+
+    this._mapper.setInputData(this._source);
+    this._renderer.addActor(this._actor);
+    this._renderer.resetCamera();
+    this._renderWindow.render();
   };
 
   render(): JSX.Element {
@@ -226,14 +227,14 @@ export class MainView extends React.Component<IProps, IStates> {
 
   private _fullScreenRenderer: vtkRenderWindowWithControlBar;
   private _renderer: vtkRenderer;
-  // private _source: any = null;
+  private _source: vtkPolyData;
   private _renderWindow: vtkRenderWindow;
-  // private _mapper: any = null;
-  // private _container: any = null;
-  // private _dataRange: any = null;
-  // private _activeArray: any = null;
-  // private _lookupTable: any = null;
-  // private _actor: any = null;
+  private _mapper: vtkMapper;
+  private _container: any = null;
+  private _dataRange: number[];
+  private _activeArray: typeof vtkDataArray;
+  private _lookupTable: vtkColorTransferFunction;
+  private _actor: vtkActor;
   // private _SUPPORTED_FILE: any = null;
   // private _allSource: {};
   // private _fileData: any = null;

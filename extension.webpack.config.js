@@ -15,7 +15,8 @@ module.exports = {
     extensions: ['.webpack.js', '.web.js', '.js'],
     alias: {
       './itkConfig$': path.resolve(__dirname, 'lib', 'itkConfigJupyter.js')
-    }
+    },
+    fallback: { fs: false, path: false, url: false, module: false },
   },
   plugins: [
     new CopyPlugin({
