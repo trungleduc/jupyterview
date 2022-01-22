@@ -483,6 +483,28 @@
     react-dom "^17.0.1"
     typestyle "^2.0.4"
 
+"@kitware/vtk.js@^22.1.7":
+  version "22.1.7"
+  resolved "https://registry.yarnpkg.com/@kitware/vtk.js/-/vtk.js-22.1.7.tgz#5f1602b90876f5c404cae9afee232c37b118684d"
+  integrity sha512-1tDuyido9e+9nRPvPEVnEWECbe4oZ0gss6969Kk3YmeObea43QZ/qobK4c387un4wUzNKMdQat81IE8HHEI3PA==
+  dependencies:
+    "@babel/runtime" "7.16.7"
+    blueimp-md5 "2.19.0"
+    commander "8.3.0"
+    d3-scale "4.0.2"
+    gl-matrix "3.4.3"
+    globalthis "1.0.2"
+    jszip "3.7.1"
+    pako "2.0.4"
+    patch-package "6.4.7"
+    seedrandom "3.0.5"
+    shader-loader "1.3.1"
+    shelljs "0.8.5"
+    stream-browserify "3.0.0"
+    webworker-promise "0.4.4"
+    worker-loader "3.0.8"
+    xmlbuilder2 "3.0.2"
+
 "@lumino/algorithm@^1.3.3", "@lumino/algorithm@^1.9.1":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.9.1.tgz#a870598e031f5ee85e20e77ce7bfffbb0dffd7f5"
@@ -6130,28 +6152,6 @@ verror@1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
-
-vtk.js@^22.1.3:
-  version "22.1.3"
-  resolved "https://registry.yarnpkg.com/vtk.js/-/vtk.js-22.1.3.tgz#d23b9d2d15f8446f1c487498980b925e75b7a740"
-  integrity sha512-MdiVhrTtgiYpdHNRhcq/qYQBQwfxh0B1Zeak+aPuGH15c6plEn+4e6FjiJ6RsEpAHtEJbtAXVmZ3jhgBl8JcSw==
-  dependencies:
-    "@babel/runtime" "7.16.7"
-    blueimp-md5 "2.19.0"
-    commander "8.3.0"
-    d3-scale "4.0.2"
-    gl-matrix "3.4.3"
-    globalthis "1.0.2"
-    jszip "3.7.1"
-    pako "2.0.4"
-    patch-package "6.4.7"
-    seedrandom "3.0.5"
-    shader-loader "1.3.1"
-    shelljs "0.8.5"
-    stream-browserify "3.0.0"
-    webworker-promise "0.4.4"
-    worker-loader "3.0.8"
-    xmlbuilder2 "3.0.2"
 
 w3c-hr-time@^1.0.1:
   version "1.0.2"

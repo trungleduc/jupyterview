@@ -89,11 +89,11 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   }
 
   getWorker(): Worker {
-    if (!JupyterViewModel.worker) {
-      JupyterViewModel.worker = new Worker(
-        new URL('./worker', (import.meta as any).url)
-      );
-    }
+    // if (!JupyterViewModel.worker) {
+    //   JupyterViewModel.worker = new Worker(
+    //     new URL('./worker', (import.meta as any).url)
+    //   );
+    // }
     return JupyterViewModel.worker;
   }
 
