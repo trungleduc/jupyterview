@@ -18,8 +18,6 @@ import * as Y from 'yjs';
 export class JupyterViewModel implements DocumentRegistry.IModel {
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     this.modelDB = modelDB || new ModelDB();
-    console.log('clientID', this.sharedModel.awareness.clientID);
-
     this.sharedModel.awareness.on('change', this._onCameraChanged);
   }
 

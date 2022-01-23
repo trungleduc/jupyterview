@@ -2,21 +2,19 @@ import * as React from 'react';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { v4 as uuid } from 'uuid';
 import { JupyterViewModel } from './model';
-
+import { CameraToolbar } from './cameraToolbar';
 import {
   IMainMessage,
   IWorkerMessage,
   WorkerAction,
   MainAction
 } from './types';
-import { majorAxis } from './tools';
+import { majorAxis, moveCamera, VIEW_ORIENTATIONS } from './tools';
 // import vtk
 import '@kitware/vtk.js/Rendering/OpenGL/Profiles/All';
 import vtkRenderWindowWithControlBar from '@kitware/vtk.js/Rendering/Misc/RenderWindowWithControlBar';
 import vtkRenderer from '@kitware/vtk.js/Rendering/Core/Renderer';
-import vtkRenderWindow, {
-  DEFAULT_VIEW_API
-} from '@kitware/vtk.js/Rendering/Core/RenderWindow';
+import vtkRenderWindow from '@kitware/vtk.js/Rendering/Core/RenderWindow';
 import vtkAxesActor from '@kitware/vtk.js/Rendering/Core/AxesActor';
 import vtkOrientationMarkerWidget from '@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget';
 import vtkWidgetManager from '@kitware/vtk.js/Widgets/Core/WidgetManager';
@@ -27,15 +25,13 @@ import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
 import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
 import vtk from '@kitware/vtk.js/vtk';
 import vtkDataArray from '@kitware/vtk.js/Common/Core/DataArray';
-import vtkFullScreenRenderWindow from '@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow';
-import vtkOpenGLRenderWindow from '@kitware/vtk.js/Rendering/OpenGL/RenderWindow';
 import vtkRenderWindowInteractor from '@kitware/vtk.js/Rendering/Core/RenderWindowInteractor';
 import vtkInteractorStyleTrackballCamera from '@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera';
-import vtkConeSource from '@kitware/vtk.js/Filters/Sources/ConeSource';
-import vtkCornerAnnotation from '@kitware/vtk.js/Interaction/UI/CornerAnnotation';
-import vtkSlider from '@kitware/vtk.js/Interaction/UI/Slider';
 import { readPolyDataArrayBuffer, ReadPolyDataResult } from 'itk-wasm/dist';
 import vtkPolyData from '@kitware/vtk.js/Common/DataModel/PolyData';
+import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
+import { Vector3 } from '@kitware/vtk.js/types';
+
 type THEME_TYPE = 'JupyterLab Dark' | 'JupyterLab Light';
 const DARK_THEME: THEME_TYPE = 'JupyterLab Dark';
 const LIGHT_THEME: THEME_TYPE = 'JupyterLab Light';
@@ -44,6 +40,8 @@ const BG_COLOR = {
   [DARK_THEME]: 'linear-gradient(rgb(0, 0, 42), rgb(82, 87, 110))',
   [LIGHT_THEME]: 'linear-gradient(#000028, #ffffff)'
 };
+
+const ROTATION_STEP = 2;
 
 interface IProps {
   context: DocumentRegistry.IContext<JupyterViewModel>;
@@ -70,8 +68,6 @@ export class MainView extends React.Component<IProps, IStates> {
   componentDidMount(): void {
     setTimeout(() => {
       const rootContainer = this.container.current!;
-      rootContainer.style.position = 'relative';
-
       this._fullScreenRenderer = vtkRenderWindowWithControlBar.newInstance({
         controlSize: 0
       });
@@ -79,16 +75,12 @@ export class MainView extends React.Component<IProps, IStates> {
       this._renderer = this._fullScreenRenderer.getRenderer();
       this._renderer.setBackground([0, 0, 0, 0]);
       this._renderWindow = this._fullScreenRenderer.getRenderWindow();
-
       const axes = vtkAxesActor.newInstance();
       const orientationWidget = vtkOrientationMarkerWidget.newInstance({
         actor: axes,
         interactor: this._renderWindow.getInteractor()
       });
       orientationWidget.setEnabled(true);
-      // orientationWidget.setViewportCorner(
-      //   vtkOrientationMarkerWidget.Corners.BOTTOM_LEFT
-      // );
       orientationWidget.setViewportSize(0.15);
       orientationWidget.setMinPixelSize(100);
       orientationWidget.setMaxPixelSize(300);
@@ -136,6 +128,7 @@ export class MainView extends React.Component<IProps, IStates> {
       widgetManager.enablePicking();
       this._renderWindow.render();
       const interactor = this._fullScreenRenderer.getInteractor();
+
       document
         .querySelector('body')!
         .removeEventListener('keypress', interactor.handleKeyPress);
@@ -148,21 +141,33 @@ export class MainView extends React.Component<IProps, IStates> {
 
       this._context.ready.then(() => {
         this._model = this._context.model as JupyterViewModel;
+        const fileName = this._context.path.replace(/^.*(\\|\/|:)/, '');
         const fileContent = this._model!.toString();
-        const str = `data:application/octet-stream;base64,${fileContent}`;
-        fetch(str)
-          .then(b => b.arrayBuffer())
-          .then(buff => readPolyDataArrayBuffer(null, buff, 'temp.vtu', ''))
+        this.stringToPolyData(fileContent, fileName)
           .then(polyResult => this.createPipeline(polyResult))
-          .catch(e => console.log(e));
+          .catch(e => {
+            throw e;
+          });
       });
     }, 500);
   }
 
+  async stringToPolyData(
+    fileContent: string,
+    filePath: string
+  ): Promise<ReadPolyDataResult> {
+    const str = `data:application/octet-stream;base64,${fileContent}`;
+    return fetch(str)
+      .then(b => b.arrayBuffer())
+      .then(buff => readPolyDataArrayBuffer(null, buff, filePath, ''))
+      .then(polyResult => {
+        polyResult.webWorker.terminate();
+        return polyResult;
+      });
+  }
+
   createPipeline = (polyResult: ReadPolyDataResult): void => {
     polyResult.webWorker.terminate();
-    console.log(polyResult.polyData);
-
     this._lookupTable = vtkColorTransferFunction.newInstance();
     this._mapper = vtkMapper.newInstance({
       interpolateScalarsBeforeMapping: false,
@@ -178,8 +183,6 @@ export class MainView extends React.Component<IProps, IStates> {
     });
 
     this._source = vtk(polyResult.polyData);
-    console.log(this._source);
-
     const scalars = this._source.getPointData().getScalars();
     this._dataRange = scalars
       ? [scalars.getRange().min, scalars.getRange().max]
@@ -190,6 +193,93 @@ export class MainView extends React.Component<IProps, IStates> {
     this._renderer.addActor(this._actor);
     this._renderer.resetCamera();
     this._renderWindow.render();
+  };
+
+  rotate = (angle: number): void => {
+    const camera = this._renderer.getActiveCamera();
+    const focalPoint = camera.getFocalPoint();
+    const position = camera.getPosition();
+    const viewUp = camera.getViewUp();
+    const axis = [
+      focalPoint[0] - position[0],
+      focalPoint[1] - position[1],
+      focalPoint[2] - position[2]
+    ];
+    vtkMatrixBuilder
+      .buildFromDegree()
+      .rotate(Number.isNaN(angle) ? 90 : angle, axis as any)
+      .apply(viewUp);
+    camera.setViewUp(...viewUp);
+    camera.modified();
+    // model.orientationWidget.updateMarkerOrientation();
+    this._renderWindow.render();
+  };
+
+  rotateWithAnimation = (direction: 'left' | 'right'): (() => void) => {
+    const sign = direction == 'left' ? 1 : -1;
+    return (): void => {
+      const interactor = this._renderWindow.getInteractor();
+      interactor.requestAnimation(this._renderWindow);
+      let count = 0;
+      let intervalId: NodeJS.Timer;
+      const rotate = () => {
+        if (count < 90) {
+          count += ROTATION_STEP;
+          this.rotate(sign * ROTATION_STEP);
+        } else {
+          clearInterval(intervalId);
+          interactor.cancelAnimation(this._renderWindow);
+        }
+      };
+      intervalId = setInterval(rotate, 8);
+    };
+  };
+
+  updateOrientation = (mode: 'x' | 'y' | 'z') => {
+    if (!this._inAnimation) {
+      this._inAnimation = true;
+      const { axis, orientation, viewUp } = VIEW_ORIENTATIONS[mode];
+      // const axisIndex  = VIEW_ORIENTATIONS[mode].axis
+      const animateSteps = 100;
+
+      const interactor = this._renderWindow.getInteractor();
+      const camera = this._renderer.getActiveCamera();
+      const originalPosition = camera.getPosition();
+      const originalViewUp = camera.getViewUp();
+      const originalFocalPoint = camera.getFocalPoint();
+      const model = { axis, orientation, viewUp: viewUp as Vector3 };
+      const position = camera.getFocalPoint();
+      position[model.axis] += model.orientation;
+      camera.setPosition(...position);
+      camera.setViewUp(...model.viewUp);
+      this._renderer.resetCamera();
+
+      const destFocalPoint = camera.getFocalPoint();
+      const destPosition = camera.getPosition();
+      const destViewUp = camera.getViewUp();
+
+      // Reset to original to prevent initial render flash
+      camera.setFocalPoint(...originalFocalPoint);
+      camera.setPosition(...originalPosition);
+      camera.setViewUp(...originalViewUp);
+      moveCamera(
+        camera,
+        this._renderer,
+        interactor,
+        destFocalPoint,
+        destPosition,
+        destViewUp,
+        animateSteps
+      ).then(() => {
+        this._inAnimation = false;
+      });
+    }
+  };
+
+  resetCamera = (): void => {
+    this._renderer.resetCamera();
+    this._renderer.resetCameraClippingRange();
+    setTimeout(this._renderWindow.render, 0);
   };
 
   render(): JSX.Element {
@@ -212,8 +302,13 @@ export class MainView extends React.Component<IProps, IStates> {
           style={{
             width: '100%',
             height: 'calc(100%)',
-            background: BG_COLOR[LIGHT_THEME] //"radial-gradient(#efeded, #8f9091)"
+            background: BG_COLOR[LIGHT_THEME] //'radial-gradient(#efeded, #8f9091)'
           }}
+        />
+        <CameraToolbar
+          rotateHandler={this.rotateWithAnimation}
+          resetCamera={this.resetCamera}
+          updateOrientation={this.updateOrientation}
         />
       </div>
     );
@@ -235,6 +330,7 @@ export class MainView extends React.Component<IProps, IStates> {
   private _activeArray: typeof vtkDataArray;
   private _lookupTable: vtkColorTransferFunction;
   private _actor: vtkActor;
+  private _inAnimation = false;
   // private _SUPPORTED_FILE: any = null;
   // private _allSource: {};
   // private _fileData: any = null;

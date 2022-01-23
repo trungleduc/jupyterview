@@ -1,7 +1,8 @@
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
-  ILayoutRestorer
+  ILayoutRestorer,
+  ILabShell
 } from '@jupyterlab/application';
 import {
   WidgetTracker,
@@ -24,7 +25,8 @@ export const IJupyterViewDocTracker = new Token<
 const activate = (
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
-  themeManager: IThemeManager
+  themeManager: IThemeManager,
+  shell: ILabShell
 ): void => {
   const namespace = 'jupyterview';
   const tracker = new WidgetTracker<JupyterViewWidget>({ namespace });
@@ -81,6 +83,12 @@ const activate = (
     contentType: 'file'
   });
   console.log('JupyterLab extension jupyterview is activated!');
+  shell.currentChanged.connect((shell, change) => {
+    const widget = change.newValue;
+    if (widget instanceof JupyterViewWidget) {
+      window.dispatchEvent(new Event('resize'));
+    }
+  });
 };
 /**
  * Initialization data for the jupyterview extension.
@@ -88,7 +96,7 @@ const activate = (
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterview:plugin',
   autoStart: true,
-  requires: [ILayoutRestorer, IThemeManager],
+  requires: [ILayoutRestorer, IThemeManager, ILabShell],
   activate
 };
 
