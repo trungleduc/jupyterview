@@ -47,11 +47,15 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
     "@jupyterlab/application": "^3.1.0",
     "@jupyterlab/coreutils": "^5.2.8",
     "@jupyterlab/services": "^6.1.0",
-    "@jupyterlab/ui-components": "^3.2.8",
+    "@jupyterlab/ui-components": "^3.2.8 || ^4.0.0-alpha.10",
     "@kitware/vtk.js": "^22.1.7",
+    "@mui/icons-material": "^5.3.1",
+    "@mui/material": "^5.3.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

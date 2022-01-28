@@ -1,7 +1,11 @@
+import { LabIcon } from '@jupyterlab/ui-components';
 import vtkCamera from '@kitware/vtk.js/Rendering/Core/Camera';
 import vtkRenderer from '@kitware/vtk.js/Rendering/Core/Renderer';
 import vtkRenderWindowInteractor from '@kitware/vtk.js/Rendering/Core/RenderWindowInteractor';
 import { Vector3 } from '@kitware/vtk.js/types';
+import jvControlLight from '../style/icons/jvc-light.svg';
+
+export const jvcLightIcon = new LabIcon({ name: 'jupyterview:control-light', svgstr: jvControlLight });
 
 export function majorAxis(
   vec3: Vector3,

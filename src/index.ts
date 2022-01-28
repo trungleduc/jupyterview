@@ -4,32 +4,27 @@ import {
   ILayoutRestorer,
   ILabShell
 } from '@jupyterlab/application';
+import { IThemeManager } from '@jupyterlab/apputils';
+
 import {
-  WidgetTracker,
-  IWidgetTracker,
-  IThemeManager
-} from '@jupyterlab/apputils';
-
-import { Token } from '@lumino/coreutils';
-import { JupyterViewWidgetFactory, JupyterViewModelFactory } from './mainview/factory';
+  JupyterViewWidgetFactory,
+  JupyterViewModelFactory
+} from './mainview/factory';
 import { JupyterViewWidget } from './mainview/widget';
-
-// import { requestAPI } from './handler';
+import { PanelWidget } from './panelview/widget';
+import { IJupyterViewDocTracker, IVtkTracker } from './token';
+import { jvcLightIcon } from './tools';
+import { VtkTracker } from './vtkTracker';
 
 const FACTORY = 'Jupyterview Factory';
-
-export const IJupyterViewDocTracker = new Token<
-  IWidgetTracker<JupyterViewWidget>
->('jupyterViewDocTracker');
-
+const NAME_SPACE = 'jupyterview';
 const activate = (
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
   shell: ILabShell
-): void => {
-  const namespace = 'jupyterview';
-  const tracker = new WidgetTracker<JupyterViewWidget>({ namespace });
+): IVtkTracker => {
+  const tracker = new VtkTracker({ namespace: NAME_SPACE });
 
   if (restorer) {
     restorer.restore(tracker, {
@@ -89,15 +84,39 @@ const activate = (
       window.dispatchEvent(new Event('resize'));
     }
   });
+  return tracker;
 };
 /**
  * Initialization data for the jupyterview extension.
  */
-const plugin: JupyterFrontEndPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<IVtkTracker> = {
   id: 'jupyterview:plugin',
   autoStart: true,
   requires: [ILayoutRestorer, IThemeManager, ILabShell],
+  provides: IJupyterViewDocTracker,
   activate
 };
 
-export default plugin;
+const controlPanel: JupyterFrontEndPlugin<void> = {
+  id: 'jupyterview:controlpanel',
+  autoStart: true,
+  requires: [ILayoutRestorer, ILabShell, IJupyterViewDocTracker],
+  activate: (
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer,
+    shell: ILabShell,
+    tracker: IVtkTracker
+  ) => {
+    const controlPanel = new PanelWidget(tracker);
+    controlPanel.id = 'jupyterview::controlPanel';
+    controlPanel.title.caption = 'JupyterView Control Panel';
+    controlPanel.title.icon = jvcLightIcon;
+    if (restorer) {
+      restorer.add(controlPanel, NAME_SPACE);
+    }
+    console.log('tracker', tracker);
+
+    app.shell.add(controlPanel, 'right', { rank: 100 });
+  }
+};
+export default [plugin, controlPanel];
