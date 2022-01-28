@@ -11,8 +11,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import { Token } from '@lumino/coreutils';
-import { JupyterViewWidgetFactory, JupyterViewModelFactory } from './factory';
-import { JupyterViewWidget } from './widget';
+import { JupyterViewWidgetFactory, JupyterViewModelFactory } from './mainview/factory';
+import { JupyterViewWidget } from './mainview/widget';
 
 // import { requestAPI } from './handler';
 

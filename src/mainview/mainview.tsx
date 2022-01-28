@@ -8,8 +8,8 @@ import {
   IWorkerMessage,
   WorkerAction,
   MainAction
-} from './types';
-import { majorAxis, moveCamera, VIEW_ORIENTATIONS } from './tools';
+} from '../types';
+import { majorAxis, moveCamera, VIEW_ORIENTATIONS } from '../tools';
 // import vtk
 import '@kitware/vtk.js/Rendering/OpenGL/Profiles/All';
 import vtkRenderWindowWithControlBar from '@kitware/vtk.js/Rendering/Misc/RenderWindowWithControlBar';

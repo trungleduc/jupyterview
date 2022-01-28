@@ -26,6 +26,7 @@ export class JupyterViewWidget extends DocumentWidget<
   dispose(): void {
     this.content.dispose();
     super.dispose();
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
   }
 
   onResize = (msg: any): void => {

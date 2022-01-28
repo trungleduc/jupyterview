@@ -10,7 +10,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import { YDocument, MapChange } from '@jupyterlab/shared-models';
 
-import { Position } from './types';
+import { Position } from '../types';
 
 import * as Y from 'yjs';
 
