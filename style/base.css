@@ -64,4 +64,10 @@
   background: var(--jp-layout-color1);
   height: 100%;
 }
+.jpview-control-panel .Mui-expanded .MuiAccordionSummary-contentGutters {
+  margin: 15px 0!important;
+}
+.jpview-control-panel .Mui-expanded .MuiAccordionSummary-gutters {
+  min-height: 48px!important;
+}
 

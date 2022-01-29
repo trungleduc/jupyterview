@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { v4 as uuid } from 'uuid';
-import { JupyterViewModel } from './model';
+import { JupyterViewDoc, JupyterViewModel } from './model';
 import { CameraToolbar } from './cameraToolbar';
 import {
   IMainMessage,
@@ -51,6 +51,7 @@ interface IStates {
   id: string;
   loading: boolean;
   theme: THEME_TYPE;
+  colorOption: {label:string, value:string}[]
 }
 
 export class MainView extends React.Component<IProps, IStates> {
@@ -59,9 +60,11 @@ export class MainView extends React.Component<IProps, IStates> {
     this.state = {
       id: uuid(),
       theme: LIGHT_THEME,
-      loading: true
+      loading: true,
+      colorOption: []
     };
     this._context = props.context;
+    this._sharedModel = props.context.model.sharedModel
     this.container = React.createRef<HTMLDivElement>();
   }
 
@@ -166,6 +169,42 @@ export class MainView extends React.Component<IProps, IStates> {
       });
   }
 
+  createComponentSelector = (): {label:string, value:string}[] => {
+    const pointDataArray = this._source.getPointData().getArrays();
+    let option: {label:string, value:string}[] = [{ value: ":", label: "Solid color" }];
+    pointDataArray.forEach((a: any) => {
+      let name = a.getName();
+      let numberComp = a.getNumberOfComponents();
+      option.push({
+        label: `(p) ${name} magnitude`,
+        value: `PointData:${name}:-1`,
+      });
+      for (let index = 0; index < numberComp; index++) {
+        option.push({
+          label: `(p) ${name} ${index}`,
+          value: `PointData:${name}:${index}`,
+        });
+      }
+    });
+    const cellDataArray = this._source.getCellData().getArrays();
+
+    cellDataArray.forEach((a: any) => {
+      let name = a.getName();
+      let numberComp = a.getNumberOfComponents();
+      option.push({
+        label: `(p) ${name} magnitude`,
+        value: `CellData:${name}:-1`,
+      });
+      for (let index = 0; index < numberComp; index++) {
+        option.push({
+          label: `(p) ${name} ${index}`,
+          value: `CellData:${name}:${index}`,
+        });
+      }
+    });
+    return option;
+  };
+
   createPipeline = (polyResult: ReadPolyDataResult): void => {
     polyResult.webWorker.terminate();
     this._lookupTable = vtkColorTransferFunction.newInstance();
@@ -188,7 +227,10 @@ export class MainView extends React.Component<IProps, IStates> {
       ? [scalars.getRange().min, scalars.getRange().max]
       : [0, 1];
     this._activeArray = vtkDataArray;
-
+    if (!this._sharedModel.getContent('colorOption')) {
+      const colorByOptions = this.createComponentSelector();
+      this._sharedModel.transact(()=> this._sharedModel.setContent('colorOption', colorByOptions)) 
+    }
     this._mapper.setInputData(this._source);
     this._renderer.addActor(this._actor);
     this._renderer.resetCamera();
@@ -316,6 +358,7 @@ export class MainView extends React.Component<IProps, IStates> {
 
   private container: React.RefObject<HTMLDivElement>; // Reference of render div
   private _context: DocumentRegistry.IContext<JupyterViewModel>;
+  private _sharedModel: JupyterViewDoc
   private _model: JupyterViewModel | undefined;
   private _worker?: Worker = undefined;
   private _messageChannel?: MessageChannel;

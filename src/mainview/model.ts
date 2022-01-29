@@ -124,8 +124,8 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _themeChanged = new Signal<this, IChangedArgs<any>>(this);
   private _cameraChanged = new Signal<this, Map<number, any>>(this);
-
   static worker: Worker;
+
 }
 
 export type JupyterViewDocChange = {
@@ -137,10 +137,11 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
   constructor() {
     super();
     this._content = this.ydoc.getMap('content');
+    this._content.observe(this._contentObserver);
   }
 
   dispose(): void {
-    console.log('called dispose');
+    this._content.unobserve(this._contentObserver);
   }
 
   public static create(): JupyterViewDoc {
@@ -154,6 +155,16 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
   public setContent(key: string, value: any): void {
     this._content.set(key, value);
   }
+
+  private _contentObserver = (event: Y.YMapEvent<any>): void => {
+    const changes: JupyterViewDocChange = {};
+
+    if (event.keysChanged.has('colorOption')) {
+      changes.contentChange = this._content.get('colorOption');
+    }
+
+    this._changed.emit(changes);
+  };
 
   private _content: Y.Map<any>;
 }

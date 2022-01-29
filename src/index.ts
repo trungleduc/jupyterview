@@ -52,7 +52,6 @@ const activate = (
     themeManager.themeChanged.connect((_, changes) =>
       widget.context.model.themeChanged.emit(changes)
     );
-
     tracker.add(widget);
   });
   app.docRegistry.addWidgetFactory(widgetFactory);
