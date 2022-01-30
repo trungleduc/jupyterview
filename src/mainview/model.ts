@@ -10,10 +10,9 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import { YDocument, MapChange } from '@jupyterlab/shared-models';
 
-import { Position } from '../types';
+import { IControlViewSharedState, IDict, IMainViewSharedState, Position } from '../types';
 
 import * as Y from 'yjs';
-
 
 export class JupyterViewModel implements DocumentRegistry.IModel {
   constructor(languagePreference?: string, modelDB?: IModelDB) {
@@ -61,7 +60,6 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   set readOnly(value: boolean) {
     this._readOnly = value;
   }
-
 
   toString(): string {
     const content = this.sharedModel.getContent('content') || '';
@@ -125,27 +123,39 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   private _themeChanged = new Signal<this, IChangedArgs<any>>(this);
   private _cameraChanged = new Signal<this, Map<number, any>>(this);
   static worker: Worker;
-
 }
 
 export type JupyterViewDocChange = {
   contextChange?: MapChange;
   contentChange?: string;
+  mainViewStateChange?: IDict;
 };
 
 export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
   constructor() {
     super();
     this._content = this.ydoc.getMap('content');
-    this._content.observe(this._contentObserver);
+    this._mainViewState = this.ydoc.getMap('mainViewState');
+    this._mainViewState.observe(this._mainViewStateObserver);
+    this._controlViewState = this.ydoc.getMap('controlViewState');
+    this._controlViewState.observe(this._controlViewStateObserver);
   }
 
   dispose(): void {
-    this._content.unobserve(this._contentObserver);
+    this._mainViewState.unobserve(this._mainViewStateObserver);
+    this._controlViewState.unobserve(this._controlViewStateObserver);
   }
 
   public static create(): JupyterViewDoc {
     return new JupyterViewDoc();
+  }
+
+  public get mainViewStateChanged() {
+    return this._mainViewStateChanged;
+  }
+
+  public get controlViewStateChanged() {
+    return this._controlViewStateChanged;
   }
 
   public getContent(key: string): any {
@@ -156,15 +166,55 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
     this._content.set(key, value);
   }
 
-  private _contentObserver = (event: Y.YMapEvent<any>): void => {
-    const changes: JupyterViewDocChange = {};
-
-    if (event.keysChanged.has('colorOption')) {
-      changes.contentChange = this._content.get('colorOption');
+  public getMainViewState(): IMainViewSharedState {
+    const ret: IMainViewSharedState = {}
+    for (const key of this._mainViewState.keys()) {
+      ret[key] = this._mainViewState.get(key)
     }
+    return ret;
+  }
+  public getMainViewStateByKey(key: string): IMainViewSharedState {
+    return this._mainViewState.get(key)
+  }
 
-    this._changed.emit(changes);
+  public setMainViewState(key: keyof IMainViewSharedState, value: any): void {
+    this._mainViewState.set(key, value);
+  }
+
+  public getControlViewState(): IControlViewSharedState {
+    const ret: IControlViewSharedState = {}
+    for (const key of this._controlViewState.keys()) {
+      ret[key] = this._controlViewState.get(key)
+    }
+    return ret;
+  }
+  public getControlViewStateByKey(key: string): IControlViewSharedState {
+    return this._controlViewState.get(key)
+  }
+
+  public setControlViewState(key: keyof IControlViewSharedState, value: any): void {
+    this._controlViewState.set(key, value);
+  }
+
+  private _mainViewStateObserver = (event: Y.YMapEvent<any>): void => {
+    const changes: IMainViewSharedState = {};
+    event.keysChanged.forEach(key => {
+      changes[key] = this.getMainViewStateByKey(key);
+    });
+    this._mainViewStateChanged.emit(changes);
+  };
+
+  private _controlViewStateObserver = (event: Y.YMapEvent<any>): void => {
+    const changes: IControlViewSharedState = {};
+    event.keysChanged.forEach(key => {
+      changes[key] = this.getControlViewStateByKey(key);
+    });
+    this._controlViewStateChanged.emit(changes);
   };
 
   private _content: Y.Map<any>;
+  private _mainViewState: Y.Map<any>;
+  private _mainViewStateChanged = new Signal<this, IMainViewSharedState>(this);
+  private _controlViewState: Y.Map<any>;
+  private _controlViewStateChanged = new Signal<this, IControlViewSharedState>(this);
 }

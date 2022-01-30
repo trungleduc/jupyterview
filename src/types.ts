@@ -61,3 +61,10 @@ export type Position = {
   y: number;
   z: number;
 };
+
+export interface IMainViewSharedState {
+  colorByOptions?: {value: string, label: string}[]
+}
+export interface IControlViewSharedState {
+  selectedColor?: string
+}

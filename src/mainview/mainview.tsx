@@ -7,7 +7,8 @@ import {
   IMainMessage,
   IWorkerMessage,
   WorkerAction,
-  MainAction
+  MainAction,
+  IControlViewSharedState
 } from '../types';
 import { majorAxis, moveCamera, VIEW_ORIENTATIONS } from '../tools';
 // import vtk
@@ -31,6 +32,12 @@ import { readPolyDataArrayBuffer, ReadPolyDataResult } from 'itk-wasm/dist';
 import vtkPolyData from '@kitware/vtk.js/Common/DataModel/PolyData';
 import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
 import { Vector3 } from '@kitware/vtk.js/types';
+import {
+  ColorMode,
+  ScalarMode
+} from '@kitware/vtk.js/Rendering/Core/Mapper/Constants';
+import vtkColorMaps from "@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps";
+
 
 type THEME_TYPE = 'JupyterLab Dark' | 'JupyterLab Light';
 const DARK_THEME: THEME_TYPE = 'JupyterLab Dark';
@@ -51,7 +58,7 @@ interface IStates {
   id: string;
   loading: boolean;
   theme: THEME_TYPE;
-  colorOption: {label:string, value:string}[]
+  colorOption: { label: string; value: string }[];
 }
 
 export class MainView extends React.Component<IProps, IStates> {
@@ -64,7 +71,7 @@ export class MainView extends React.Component<IProps, IStates> {
       colorOption: []
     };
     this._context = props.context;
-    this._sharedModel = props.context.model.sharedModel
+    this._sharedModel = props.context.model.sharedModel;
     this.container = React.createRef<HTMLDivElement>();
   }
 
@@ -144,6 +151,9 @@ export class MainView extends React.Component<IProps, IStates> {
 
       this._context.ready.then(() => {
         this._model = this._context.model as JupyterViewModel;
+        this._sharedModel.controlViewStateChanged.connect(
+          this.controlStateChanged
+        );
         const fileName = this._context.path.replace(/^.*(\\|\/|:)/, '');
         const fileContent = this._model!.toString();
         this.stringToPolyData(fileContent, fileName)
@@ -169,20 +179,84 @@ export class MainView extends React.Component<IProps, IStates> {
       });
   }
 
-  createComponentSelector = (): {label:string, value:string}[] => {
+  controlStateChanged = (_, changed: IControlViewSharedState) => {
+    if (changed.selectedColor) {
+      this.updateColorBy(changed.selectedColor!);
+    }
+  };
+
+  updateColorBy = (color: string) => {
+    const [location, colorByArrayName, indexValue] = color.split(':');
+    const interpolateScalarsBeforeMapping = location === 'PointData';
+    let colorMode = ColorMode.DEFAULT;
+    let scalarMode = ScalarMode.DEFAULT;
+    const scalarVisibility = location.length > 0;
+    if (scalarVisibility) {
+      const newArray =
+        this._source[`get${location}`]().getArrayByName(colorByArrayName);
+
+      const selectedComp = parseInt(indexValue);
+      this._activeArray = newArray;
+
+        const newDataRange = this._activeArray.getRange(
+          selectedComp
+        );
+        this._dataRange[0] = newDataRange[0];
+        this._dataRange[1] = newDataRange[1];
+        if (this._dataRange[0] === this._dataRange[1]) {
+          this._dataRange[1] = this._dataRange[0] + 0.0000000001;
+        }
+
+        colorMode = ColorMode.MAP_SCALARS;
+        scalarMode =
+          location === "PointData"
+            ? ScalarMode.USE_POINT_FIELD_DATA
+            : ScalarMode.USE_CELL_FIELD_DATA;
+
+        if (this._mapper.getLookupTable()) {
+          const lut = this._mapper.getLookupTable();
+          if (selectedComp === -1) {
+            lut.setVectorModeToMagnitude();
+          } else {
+            lut.setVectorModeToComponent();
+            lut.setVectorComponent(selectedComp);
+          }
+        }
+      }
+      this._mapper.set({
+        colorByArrayName,
+        colorMode,
+        interpolateScalarsBeforeMapping,
+        scalarMode,
+        scalarVisibility,
+      });
+      this.applyPreset();
+    };
+
+  applyPreset = () => {
+    const preset = vtkColorMaps.getPresetByName("rainbow");
+    this._lookupTable.applyColorMap(preset);
+
+    this._lookupTable.setMappingRange(this._dataRange[0], this._dataRange[1]);
+    this._lookupTable.updateRange();
+  };
+
+  createComponentSelector = (): { label: string; value: string }[] => {
     const pointDataArray = this._source.getPointData().getArrays();
-    let option: {label:string, value:string}[] = [{ value: ":", label: "Solid color" }];
+    let option: { label: string; value: string }[] = [
+      { value: ':', label: 'Solid color' }
+    ];
     pointDataArray.forEach((a: any) => {
       let name = a.getName();
       let numberComp = a.getNumberOfComponents();
       option.push({
-        label: `(p) ${name} magnitude`,
-        value: `PointData:${name}:-1`,
+        label: `${name}`,
+        value: `PointData:${name}:-1`
       });
       for (let index = 0; index < numberComp; index++) {
         option.push({
-          label: `(p) ${name} ${index}`,
-          value: `PointData:${name}:${index}`,
+          label: `${name} ${index}`,
+          value: `PointData:${name}:${index}`
         });
       }
     });
@@ -192,13 +266,13 @@ export class MainView extends React.Component<IProps, IStates> {
       let name = a.getName();
       let numberComp = a.getNumberOfComponents();
       option.push({
-        label: `(p) ${name} magnitude`,
-        value: `CellData:${name}:-1`,
+        label: `${name}`,
+        value: `CellData:${name}:-1`
       });
       for (let index = 0; index < numberComp; index++) {
         option.push({
-          label: `(p) ${name} ${index}`,
-          value: `CellData:${name}:${index}`,
+          label: `${name} ${index}`,
+          value: `CellData:${name}:${index}`
         });
       }
     });
@@ -226,10 +300,11 @@ export class MainView extends React.Component<IProps, IStates> {
     this._dataRange = scalars
       ? [scalars.getRange().min, scalars.getRange().max]
       : [0, 1];
-    this._activeArray = vtkDataArray;
-    if (!this._sharedModel.getContent('colorOption')) {
+    if (!this._sharedModel.getContent('mainViewState')) {
       const colorByOptions = this.createComponentSelector();
-      this._sharedModel.transact(()=> this._sharedModel.setContent('colorOption', colorByOptions)) 
+      this._sharedModel.transact(() =>
+        this._sharedModel.setMainViewState('colorByOptions', colorByOptions)
+      );
     }
     this._mapper.setInputData(this._source);
     this._renderer.addActor(this._actor);
@@ -358,7 +433,7 @@ export class MainView extends React.Component<IProps, IStates> {
 
   private container: React.RefObject<HTMLDivElement>; // Reference of render div
   private _context: DocumentRegistry.IContext<JupyterViewModel>;
-  private _sharedModel: JupyterViewDoc
+  private _sharedModel: JupyterViewDoc;
   private _model: JupyterViewModel | undefined;
   private _worker?: Worker = undefined;
   private _messageChannel?: MessageChannel;
@@ -370,7 +445,7 @@ export class MainView extends React.Component<IProps, IStates> {
   private _mapper: vtkMapper;
   private _container: any = null;
   private _dataRange: number[];
-  private _activeArray: typeof vtkDataArray;
+  private _activeArray: vtkDataArray;
   private _lookupTable: vtkColorTransferFunction;
   private _actor: vtkActor;
   private _inAnimation = false;
