@@ -4,8 +4,11 @@ import vtkRenderer from '@kitware/vtk.js/Rendering/Core/Renderer';
 import vtkRenderWindowInteractor from '@kitware/vtk.js/Rendering/Core/RenderWindowInteractor';
 import { Vector3 } from '@kitware/vtk.js/types';
 import jvControlLight from '../style/icons/jvc-light.svg';
-
-export const jvcLightIcon = new LabIcon({ name: 'jupyterview:control-light', svgstr: jvControlLight });
+import * as React from 'react';
+export const jvcLightIcon = new LabIcon({
+  name: 'jupyterview:control-light',
+  svgstr: jvControlLight
+});
 
 export function majorAxis(
   vec3: Vector3,
@@ -208,3 +211,31 @@ export const VIEW_ORIENTATIONS: {
     viewUp: [0, 1, 0]
   }
 };
+
+export function selectorFactory(props: {
+  defaultValue: any;
+  options: { value: any; label: string }[];
+  onChange: (e: any) => void;
+  label?: string;
+}): JSX.Element {
+  return (
+    <div
+      className="lm-Widget p-Widget jp-Dialog-body"
+      style={{ margin: '2px 2px 5px 2px' }}
+    >
+      <div className="jp-select-wrapper" style={{height: '30px'}}>
+        {props.label ? <label>{props.label}</label> : <div />}
+        <select
+          value={props.defaultValue}
+          onChange={props.onChange}
+          className="jp-mod-styled"
+          style={{ marginTop: '2px' }}
+        >
+          {props.options.map(option => (
+            <option value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}

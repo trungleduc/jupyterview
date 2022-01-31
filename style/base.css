@@ -56,18 +56,17 @@
   padding-right: 4px;
 }
 
-/* .jpview-control-panel .Mui-expanded {
-  margin: 0px 0px 16px 0px!important;
-} */
 .jpview-control-panel {
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   height: 100%;
 }
+.jpview-control-panel * {
+  font-family: var(--jp-ui-font-family);
+}
 .jpview-control-panel .Mui-expanded .MuiAccordionSummary-contentGutters {
-  margin: 15px 0!important;
+  margin: 15px 0 !important;
 }
 .jpview-control-panel .Mui-expanded .MuiAccordionSummary-gutters {
-  min-height: 48px!important;
+  min-height: 48px !important;
 }
-

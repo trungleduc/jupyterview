@@ -9,6 +9,8 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
+import { selectorFactory } from '../tools';
 
 interface IProps {
   filePath?: string;
@@ -29,7 +31,7 @@ const panelTitleStyle = {
 const panelBodyStyle = {
   color: 'var(--jp-ui-font-color1)',
   background: 'var(--jp-layout-color1)',
-  padding: '8px 0px 8px 16px'
+  padding: '8px'
 };
 export default class MainView extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
@@ -42,6 +44,10 @@ export default class MainView extends React.Component<IProps, IStates> {
       controlViewState: { selectedColor: ':' }
     };
     this.updateSharedState(this.props.sharedModel);
+    this._colorMapOptions = (vtkColorMaps.rgbPresetNames as string[]).map(
+      option => ({ value: option, label: option })
+    );
+    this._defaultColorMap = 'erdc_rainbow_bright';
   }
 
   componentWillUnmount() {
@@ -53,8 +59,6 @@ export default class MainView extends React.Component<IProps, IStates> {
   }
 
   componentDidUpdate(oldProps, oldState) {
-    console.log('state', this.state);
-
     if (oldProps.sharedModel === this.props.sharedModel) {
       return;
     }
@@ -92,7 +96,11 @@ export default class MainView extends React.Component<IProps, IStates> {
     this.setState(old => ({ ...old, [panel]: !old[panel] }));
   };
 
-  private onSelectedColorChange = (evt: SelectChangeEvent<string>) => {
+  private onSelectedColorChange = (
+    evt: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    console.log('e', evt);
+
     const value = evt.target.value;
     if (this.props.sharedModel) {
       this.props.sharedModel.setControlViewState('selectedColor', value);
@@ -123,19 +131,18 @@ export default class MainView extends React.Component<IProps, IStates> {
             <span className="lm-Widget">Color</span>
           </AccordionSummary>
           <AccordionDetails sx={panelBodyStyle} className={'lm-Widget'}>
-            <FormControl variant="standard" sx={{ m: 1, minWidth: 180 }}>
-              <Select
-                labelId="demo-simple-select-standard-label"
-                id="demo-simple-select-standard"
-                value={this.state.controlViewState.selectedColor}
-                onChange={this.onSelectedColorChange}
-                autoWidth
-              >
-                {colorSelectorData.map(option => (
-                  <MenuItem value={option.value}>{option.label}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {selectorFactory({
+              defaultValue: this.state.controlViewState.selectedColor,
+              options: colorSelectorData,
+              onChange: this.onSelectedColorChange,
+              label: 'Color by'
+            })}
+            {selectorFactory({
+              defaultValue: this._defaultColorMap,
+              options: this._colorMapOptions,
+              onChange: () => {},
+              label: 'Color map option'
+            })}
           </AccordionDetails>
         </Accordion>
         <Accordion expanded={this.state.panel2}>
@@ -177,4 +184,7 @@ export default class MainView extends React.Component<IProps, IStates> {
       </div>
     );
   }
+
+  private _colorMapOptions: { value: string; label: string }[];
+  private _defaultColorMap: string;
 }

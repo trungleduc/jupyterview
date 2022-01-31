@@ -18,6 +18,7 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     this.modelDB = modelDB || new ModelDB();
     this.sharedModel.awareness.on('change', this._onCameraChanged);
+    console.log('clientID', this.sharedModel.awareness.clientID);
   }
 
   get isDisposed(): boolean {
