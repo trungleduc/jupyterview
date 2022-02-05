@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { refreshIcon, LabIcon } from '@jupyterlab/ui-components';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -36,41 +37,45 @@ const panelBodyStyle = {
 export default class MainView extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
+    this._defaultColorMap = 'erdc_rainbow_bright';
+
     this.state = {
       panel1: true,
       panel2: true,
       panel3: true,
       mainViewState: {},
-      controlViewState: { selectedColor: ':' }
+      controlViewState: {
+        selectedColor: ':',
+        colorSchema: this._defaultColorMap
+      }
     };
     this.updateSharedState(this.props.sharedModel);
     this._colorMapOptions = (vtkColorMaps.rgbPresetNames as string[]).map(
       option => ({ value: option, label: option })
     );
-    this._defaultColorMap = 'erdc_rainbow_bright';
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     if (this.props.sharedModel) {
       this.props.sharedModel.mainViewStateChanged.disconnect(
-        this.sharedModelChanged
+        this.sharedMainViewModelChanged
       );
     }
   }
 
-  componentDidUpdate(oldProps, oldState) {
+  componentDidUpdate(oldProps, oldState): void {
     if (oldProps.sharedModel === this.props.sharedModel) {
       return;
     }
     if (oldProps.sharedModel) {
-      oldProps.sharedModel.changed.disconnect(this.sharedModelChanged);
+      oldProps.sharedModel.changed.disconnect(this.sharedMainViewModelChanged);
     }
     this.updateSharedState(this.props.sharedModel);
   }
 
-  updateSharedState(sharedModel?: JupyterViewDoc) {
+  updateSharedState(sharedModel?: JupyterViewDoc): void {
     if (sharedModel) {
-      sharedModel.mainViewStateChanged.connect(this.sharedModelChanged);
+      sharedModel.mainViewStateChanged.connect(this.sharedMainViewModelChanged);
       this.setState(old => {
         const controlViewState = sharedModel.getControlViewState();
         controlViewState.selectedColor = controlViewState.selectedColor ?? ':';
@@ -83,24 +88,24 @@ export default class MainView extends React.Component<IProps, IStates> {
     }
   }
 
-  private sharedModelChanged = (_, changed: IMainViewSharedState) => {
-    this.setState(
-      old => ({ ...old, mainViewState: changed }),
-      () => {
-        console.log(this.state);
+  sharedMainViewModelChanged = (_, changed: IMainViewSharedState): void => {
+    this.setState(old => {
+      const newState = {
+        ...old,
+        mainViewState: { ...old.mainViewState, ...changed }
+      };
+      if (changed.dataRange) {
+        newState.controlViewState.modifiedDataRange = [...changed.dataRange];
       }
-    );
+      return newState;
+    });
   };
 
-  private togglePanel = (panel: 'panel1' | 'panel2' | 'panel3') => {
+  togglePanel = (panel: 'panel1' | 'panel2' | 'panel3'): void => {
     this.setState(old => ({ ...old, [panel]: !old[panel] }));
   };
 
-  private onSelectedColorChange = (
-    evt: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    console.log('e', evt);
-
+  onSelectedColorChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
     const value = evt.target.value;
     if (this.props.sharedModel) {
       this.props.sharedModel.setControlViewState('selectedColor', value);
@@ -110,6 +115,106 @@ export default class MainView extends React.Component<IProps, IStates> {
       controlViewState: { ...old.controlViewState, selectedColor: value }
     }));
   };
+
+  onColorSchemaChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
+    const value = evt.target.value;
+    if (this.props.sharedModel) {
+      this.props.sharedModel.setControlViewState('colorSchema', value);
+    }
+    this.setState(old => ({
+      ...old,
+      controlViewState: { ...old.controlViewState, colorSchema: value }
+    }));
+  };
+
+  onRangeChange = (option: 'min' | 'max', value: string): void => {
+    if (!this.state.controlViewState.modifiedDataRange) {
+      return;
+    }
+    const index = { min: 0, max: 1 };
+    const newRange = [...this.state.controlViewState.modifiedDataRange!];
+    newRange[index[option]] = parseFloat(value);
+    this.setState(old => ({
+      ...old,
+      controlViewState: {
+        ...old.controlViewState,
+        modifiedDataRange: newRange
+      }
+    }));
+    if (this.props.sharedModel) {
+      this.props.sharedModel.setControlViewState('modifiedDataRange', newRange);
+    }
+  };
+
+  resetRange = (): void => {
+    const newRange = this.props.sharedModel?.getMainViewStateByKey('dataRange');
+    if (newRange) {
+      this.setState(old => ({
+        ...old,
+        controlViewState: {
+          ...old.controlViewState,
+          modifiedDataRange: newRange
+        }
+      }));
+      if (this.props.sharedModel) {
+        this.props.sharedModel.setControlViewState(
+          'modifiedDataRange',
+          newRange
+        );
+      }
+    }
+  };
+
+  rangeSettingComponent = (): JSX.Element => {
+    let dataRangeBlock = <div></div>;
+    if (this.state.controlViewState.modifiedDataRange) {
+      const step =
+        (this.state.controlViewState.modifiedDataRange[1] -
+          this.state.controlViewState.modifiedDataRange[0]) /
+        10;
+      dataRangeBlock = (
+        <div className="jpview-input-wrapper">
+          <div style={{ width: '40%' }}>
+            <label>Min</label>
+            <input
+              className="jpview-input"
+              type="number"
+              value={this.state.controlViewState.modifiedDataRange[0]}
+              onChange={e => this.onRangeChange('min', e.target.value)}
+              step={step}
+            />
+          </div>
+          <div
+            style={{
+              width: '15%',
+              display: 'flex',
+              flexDirection: 'column-reverse'
+            }}
+          >
+            <button
+              className="jp-Button jpview-toolbar-button"
+              title="Reset range"
+              onClick={this.resetRange}
+            >
+              {LabIcon.resolveReact({ icon: refreshIcon })}
+            </button>
+          </div>
+          <div style={{ width: '40%' }}>
+            <label>Max</label>
+            <input
+              className="jpview-input"
+              type="number"
+              value={this.state.controlViewState.modifiedDataRange[1]}
+              onChange={e => this.onRangeChange('max', e.target.value)}
+              step={step}
+            />
+          </div>
+        </div>
+      );
+    }
+    return dataRangeBlock;
+  };
+
   render(): JSX.Element {
     const colorSelectorData = this.state.mainViewState.colorByOptions ?? [
       { value: ':', label: 'Solid color' }
@@ -138,11 +243,12 @@ export default class MainView extends React.Component<IProps, IStates> {
               label: 'Color by'
             })}
             {selectorFactory({
-              defaultValue: this._defaultColorMap,
+              defaultValue: this.state.controlViewState.colorSchema,
               options: this._colorMapOptions,
-              onChange: () => {},
+              onChange: this.onColorSchemaChange,
               label: 'Color map option'
             })}
+            {this.rangeSettingComponent()}
           </AccordionDetails>
         </Accordion>
         <Accordion expanded={this.state.panel2}>
@@ -185,6 +291,6 @@ export default class MainView extends React.Component<IProps, IStates> {
     );
   }
 
-  private _colorMapOptions: { value: string; label: string }[];
-  private _defaultColorMap: string;
+  _colorMapOptions: { value: string; label: string }[];
+  _defaultColorMap: string;
 }

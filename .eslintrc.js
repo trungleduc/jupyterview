@@ -40,8 +40,8 @@ module.exports = {
       'warn',
       {
         singleQuote: true,
-        semi: false,
-        trailingComma: 'always'
+        semi: true,
+        trailingComma: 'none'
       }
     ]
   }

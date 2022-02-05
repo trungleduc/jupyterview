@@ -27,7 +27,7 @@
   padding: 0 7px;
 }
 
-.jpview-toolbar-button:hover {
+.jpview-toolbar-button.dark:hover {
   background-color: #424242;
 }
 
@@ -69,4 +69,22 @@
 }
 .jpview-control-panel .Mui-expanded .MuiAccordionSummary-gutters {
   min-height: 48px !important;
+}
+
+.jpview-input-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: var(--jp-layout-color0);
+  margin: 3px;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jpview-input {
+  background: transparent;
+  color: var(--jp-ui-font-color0);
+  outline: none;
+  font-size: var(--jp-ui-font-size1);
+  border: var(--jp-border-width) solid var(--jp-border-color0);
+  width: 95%;
 }

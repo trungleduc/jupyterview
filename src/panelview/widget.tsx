@@ -16,9 +16,9 @@ export class PanelWidget extends ReactWidget {
         this._filePath = changed.context.localPath;
         this._sharedModel = changed.context.model.sharedModel;
       } else {
-        this._filePath = undefined
-        this._sharedModel = undefined
-      }   
+        this._filePath = undefined;
+        this._sharedModel = undefined;
+      }
       this.update();
     });
   }

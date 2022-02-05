@@ -36,8 +36,7 @@ import {
   ColorMode,
   ScalarMode
 } from '@kitware/vtk.js/Rendering/Core/Mapper/Constants';
-import vtkColorMaps from "@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps";
-
+import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
 
 type THEME_TYPE = 'JupyterLab Dark' | 'JupyterLab Light';
 const DARK_THEME: THEME_TYPE = 'JupyterLab Dark';
@@ -182,6 +181,18 @@ export class MainView extends React.Component<IProps, IStates> {
   controlStateChanged = (_, changed: IControlViewSharedState) => {
     if (changed.selectedColor) {
       this.updateColorBy(changed.selectedColor!);
+      return;
+    }
+    if (changed.colorSchema) {
+      this.applyPreset({ colorSchema: changed.colorSchema! });
+      return;
+    }
+
+    if (changed.modifiedDataRange) {
+      this.applyPreset({
+        colorSchema: this._sharedModel.getControlViewStateByKey('colorSchema'),
+        dataRange: changed.modifiedDataRange
+      });
     }
   };
 
@@ -198,73 +209,86 @@ export class MainView extends React.Component<IProps, IStates> {
       const selectedComp = parseInt(indexValue);
       this._activeArray = newArray;
 
-        const newDataRange = this._activeArray.getRange(
-          selectedComp
-        );
-        this._dataRange[0] = newDataRange[0];
-        this._dataRange[1] = newDataRange[1];
-        if (this._dataRange[0] === this._dataRange[1]) {
-          this._dataRange[1] = this._dataRange[0] + 0.0000000001;
-        }
+      const newDataRange = this._activeArray.getRange(selectedComp);
+      this._dataRange[0] = newDataRange[0];
+      this._dataRange[1] = newDataRange[1];
+      if (this._dataRange[0] === this._dataRange[1]) {
+        this._dataRange[1] = this._dataRange[0] + 0.0000000001;
+      }
+      this._sharedModel.transact(() => {
+        this._sharedModel.setMainViewState('dataRange', [...this._dataRange]);
+      });
+      colorMode = ColorMode.MAP_SCALARS;
+      scalarMode =
+        location === 'PointData'
+          ? ScalarMode.USE_POINT_FIELD_DATA
+          : ScalarMode.USE_CELL_FIELD_DATA;
 
-        colorMode = ColorMode.MAP_SCALARS;
-        scalarMode =
-          location === "PointData"
-            ? ScalarMode.USE_POINT_FIELD_DATA
-            : ScalarMode.USE_CELL_FIELD_DATA;
-
-        if (this._mapper.getLookupTable()) {
-          const lut = this._mapper.getLookupTable();
-          if (selectedComp === -1) {
-            lut.setVectorModeToMagnitude();
-          } else {
-            lut.setVectorModeToComponent();
-            lut.setVectorComponent(selectedComp);
-          }
+      if (this._mapper.getLookupTable()) {
+        const lut = this._mapper.getLookupTable();
+        if (selectedComp === -1) {
+          lut.setVectorModeToMagnitude();
+        } else {
+          lut.setVectorModeToComponent();
+          lut.setVectorComponent(selectedComp);
         }
       }
-      this._mapper.set({
-        colorByArrayName,
-        colorMode,
-        interpolateScalarsBeforeMapping,
-        scalarMode,
-        scalarVisibility,
-      });
-      this.applyPreset();
-    };
+    }
+    this._mapper.set({
+      colorByArrayName,
+      colorMode,
+      interpolateScalarsBeforeMapping,
+      scalarMode,
+      scalarVisibility
+    });
+    this.applyPreset({
+      colorSchema: this._sharedModel.getControlViewStateByKey('colorSchema')
+    });
+  };
 
-  applyPreset = () => {
-    const preset = vtkColorMaps.getPresetByName("rainbow");
+  applyPreset = (options: { colorSchema?: string; dataRange?: number[] }) => {
+    if (!options.colorSchema) {
+      options.colorSchema = 'erdc_rainbow_bright';
+    }
+    if (!options.dataRange) {
+      options.dataRange = this._dataRange;
+    }
+    const preset = vtkColorMaps.getPresetByName(options.colorSchema);
     this._lookupTable.applyColorMap(preset);
 
-    this._lookupTable.setMappingRange(this._dataRange[0], this._dataRange[1]);
+    this._lookupTable.setMappingRange(
+      options.dataRange[0],
+      options.dataRange[1]
+    );
     this._lookupTable.updateRange();
   };
 
   createComponentSelector = (): { label: string; value: string }[] => {
     const pointDataArray = this._source.getPointData().getArrays();
-    let option: { label: string; value: string }[] = [
+    const option: { label: string; value: string }[] = [
       { value: ':', label: 'Solid color' }
     ];
     pointDataArray.forEach((a: any) => {
-      let name = a.getName();
-      let numberComp = a.getNumberOfComponents();
+      const name = a.getName();
+      const numberComp = a.getNumberOfComponents();
       option.push({
         label: `${name}`,
         value: `PointData:${name}:-1`
       });
-      for (let index = 0; index < numberComp; index++) {
-        option.push({
-          label: `${name} ${index}`,
-          value: `PointData:${name}:${index}`
-        });
+      if (numberComp > 1) {
+        for (let index = 0; index < numberComp; index++) {
+          option.push({
+            label: `${name} - ${index}`,
+            value: `PointData:${name}:${index}`
+          });
+        }
       }
     });
     const cellDataArray = this._source.getCellData().getArrays();
 
     cellDataArray.forEach((a: any) => {
-      let name = a.getName();
-      let numberComp = a.getNumberOfComponents();
+      const name = a.getName();
+      const numberComp = a.getNumberOfComponents();
       option.push({
         label: `${name}`,
         value: `CellData:${name}:-1`
@@ -302,9 +326,10 @@ export class MainView extends React.Component<IProps, IStates> {
       : [0, 1];
     if (!this._sharedModel.getContent('mainViewState')) {
       const colorByOptions = this.createComponentSelector();
-      this._sharedModel.transact(() =>
-        this._sharedModel.setMainViewState('colorByOptions', colorByOptions)
-      );
+      this._sharedModel.transact(() => {
+        this._sharedModel.setMainViewState('colorByOptions', colorByOptions);
+        this._sharedModel.setMainViewState('dataRange', [...this._dataRange]);
+      });
     }
     this._mapper.setInputData(this._source);
     this._renderer.addActor(this._actor);

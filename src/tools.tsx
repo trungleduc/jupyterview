@@ -223,7 +223,7 @@ export function selectorFactory(props: {
       className="lm-Widget p-Widget jp-Dialog-body"
       style={{ margin: '2px 2px 5px 2px' }}
     >
-      <div className="jp-select-wrapper" style={{height: '30px'}}>
+      <div className="jp-select-wrapper" style={{ height: '32px' }}>
         {props.label ? <label>{props.label}</label> : <div />}
         <select
           value={props.defaultValue}

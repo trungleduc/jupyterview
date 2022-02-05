@@ -113,7 +113,6 @@ const controlPanel: JupyterFrontEndPlugin<void> = {
     if (restorer) {
       restorer.add(controlPanel, NAME_SPACE);
     }
-    console.log('tracker', tracker);
 
     app.shell.add(controlPanel, 'right', { rank: 100 });
   }

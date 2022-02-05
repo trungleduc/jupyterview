@@ -10,7 +10,12 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import { YDocument, MapChange } from '@jupyterlab/shared-models';
 
-import { IControlViewSharedState, IDict, IMainViewSharedState, Position } from '../types';
+import {
+  IControlViewSharedState,
+  IDict,
+  IMainViewSharedState,
+  Position
+} from '../types';
 
 import * as Y from 'yjs';
 
@@ -78,7 +83,7 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   }
 
   fromJSON(data: PartialJSONObject): void {
-    console.log('');
+    /** */
   }
 
   initialize(): void {
@@ -168,14 +173,14 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
   }
 
   public getMainViewState(): IMainViewSharedState {
-    const ret: IMainViewSharedState = {}
+    const ret: IMainViewSharedState = {};
     for (const key of this._mainViewState.keys()) {
-      ret[key] = this._mainViewState.get(key)
+      ret[key] = this._mainViewState.get(key);
     }
     return ret;
   }
-  public getMainViewStateByKey(key: string): IMainViewSharedState {
-    return this._mainViewState.get(key)
+  public getMainViewStateByKey(key: keyof IMainViewSharedState): any {
+    return this._mainViewState.get(key);
   }
 
   public setMainViewState(key: keyof IMainViewSharedState, value: any): void {
@@ -183,17 +188,20 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
   }
 
   public getControlViewState(): IControlViewSharedState {
-    const ret: IControlViewSharedState = {}
+    const ret: IControlViewSharedState = {};
     for (const key of this._controlViewState.keys()) {
-      ret[key] = this._controlViewState.get(key)
+      ret[key] = this._controlViewState.get(key);
     }
     return ret;
   }
-  public getControlViewStateByKey(key: string): IControlViewSharedState {
-    return this._controlViewState.get(key)
+  public getControlViewStateByKey(key: keyof IControlViewSharedState): any {
+    return this._controlViewState.get(key);
   }
 
-  public setControlViewState(key: keyof IControlViewSharedState, value: any): void {
+  public setControlViewState(
+    key: keyof IControlViewSharedState,
+    value: any
+  ): void {
     this._controlViewState.set(key, value);
   }
 
@@ -217,5 +225,7 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
   private _mainViewState: Y.Map<any>;
   private _mainViewStateChanged = new Signal<this, IMainViewSharedState>(this);
   private _controlViewState: Y.Map<any>;
-  private _controlViewStateChanged = new Signal<this, IControlViewSharedState>(this);
+  private _controlViewStateChanged = new Signal<this, IControlViewSharedState>(
+    this
+  );
 }
