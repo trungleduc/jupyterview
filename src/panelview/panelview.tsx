@@ -5,13 +5,17 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { JupyterViewDoc, JupyterViewDocChange } from '../mainview/model';
-import { IControlViewSharedState, IMainViewSharedState } from '../types';
+import {
+  IControlViewSharedState,
+  IMainViewSharedState,
+  ValueOf
+} from '../types';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
-import { selectorFactory } from '../tools';
+import { debounce, selectorFactory } from '../tools';
 
 interface IProps {
   filePath?: string;
@@ -34,11 +38,28 @@ const panelBodyStyle = {
   background: 'var(--jp-layout-color1)',
   padding: '8px'
 };
+const DISPLAY_MODE = [
+  { label: 'Surface', value: '1:2:0' },
+  { label: 'Surface with Edge', value: '1:2:1' },
+  { label: 'Wireframe', value: '1:1:0' },
+  { label: 'Points', value: '1:0:0' },
+  { label: 'Hidden', value: '0:-1:0' }
+];
 export default class MainView extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
     this._defaultColorMap = 'erdc_rainbow_bright';
-
+    this.updateSharedState = debounce(
+      (
+        key: keyof IControlViewSharedState,
+        value: ValueOf<IControlViewSharedState>
+      ) => {
+        if (this.props.sharedModel) {
+          this.props.sharedModel.setControlViewState(key, value);
+        }
+      },
+      100
+    ) as any;
     this.state = {
       panel1: true,
       panel2: true,
@@ -46,10 +67,12 @@ export default class MainView extends React.Component<IProps, IStates> {
       mainViewState: {},
       controlViewState: {
         selectedColor: ':',
-        colorSchema: this._defaultColorMap
+        colorSchema: this._defaultColorMap,
+        displayMode: DISPLAY_MODE[0].value,
+        opacity: 1
       }
     };
-    this.updateSharedState(this.props.sharedModel);
+    this.onSharedModelPropChange(this.props.sharedModel);
     this._colorMapOptions = (vtkColorMaps.rgbPresetNames as string[]).map(
       option => ({ value: option, label: option })
     );
@@ -70,10 +93,10 @@ export default class MainView extends React.Component<IProps, IStates> {
     if (oldProps.sharedModel) {
       oldProps.sharedModel.changed.disconnect(this.sharedMainViewModelChanged);
     }
-    this.updateSharedState(this.props.sharedModel);
+    this.onSharedModelPropChange(this.props.sharedModel);
   }
 
-  updateSharedState(sharedModel?: JupyterViewDoc): void {
+  onSharedModelPropChange(sharedModel?: JupyterViewDoc): void {
     if (sharedModel) {
       sharedModel.mainViewStateChanged.connect(this.sharedMainViewModelChanged);
       this.setState(old => {
@@ -107,24 +130,12 @@ export default class MainView extends React.Component<IProps, IStates> {
 
   onSelectedColorChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
     const value = evt.target.value;
-    if (this.props.sharedModel) {
-      this.props.sharedModel.setControlViewState('selectedColor', value);
-    }
-    this.setState(old => ({
-      ...old,
-      controlViewState: { ...old.controlViewState, selectedColor: value }
-    }));
+    this.updateLocalAndSharedState('selectedColor', value);
   };
 
   onColorSchemaChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
     const value = evt.target.value;
-    if (this.props.sharedModel) {
-      this.props.sharedModel.setControlViewState('colorSchema', value);
-    }
-    this.setState(old => ({
-      ...old,
-      controlViewState: { ...old.controlViewState, colorSchema: value }
-    }));
+    this.updateLocalAndSharedState('colorSchema', value);
   };
 
   onRangeChange = (option: 'min' | 'max', value: string): void => {
@@ -134,35 +145,38 @@ export default class MainView extends React.Component<IProps, IStates> {
     const index = { min: 0, max: 1 };
     const newRange = [...this.state.controlViewState.modifiedDataRange!];
     newRange[index[option]] = parseFloat(value);
-    this.setState(old => ({
-      ...old,
-      controlViewState: {
-        ...old.controlViewState,
-        modifiedDataRange: newRange
-      }
-    }));
-    if (this.props.sharedModel) {
-      this.props.sharedModel.setControlViewState('modifiedDataRange', newRange);
-    }
+    this.updateLocalAndSharedState('modifiedDataRange', newRange);
   };
 
   resetRange = (): void => {
     const newRange = this.props.sharedModel?.getMainViewStateByKey('dataRange');
     if (newRange) {
-      this.setState(old => ({
-        ...old,
-        controlViewState: {
-          ...old.controlViewState,
-          modifiedDataRange: newRange
-        }
-      }));
-      if (this.props.sharedModel) {
-        this.props.sharedModel.setControlViewState(
-          'modifiedDataRange',
-          newRange
-        );
-      }
+      this.updateLocalAndSharedState('modifiedDataRange', newRange);
     }
+  };
+
+  onDisplayModeChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const displayMode = e.target.value;
+    this.updateLocalAndSharedState('displayMode', displayMode);
+  };
+
+  onOpacityChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const opacity = parseFloat(e.target.value);
+    this.updateLocalAndSharedState('opacity', opacity);
+  };
+
+  updateLocalAndSharedState = (
+    key: keyof IControlViewSharedState,
+    value: ValueOf<IControlViewSharedState>
+  ): void => {
+    this.setState(old => ({
+      ...old,
+      controlViewState: {
+        ...old.controlViewState,
+        [key]: value
+      }
+    }));
+    this.updateSharedState(key, value);
   };
 
   rangeSettingComponent = (): JSX.Element => {
@@ -171,7 +185,7 @@ export default class MainView extends React.Component<IProps, IStates> {
       const step =
         (this.state.controlViewState.modifiedDataRange[1] -
           this.state.controlViewState.modifiedDataRange[0]) /
-        10;
+        100;
       dataRangeBlock = (
         <div className="jpview-input-wrapper">
           <div style={{ width: '40%' }}>
@@ -225,6 +239,40 @@ export default class MainView extends React.Component<IProps, IStates> {
         <div className="lm-Widget p-Widget jpview-control-panel-title">
           <h2>{this.props.filePath}</h2>
         </div>
+        <Accordion expanded={this.state.panel2}>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel2a-content"
+            id="panel2a-header"
+            sx={panelTitleStyle}
+            onClick={() => this.togglePanel('panel2')}
+          >
+            <span>Display</span>
+          </AccordionSummary>
+          <AccordionDetails sx={panelBodyStyle}>
+            {selectorFactory({
+              defaultValue: this.state.controlViewState.displayMode,
+              options: DISPLAY_MODE,
+              onChange: this.onDisplayModeChange,
+              label: 'Display mode'
+            })}
+            <div className="jpview-input-wrapper">
+              <div style={{ width: '100%' }}>
+                <label>Opacity: {this.state.controlViewState.opacity}</label>
+                <input
+                  className="jpview-slider"
+                  type="range"
+                  name="opacity"
+                  min={0.01}
+                  max={1}
+                  step={0.01}
+                  value={this.state.controlViewState.opacity}
+                  onChange={this.onOpacityChange}
+                />
+              </div>
+            </div>
+          </AccordionDetails>
+        </Accordion>
         <Accordion expanded={this.state.panel1}>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
@@ -251,24 +299,7 @@ export default class MainView extends React.Component<IProps, IStates> {
             {this.rangeSettingComponent()}
           </AccordionDetails>
         </Accordion>
-        <Accordion expanded={this.state.panel2}>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel2a-content"
-            id="panel2a-header"
-            sx={panelTitleStyle}
-            onClick={() => this.togglePanel('panel2')}
-          >
-            <span>Accordion 2</span>
-          </AccordionSummary>
-          <AccordionDetails sx={panelBodyStyle}>
-            <span>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Suspendisse malesuada lacus ex, sit amet blandit leo lobortis
-              eget.
-            </span>
-          </AccordionDetails>
-        </Accordion>
+
         <Accordion expanded={this.state.panel3}>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
@@ -293,4 +324,8 @@ export default class MainView extends React.Component<IProps, IStates> {
 
   _colorMapOptions: { value: string; label: string }[];
   _defaultColorMap: string;
+  updateSharedState: (
+    key: keyof IControlViewSharedState,
+    value: ValueOf<IControlViewSharedState>
+  ) => void;
 }

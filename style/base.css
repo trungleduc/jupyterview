@@ -83,8 +83,37 @@
 .jpview-input {
   background: transparent;
   color: var(--jp-ui-font-color0);
+  background: var(--jp-input-background);
   outline: none;
   font-size: var(--jp-ui-font-size1);
   border: var(--jp-border-width) solid var(--jp-border-color0);
   width: 95%;
+}
+
+.jpview-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%; 
+  height: 5px; 
+  border-radius: 5px;  
+  background: var(--jp-layout-color3); 
+  outline: none; 
+}
+
+.jpview-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%; 
+  background: var(--jp-ui-font-color2);
+  cursor: pointer;
+}
+
+.jpview-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--jp-ui-font-color2);;
+  cursor: pointer;
 }

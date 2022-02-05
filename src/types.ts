@@ -2,6 +2,8 @@ export interface IDict<T = any> {
   [key: string]: T;
 }
 
+export type ValueOf<T> = T[keyof T];
+
 /**
  * Action definitions for worker
  */
@@ -70,4 +72,6 @@ export interface IControlViewSharedState {
   selectedColor?: string;
   colorSchema?: string;
   modifiedDataRange?: number[];
+  displayMode?: string;
+  opacity?: number;
 }

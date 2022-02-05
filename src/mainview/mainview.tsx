@@ -178,14 +178,12 @@ export class MainView extends React.Component<IProps, IStates> {
       });
   }
 
-  controlStateChanged = (_, changed: IControlViewSharedState) => {
+  controlStateChanged = (_, changed: IControlViewSharedState): void => {
     if (changed.selectedColor) {
       this.updateColorBy(changed.selectedColor!);
-      return;
     }
     if (changed.colorSchema) {
       this.applyPreset({ colorSchema: changed.colorSchema! });
-      return;
     }
 
     if (changed.modifiedDataRange) {
@@ -194,9 +192,23 @@ export class MainView extends React.Component<IProps, IStates> {
         dataRange: changed.modifiedDataRange
       });
     }
+
+    if (changed.displayMode) {
+      const [visibility, representation, edgeVisibility] = changed.displayMode
+        .split(':')
+        .map(Number);
+      this._actor.getProperty().set({ representation, edgeVisibility });
+      this._actor.setVisibility(!!visibility);
+      this._renderWindow.render();
+    }
+
+    if (changed.opacity) {
+      this._actor.getProperty().setOpacity(changed.opacity);
+      this._renderWindow.render();
+    }
   };
 
-  updateColorBy = (color: string) => {
+  updateColorBy = (color: string): void => {
     const [location, colorByArrayName, indexValue] = color.split(':');
     const interpolateScalarsBeforeMapping = location === 'PointData';
     let colorMode = ColorMode.DEFAULT;
@@ -358,7 +370,7 @@ export class MainView extends React.Component<IProps, IStates> {
   };
 
   rotateWithAnimation = (direction: 'left' | 'right'): (() => void) => {
-    const sign = direction == 'left' ? 1 : -1;
+    const sign = direction === 'left' ? 1 : -1;
     return (): void => {
       const interactor = this._renderWindow.getInteractor();
       interactor.requestAnimation(this._renderWindow);

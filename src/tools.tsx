@@ -239,3 +239,16 @@ export function selectorFactory(props: {
     </div>
   );
 }
+
+export const debounce = (
+  func: CallableFunction,
+  timeout = 100
+): CallableFunction => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, timeout);
+  };
+};
