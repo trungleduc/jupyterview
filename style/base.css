@@ -64,11 +64,17 @@
 .jpview-control-panel * {
   font-family: var(--jp-ui-font-family);
 }
-.jpview-control-panel .Mui-expanded .MuiAccordionSummary-contentGutters {
-  margin: 15px 0 !important;
+/* .jpview-control-panel .Mui-expanded .MuiAccordionSummary-contentGutters {
+  margin: 10px 0 !important;
+} */
+.jpview-control-panel .MuiAccordionSummary-contentGutters {
+  margin: 10px 0 !important;
 }
 .jpview-control-panel .Mui-expanded .MuiAccordionSummary-gutters {
-  min-height: 48px !important;
+  min-height: 38px !important;
+}
+.jpview-control-panel .MuiAccordionSummary-root.MuiAccordionSummary-gutters {
+  min-height: 38px !important;
 }
 
 .jpview-input-wrapper {
