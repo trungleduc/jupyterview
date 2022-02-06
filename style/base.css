@@ -1,7 +1,7 @@
 .jpview-view-toolbar {
   position: absolute;
   z-index: 1;
-  right: 10px;
+  left: 10px;
   top: 10px;
   background-color: rgba(0, 0, 0, 0.4);
   border-radius: 16px;

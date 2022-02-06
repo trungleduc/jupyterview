@@ -26,8 +26,7 @@ import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
 import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
 import vtk from '@kitware/vtk.js/vtk';
 import vtkDataArray from '@kitware/vtk.js/Common/Core/DataArray';
-import vtkRenderWindowInteractor from '@kitware/vtk.js/Rendering/Core/RenderWindowInteractor';
-import vtkInteractorStyleTrackballCamera from '@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera';
+import vtkScalarBarActor from '@kitware/vtk.js/Rendering/Core/ScalarBarActor';
 import { readPolyDataArrayBuffer, ReadPolyDataResult } from 'itk-wasm/dist';
 import vtkPolyData from '@kitware/vtk.js/Common/DataModel/PolyData';
 import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
@@ -49,6 +48,8 @@ const BG_COLOR = {
 
 const ROTATION_STEP = 2;
 
+const JUPYTER_FONT =
+  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'";
 interface IProps {
   context: DocumentRegistry.IContext<JupyterViewModel>;
 }
@@ -246,6 +247,8 @@ export class MainView extends React.Component<IProps, IStates> {
         }
       }
     }
+    this._scalarBarActor.setAxisLabel(colorByArrayName);
+    this._scalarBarActor.setVisibility(true);
     this._mapper.set({
       colorByArrayName,
       colorMode,
@@ -258,7 +261,10 @@ export class MainView extends React.Component<IProps, IStates> {
     });
   };
 
-  applyPreset = (options: { colorSchema?: string; dataRange?: number[] }) => {
+  applyPreset = (options: {
+    colorSchema?: string;
+    dataRange?: number[];
+  }): void => {
     if (!options.colorSchema) {
       options.colorSchema = 'erdc_rainbow_bright';
     }
@@ -267,12 +273,13 @@ export class MainView extends React.Component<IProps, IStates> {
     }
     const preset = vtkColorMaps.getPresetByName(options.colorSchema);
     this._lookupTable.applyColorMap(preset);
-
     this._lookupTable.setMappingRange(
       options.dataRange[0],
       options.dataRange[1]
     );
     this._lookupTable.updateRange();
+
+    setTimeout(() => this._renderWindow.render(), 250);
   };
 
   createComponentSelector = (): { label: string; value: string }[] => {
@@ -343,7 +350,22 @@ export class MainView extends React.Component<IProps, IStates> {
         this._sharedModel.setMainViewState('dataRange', [...this._dataRange]);
       });
     }
+    this._scalarBarActor = vtkScalarBarActor.newInstance();
+    this._scalarBarActor.setAxisTextStyle({
+      fontColor: 'black',
+      fontFamily: JUPYTER_FONT,
+      fontSize: '18px'
+    });
+    this._scalarBarActor.setTickTextStyle({
+      fontColor: 'black',
+      fontFamily: JUPYTER_FONT,
+      fontSize: '12px'
+    });
+    this._scalarBarActor.setScalarsToColors(this._mapper.getLookupTable());
+    this._scalarBarActor.setVisibility(false);
+    this._scalarBarActor.setDrawNanAnnotation(false);
     this._mapper.setInputData(this._source);
+    this._renderer.addActor(this._scalarBarActor);
     this._renderer.addActor(this._actor);
     this._renderer.resetCamera();
     this._renderWindow.render();
@@ -485,6 +507,7 @@ export class MainView extends React.Component<IProps, IStates> {
   private _activeArray: vtkDataArray;
   private _lookupTable: vtkColorTransferFunction;
   private _actor: vtkActor;
+  private _scalarBarActor: vtkScalarBarActor;
   private _inAnimation = false;
   // private _SUPPORTED_FILE: any = null;
   // private _allSource: {};
