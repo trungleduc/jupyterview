@@ -32,25 +32,29 @@ export default class WrapPanel extends React.Component<IProps, IStates> {
     super(props);
     this.state = {
       clientId: this.props.clientId,
-      normalX: 0,
+      normalX: 1,
       normalY: 0,
-      normalZ: 1
+      normalZ: 0
     };
   }
 
   onNormalChange = (ax: 'X' | 'Y' | 'Z', value: number): void => {
-    this.setState(old => ({ ...old, [`normal${ax}`]: value }));
-    this.props.onWarpNormalAxisChange([
-      this.state.normalX,
-      this.state.normalY,
-      this.state.normalZ
-    ]);
+    this.setState(
+      old => ({ ...old, [`normal${ax}`]: value }),
+      () => {
+        this.props.onWarpNormalAxisChange([
+          this.state.normalX,
+          this.state.normalY,
+          this.state.normalZ
+        ]);
+      }
+    );
   };
 
   render(): React.ReactNode {
     const warpSelectorData = [{ value: ':', label: 'None' }].concat(
       this.props.mainViewState.colorByOptions?.filter(item => {
-        return item.value.endsWith('-1')
+        return item.value.endsWith('-1');
       }) ?? []
     );
     return (
@@ -92,6 +96,7 @@ export default class WrapPanel extends React.Component<IProps, IStates> {
             {['X', 'Y', 'Z'].map(ax => {
               return (
                 <input
+                  type={"number"}
                   style={{ width: '25%' }}
                   className="jpview-input"
                   key={ax}
@@ -104,7 +109,7 @@ export default class WrapPanel extends React.Component<IProps, IStates> {
                   onChange={e => {
                     this.onNormalChange(
                       ax as 'X' | 'Y' | 'Z',
-                      Number(e.target.value)
+                      parseFloat(e.target.value)
                     );
                   }}
                 />

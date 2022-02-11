@@ -202,22 +202,19 @@ export class MainView extends React.Component<IProps, IStates> {
         .map(Number);
       this._actor.getProperty().set({ representation, edgeVisibility });
       this._actor.setVisibility(!!visibility);
-      needRerender = true
-      // this._renderWindow.render();
+      needRerender = true;
     }
 
     if (changed.opacity) {
       this._actor.getProperty().setOpacity(changed.opacity);
-      needRerender = true
-      // this._renderWindow.render();
+      needRerender = true;
     }
 
     if (changed.warpFactor || changed.warpFactor === 0) {
       const value = Number(changed.warpFactor);
       this._warpScalar.setScaleFactor(value);
       this._mapper.setInputData(this._warpScalar.getOutputData());
-      needRerender = true
-      // setTimeout(() => this._renderWindow.render(), 250);
+      needRerender = true;
     }
 
     if (changed.selectedWarp) {
@@ -225,8 +222,14 @@ export class MainView extends React.Component<IProps, IStates> {
         changed.selectedWarp.split(':');
       this._warpScalar.setInputArrayToProcess(0, colorByArrayName, location);
       this._mapper.setInputData(this._warpScalar.getOutputData());
-      needRerender = true
-      // setTimeout(() => this._renderWindow.render(), 250);
+      needRerender = true;
+    }
+
+    if (changed.warpNormalAxis) {
+      this._warpScalar.setNormal(changed.warpNormalAxis);
+      this._warpScalar.update()
+      this._mapper.setInputData(this._warpScalar.getOutputData());
+      needRerender = true;
     }
 
     if (needRerender) {
