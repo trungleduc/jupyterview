@@ -64,6 +64,10 @@
 .jpview-control-panel * {
   font-family: var(--jp-ui-font-family);
 }
+
+.jpview-control-panel-component {
+  font-size: var(--jp-ui-font-size1);
+}
 /* .jpview-control-panel .Mui-expanded .MuiAccordionSummary-contentGutters {
   margin: 10px 0 !important;
 } */
@@ -77,11 +81,17 @@
   min-height: 38px !important;
 }
 
+.jpview-control-panel
+  .MuiAccordionSummary-content.MuiAccordionSummary-contentGutters
+  > span {
+  text-transform:uppercase;
+}
+
 .jpview-input-wrapper {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  background-color: var(--jp-layout-color0);
+  background-color: var(--jp-layout-color1);
   margin: 3px;
   font-size: var(--jp-ui-font-size1);
 }
@@ -99,11 +109,11 @@
 .jpview-slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 100%; 
-  height: 5px; 
-  border-radius: 5px;  
-  background: var(--jp-layout-color3); 
-  outline: none; 
+  width: 100%;
+  height: 5px;
+  border-radius: 5px;
+  background: var(--jp-layout-color3);
+  outline: none;
 }
 
 .jpview-slider::-webkit-slider-thumb {
@@ -111,7 +121,7 @@
   appearance: none;
   width: 10px;
   height: 10px;
-  border-radius: 50%; 
+  border-radius: 50%;
   background: var(--jp-ui-font-color2);
   cursor: pointer;
 }
@@ -120,6 +130,6 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--jp-ui-font-color2);;
+  background: var(--jp-ui-font-color2);
   cursor: pointer;
 }

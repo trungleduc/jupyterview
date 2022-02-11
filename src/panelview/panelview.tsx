@@ -1,18 +1,18 @@
-import * as React from "react";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { JupyterViewDoc } from "../mainview/model";
+import * as React from 'react';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { JupyterViewDoc } from '../mainview/model';
 import {
   IControlViewSharedState,
   IMainViewSharedState,
   ValueOf
-} from "../types";
-import { debounce } from "../tools";
-import DisplayPanel, { DISPLAY_MODE } from "./displaypanel";
-import ColorPanel from "./colorpanel";
-import WrapPanel from "./wrappanel";
+} from '../types';
+import { debounce } from '../tools';
+import DisplayPanel, { DISPLAY_MODE } from './displaypanel';
+import ColorPanel from './colorpanel';
+import WrapPanel from './wrappanel';
 
 interface IProps {
   filePath?: string;
@@ -27,37 +27,31 @@ interface IStates {
   controlViewState: IControlViewSharedState;
 }
 const panelTitleStyle = {
-  background: "var(--jp-layout-color2)",
-  color: "var(--jp-ui-font-color1)"
+  background: 'var(--jp-layout-color2)',
+  color: 'var(--jp-ui-font-color1)'
 };
 const panelBodyStyle = {
-  color: "var(--jp-ui-font-color1)",
-  background: "var(--jp-layout-color1)",
-  padding: "8px"
+  color: 'var(--jp-ui-font-color1)',
+  background: 'var(--jp-layout-color1)',
+  padding: '8px'
 };
 
 export default class MainView extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
-    this._defaultColorMap = "erdc_rainbow_bright";
-    this.updateSharedState = debounce(
-      (
-        key: keyof IControlViewSharedState,
-        value: ValueOf<IControlViewSharedState>
-      ) => {
-        if (this.props.sharedModel) {
-          this.props.sharedModel.setControlViewState(key, value);
-        }
-      },
-      100
-    ) as any;
+    this._defaultColorMap = 'erdc_rainbow_bright';
+    this.updateSharedState = debounce((payload: IControlViewSharedState) => {
+      if (this.props.sharedModel) {
+        this.props.sharedModel.setControlViewState(payload);
+      }
+    }, 100) as any;
     this.state = {
       colorPanel: true,
       displayPanel: true,
       filterPanel: true,
       mainViewState: {},
       controlViewState: {
-        selectedColor: ":",
+        selectedColor: ':',
         colorSchema: this._defaultColorMap,
         displayMode: DISPLAY_MODE[0].value,
         opacity: 1
@@ -89,7 +83,7 @@ export default class MainView extends React.Component<IProps, IStates> {
       sharedModel.mainViewStateChanged.connect(this.sharedMainViewModelChanged);
       this.setState(old => {
         const controlViewState = sharedModel.getControlViewState();
-        controlViewState.selectedColor = controlViewState.selectedColor ?? ":";
+        controlViewState.selectedColor = controlViewState.selectedColor ?? ':';
         return {
           ...old,
           mainViewState: sharedModel.getMainViewState(),
@@ -113,60 +107,88 @@ export default class MainView extends React.Component<IProps, IStates> {
   };
 
   togglePanel = (
-    panel: "colorPanel" | "displayPanel" | "filterPanel"
+    panel: 'colorPanel' | 'displayPanel' | 'filterPanel'
   ): void => {
     this.setState(old => ({ ...old, [panel]: !old[panel] }));
   };
 
   onSelectedColorChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
-    const value = evt.target.value;
-    this.updateLocalAndSharedState("selectedColor", value);
+    const selectedColor = evt.target.value;
+    this.updateLocalAndSharedState({ selectedColor });
   };
 
   onColorSchemaChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
-    const value = evt.target.value;
-    this.updateLocalAndSharedState("colorSchema", value);
+    const colorSchema = evt.target.value;
+    this.updateLocalAndSharedState({ colorSchema });
   };
 
-  onRangeChange = (option: "min" | "max", value: string): void => {
+  onRangeChange = (option: 'min' | 'max', value: string): void => {
     if (!this.state.controlViewState.modifiedDataRange) {
       return;
     }
     const index = { min: 0, max: 1 };
-    const newRange = [...this.state.controlViewState.modifiedDataRange!];
-    newRange[index[option]] = parseFloat(value);
-    this.updateLocalAndSharedState("modifiedDataRange", newRange);
+    const modifiedDataRange = [
+      ...this.state.controlViewState.modifiedDataRange!
+    ];
+    modifiedDataRange[index[option]] = parseFloat(value);
+    this.updateLocalAndSharedState({ modifiedDataRange });
   };
 
   resetRange = (): void => {
-    const newRange = this.props.sharedModel?.getMainViewStateByKey("dataRange");
-    if (newRange) {
-      this.updateLocalAndSharedState("modifiedDataRange", newRange);
+    const modifiedDataRange =
+      this.props.sharedModel?.getMainViewStateByKey('dataRange');
+    if (modifiedDataRange) {
+      this.updateLocalAndSharedState({ modifiedDataRange });
     }
   };
 
   onDisplayModeChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const displayMode = e.target.value;
-    this.updateLocalAndSharedState("displayMode", displayMode);
+    this.updateLocalAndSharedState({ displayMode });
   };
 
   onOpacityChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const opacity = parseFloat(e.target.value);
-    this.updateLocalAndSharedState("opacity", opacity);
+    this.updateLocalAndSharedState({ opacity });
+  };
+
+  onWarpActivationChange = (enableWarp: boolean): void => {
+    this.updateLocalAndSharedState({ enableWarp });
+  };
+  onWarpFactorChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const warpFactor = parseFloat(e.target.value);
+    this.updateLocalAndSharedState({ warpFactor });
+  };
+
+  onSelectedWarpChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const selectedWarp = e.target.value;
+    const enableWarp = e.target.value !== ':';
+    const warpFactor = 0
+    this.updateLocalAndSharedState({ selectedWarp, enableWarp, warpFactor });
+  };
+
+  onWarpUseNormalChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const warpNormal = e.target.checked;
+    this.updateLocalAndSharedState({ warpNormal });
+  };
+
+  onWarpNormalAxisChange = (warpNormalAxis: number[]): void => {
+    this.updateLocalAndSharedState({ warpNormalAxis });
   };
 
   updateLocalAndSharedState = (
-    key: keyof IControlViewSharedState,
-    value: ValueOf<IControlViewSharedState>
+    payload: IControlViewSharedState
+    // key: keyof IControlViewSharedState,
+    // value: ValueOf<IControlViewSharedState>
   ): void => {
     this.setState(old => ({
       ...old,
       controlViewState: {
         ...old.controlViewState,
-        [key]: value
+        ...payload
       }
     }));
-    this.updateSharedState(key, value);
+    this.updateSharedState(payload);
   };
 
   render(): JSX.Element {
@@ -181,7 +203,7 @@ export default class MainView extends React.Component<IProps, IStates> {
             aria-controls="displayPanela-content"
             id="displayPanela-header"
             sx={panelTitleStyle}
-            onClick={() => this.togglePanel("displayPanel")}
+            onClick={() => this.togglePanel('displayPanel')}
           >
             <span>Display</span>
           </AccordionSummary>
@@ -200,11 +222,11 @@ export default class MainView extends React.Component<IProps, IStates> {
             aria-controls="colorPanela-content"
             id="colorPanela-header"
             sx={panelTitleStyle}
-            onClick={() => this.togglePanel("colorPanel")}
+            onClick={() => this.togglePanel('colorPanel')}
           >
             <span className="lm-Widget">Color</span>
           </AccordionSummary>
-          <AccordionDetails sx={panelBodyStyle} className={"lm-Widget"}>
+          <AccordionDetails sx={panelBodyStyle} className={'lm-Widget'}>
             <ColorPanel
               clientId=""
               controlViewState={this.state.controlViewState}
@@ -223,7 +245,7 @@ export default class MainView extends React.Component<IProps, IStates> {
             aria-controls="filterPanela-content"
             id="filterPanela-header"
             sx={panelTitleStyle}
-            onClick={() => this.togglePanel("filterPanel")}
+            onClick={() => this.togglePanel('filterPanel')}
           >
             <span>Warp by scalar</span>
           </AccordionSummary>
@@ -231,6 +253,12 @@ export default class MainView extends React.Component<IProps, IStates> {
             <WrapPanel
               clientId=""
               controlViewState={this.state.controlViewState}
+              onWarpActivationChange={this.onWarpActivationChange}
+              onWarpFactorChange={this.onWarpFactorChange}
+              mainViewState={this.state.mainViewState}
+              onSelectedWarpChange={this.onSelectedWarpChange}
+              onWarpUseNormalChange={this.onWarpUseNormalChange}
+              onWarpNormalAxisChange={this.onWarpNormalAxisChange}
             />
           </AccordionDetails>
         </Accordion>
@@ -239,8 +267,5 @@ export default class MainView extends React.Component<IProps, IStates> {
   }
 
   _defaultColorMap: string;
-  updateSharedState: (
-    key: keyof IControlViewSharedState,
-    value: ValueOf<IControlViewSharedState>
-  ) => void;
+  updateSharedState: (payload: IControlViewSharedState) => void;
 }

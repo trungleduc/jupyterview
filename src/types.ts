@@ -74,4 +74,9 @@ export interface IControlViewSharedState {
   modifiedDataRange?: number[];
   displayMode?: string;
   opacity?: number;
+  enableWarp?: boolean;
+  warpFactor?: number;
+  warpNormal?: boolean;
+  warpNormalAxis?: number[];
+  selectedWarp?: string;
 }

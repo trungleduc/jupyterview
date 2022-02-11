@@ -199,10 +199,13 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
   }
 
   public setControlViewState(
-    key: keyof IControlViewSharedState,
-    value: any
+    payload: IControlViewSharedState,
   ): void {
-    this._controlViewState.set(key, value);
+    this.transact(() => {
+      for (const key in payload) {
+        this._controlViewState.set(key, payload[key]);
+      }
+    })
   }
 
   private _mainViewStateObserver = (event: Y.YMapEvent<any>): void => {

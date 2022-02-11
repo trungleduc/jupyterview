@@ -36,6 +36,7 @@ import {
   ScalarMode
 } from '@kitware/vtk.js/Rendering/Core/Mapper/Constants';
 import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
+import vtkWarpScalar from '@kitware/vtk.js/Filters/General/WarpScalar';
 
 type THEME_TYPE = 'JupyterLab Dark' | 'JupyterLab Light';
 const DARK_THEME: THEME_TYPE = 'JupyterLab Dark';
@@ -180,6 +181,7 @@ export class MainView extends React.Component<IProps, IStates> {
   }
 
   controlStateChanged = (_, changed: IControlViewSharedState): void => {
+    let needRerender = false;
     if (changed.selectedColor) {
       this.updateColorBy(changed.selectedColor!);
     }
@@ -200,12 +202,35 @@ export class MainView extends React.Component<IProps, IStates> {
         .map(Number);
       this._actor.getProperty().set({ representation, edgeVisibility });
       this._actor.setVisibility(!!visibility);
-      this._renderWindow.render();
+      needRerender = true
+      // this._renderWindow.render();
     }
 
     if (changed.opacity) {
       this._actor.getProperty().setOpacity(changed.opacity);
-      this._renderWindow.render();
+      needRerender = true
+      // this._renderWindow.render();
+    }
+
+    if (changed.warpFactor || changed.warpFactor === 0) {
+      const value = Number(changed.warpFactor);
+      this._warpScalar.setScaleFactor(value);
+      this._mapper.setInputData(this._warpScalar.getOutputData());
+      needRerender = true
+      // setTimeout(() => this._renderWindow.render(), 250);
+    }
+
+    if (changed.selectedWarp) {
+      const [location, colorByArrayName, indexValue] =
+        changed.selectedWarp.split(':');
+      this._warpScalar.setInputArrayToProcess(0, colorByArrayName, location);
+      this._mapper.setInputData(this._warpScalar.getOutputData());
+      needRerender = true
+      // setTimeout(() => this._renderWindow.render(), 250);
+    }
+
+    if (needRerender) {
+      setTimeout(() => this._renderWindow.render(), 250);
     }
   };
 
@@ -326,7 +351,7 @@ export class MainView extends React.Component<IProps, IStates> {
     polyResult.webWorker.terminate();
     this._lookupTable = vtkColorTransferFunction.newInstance();
     this._mapper = vtkMapper.newInstance({
-      interpolateScalarsBeforeMapping: false,
+      interpolateScalarsBeforeMapping: true,
       useLookupTableScalarRange: true,
       scalarVisibility: false
     });
@@ -339,6 +364,20 @@ export class MainView extends React.Component<IProps, IStates> {
     });
 
     this._source = vtk(polyResult.polyData);
+
+    this._warpScalar = vtkWarpScalar.newInstance({
+      scaleFactor: 0,
+      useNormal: true
+    });
+
+    this._warpScalar.setNormal([1, 0, 0]);
+    this._warpScalar.addInputData(this._source);
+    console.log(
+      'this._warpScalar',
+      this._warpScalar,
+      this._warpScalar.getNormal(),
+      this._warpScalar.getXyPlane()
+    );
     const scalars = this._source.getPointData().getScalars();
     this._dataRange = scalars
       ? [scalars.getRange().min, scalars.getRange().max]
@@ -364,7 +403,8 @@ export class MainView extends React.Component<IProps, IStates> {
     this._scalarBarActor.setScalarsToColors(this._mapper.getLookupTable());
     this._scalarBarActor.setVisibility(false);
     this._scalarBarActor.setDrawNanAnnotation(false);
-    this._mapper.setInputData(this._source);
+    this._mapper.setInputData(this._warpScalar.getOutputData());
+    // this._mapper.setInputData(this._source);
     this._renderer.addActor(this._scalarBarActor);
     this._renderer.addActor(this._actor);
     this._renderer.resetCamera();
@@ -509,6 +549,7 @@ export class MainView extends React.Component<IProps, IStates> {
   private _actor: vtkActor;
   private _scalarBarActor: vtkScalarBarActor;
   private _inAnimation = false;
+  private _warpScalar: vtkWarpScalar;
   // private _SUPPORTED_FILE: any = null;
   // private _allSource: {};
   // private _fileData: any = null;

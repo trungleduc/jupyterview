@@ -32,7 +32,7 @@ export default class DisplayPanel extends React.Component<IProps, IStates> {
 
   render(): React.ReactNode {
     return (
-      <div>
+      <div  className='jpview-control-panel-component'>
         {selectorFactory({
           defaultValue: this.props.controlViewState.displayMode,
           options: DISPLAY_MODE,
