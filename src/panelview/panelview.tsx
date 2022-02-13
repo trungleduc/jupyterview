@@ -40,28 +40,29 @@ const panelBodyStyle = {
   padding: '8px'
 };
 
+const STOCK_STATE = {
+  datasetPanel: true,
+  colorPanel: true,
+  displayPanel: true,
+  filterPanel: true,
+  mainViewState: {},
+  controlViewState: {
+    selectedColor: ':',
+    colorSchema: 'erdc_rainbow_bright',
+    displayMode: DISPLAY_MODE[0].value,
+    opacity: 1
+  }
+};
+
 export default class MainView extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
-    this._defaultColorMap = 'erdc_rainbow_bright';
     this.updateSharedState = debounce((payload: IControlViewSharedState) => {
       if (this.props.sharedModel) {
         this.props.sharedModel.setControlViewState(payload);
       }
     }, 100) as any;
-    this.state = {
-      datasetPanel: true,
-      colorPanel: true,
-      displayPanel: true,
-      filterPanel: true,
-      mainViewState: {},
-      controlViewState: {
-        selectedColor: ':',
-        colorSchema: this._defaultColorMap,
-        displayMode: DISPLAY_MODE[0].value,
-        opacity: 1
-      }
-    };
+    this.state = STOCK_STATE;
     this.onSharedModelPropChange(this.props.sharedModel);
   }
 
@@ -95,6 +96,8 @@ export default class MainView extends React.Component<IProps, IStates> {
           controlViewState
         };
       });
+    } else {
+      this.setState(old => STOCK_STATE);
     }
   }
 
@@ -108,7 +111,7 @@ export default class MainView extends React.Component<IProps, IStates> {
         newState.controlViewState.modifiedDataRange = [...changed.dataRange];
       }
       if (changed.fileList) {
-        newState.controlViewState.selectedDataset = changed.fileList[0]
+        newState.controlViewState.selectedDataset = changed.fileList[0];
       }
       return newState;
     });
@@ -300,6 +303,5 @@ export default class MainView extends React.Component<IProps, IStates> {
     );
   }
 
-  _defaultColorMap: string;
   updateSharedState: (payload: IControlViewSharedState) => void;
 }

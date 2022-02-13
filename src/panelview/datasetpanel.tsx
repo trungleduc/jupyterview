@@ -60,6 +60,7 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
     const fileList = (this.props.mainViewState.fileList ?? ['None']).map(
       item => ({ label: item.split('::')[0], value: item })
     );
+
     return (
       <div className="jpview-control-panel-component">
         {selectorFactory({

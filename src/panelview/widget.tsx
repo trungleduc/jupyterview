@@ -11,6 +11,11 @@ export class PanelWidget extends ReactWidget {
     this._tracker = tracker;
     this._filePath = tracker.currentWidget?.context.localPath;
     this._sharedModel = tracker.currentWidget?.context.model.sharedModel;
+    console.log(
+      this._sharedModel?.getControlViewState(),
+      this._sharedModel?.getMainViewState()
+    );
+
     tracker.currentChanged.connect((_, changed) => {
       if (changed) {
         this._filePath = changed.context.localPath;
@@ -18,6 +23,12 @@ export class PanelWidget extends ReactWidget {
       } else {
         this._filePath = undefined;
         this._sharedModel = undefined;
+      }
+      if (tracker.size === 0) {
+        console.log(
+          this._sharedModel?.getControlViewState(),
+          this._sharedModel?.getMainViewState()
+        );
       }
       this.update();
     });

@@ -65,6 +65,7 @@ interface IStates {
   loading: boolean;
   theme: THEME_TYPE;
   colorOption: { label: string; value: string }[];
+  counter: number;
 }
 
 export class MainView extends React.Component<IProps, IStates> {
@@ -74,7 +75,8 @@ export class MainView extends React.Component<IProps, IStates> {
       id: uuid(),
       theme: LIGHT_THEME,
       loading: true,
-      colorOption: []
+      colorOption: [],
+      counter: 0
     };
     this._context = props.context;
     this._sharedModel = props.context.model.sharedModel;
@@ -171,8 +173,9 @@ export class MainView extends React.Component<IProps, IStates> {
           fileName,
           fileContent
         );
+        let counter = 0;
         const entries = Object.entries(contentPromises);
-        this._counter = entries.length;
+        const totalItems = entries.length;
         const firstName = entries[0][0];
         const fileList = Object.keys(contentPromises);
         for (const [path, promise] of entries) {
@@ -180,12 +183,14 @@ export class MainView extends React.Component<IProps, IStates> {
           promise.then(vtkStringContent => {
             this.stringToPolyData(vtkStringContent, name)
               .then(polyResult => {
-                --this._counter;
+                counter = counter + 100 / totalItems;
                 this._fileData[path] = polyResult;
-                if (this._counter === 0) {
+                if (counter === 100) {
                   this.createPipeline(this._fileData[firstName]);
-                  this.setState(old => ({ ...old, loading: false }));
+                  this.setState(old => ({ ...old, loading: false, counter }));
                   this._sharedModel.setMainViewState({ fileList });
+                } else {
+                  this.setState(old => ({ ...old, counter }));
                 }
               })
               .catch(e => {
@@ -579,8 +584,15 @@ export class MainView extends React.Component<IProps, IStates> {
           className={'jpview-Spinner'}
           style={{ display: this.state.loading ? 'flex' : 'none' }}
         >
-          {' '}
-          <div className={'jpview-SpinnerContent'}></div>{' '}
+          <div className={'jpview-SpinnerContent'}></div>
+          <p
+            style={{
+              position: 'relative',
+              right: '50%',
+              fontSize: 'var(--jp-ui-font-size2)',
+              color: '#27b9f3'
+            }}
+          >{`${this.state.counter}%`}</p>
         </div>
         <div
           ref={this.container}
@@ -620,7 +632,6 @@ export class MainView extends React.Component<IProps, IStates> {
   private _inAnimation = false;
   private _warpScalar: vtkWarpScalar;
   private _fileData: { [key: string]: any };
-  private _counter: number;
   // private _SUPPORTED_FILE: any = null;
   // private _allSource: {};
   // private _fileData: any = null;
