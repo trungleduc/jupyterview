@@ -68,9 +68,9 @@
 .jpview-control-panel-component {
   font-size: var(--jp-ui-font-size1);
 }
-/* .jpview-control-panel .Mui-expanded .MuiAccordionSummary-contentGutters {
-  margin: 10px 0 !important;
-} */
+.jpview-control-panel .MuiAccordion-root.Mui-expanded   {
+  margin: 0px 0px !important;
+}
 .jpview-control-panel .MuiAccordionSummary-contentGutters {
   margin: 10px 0 !important;
 }

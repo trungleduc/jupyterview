@@ -32,12 +32,25 @@ export default class WrapPanel extends React.Component<IProps, IStates> {
     super(props);
     this.state = {
       clientId: this.props.clientId,
-      normalX: 1,
+      normalX: 0,
       normalY: 0,
-      normalZ: 0
+      normalZ: 1
     };
   }
 
+  onUserNormalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    console.log('checked', checked);
+    this.props.onWarpUseNormalChange(e);
+    if (!checked) {
+      this.setState(old => ({
+        ...old,
+        normalX: 0,
+        normalY: 0,
+        normalZ: 1
+      }));
+    }
+  };
   onNormalChange = (ax: 'X' | 'Y' | 'Z', value: number): void => {
     this.setState(
       old => ({ ...old, [`normal${ax}`]: value }),
@@ -89,14 +102,14 @@ export default class WrapPanel extends React.Component<IProps, IStates> {
               style={{ width: 'auto' }}
               disabled={!this.props.controlViewState.enableWarp}
               checked={!!this.props.controlViewState.warpNormal}
-              onChange={this.props.onWarpUseNormalChange}
+              onChange={this.onUserNormalChange}
             />
           </div>
           <div style={INPUT_STYLE}>
             {['X', 'Y', 'Z'].map(ax => {
               return (
                 <input
-                  type={"number"}
+                  type={'number'}
                   style={{ width: '25%' }}
                   className="jpview-input"
                   key={ax}

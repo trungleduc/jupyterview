@@ -1,17 +1,20 @@
 import * as React from 'react';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+
 import { JupyterViewDoc } from '../mainview/model';
+import { debounce } from '../tools';
 import {
   IControlViewSharedState,
   IMainViewSharedState,
   ValueOf
 } from '../types';
-import { debounce } from '../tools';
-import DisplayPanel, { DISPLAY_MODE } from './displaypanel';
 import ColorPanel from './colorpanel';
+import DatasetPanel from './datasetpanel';
+import DisplayPanel, { DISPLAY_MODE } from './displaypanel';
 import WrapPanel from './wrappanel';
 
 interface IProps {
@@ -20,6 +23,7 @@ interface IProps {
 }
 
 interface IStates {
+  datasetPanel: boolean;
   colorPanel: boolean;
   displayPanel: boolean;
   filterPanel: boolean;
@@ -46,6 +50,7 @@ export default class MainView extends React.Component<IProps, IStates> {
       }
     }, 100) as any;
     this.state = {
+      datasetPanel: true,
       colorPanel: true,
       displayPanel: true,
       filterPanel: true,
@@ -107,7 +112,7 @@ export default class MainView extends React.Component<IProps, IStates> {
   };
 
   togglePanel = (
-    panel: 'colorPanel' | 'displayPanel' | 'filterPanel'
+    panel: 'datasetPanel' | 'colorPanel' | 'displayPanel' | 'filterPanel'
   ): void => {
     this.setState(old => ({ ...old, [panel]: !old[panel] }));
   };
@@ -163,24 +168,24 @@ export default class MainView extends React.Component<IProps, IStates> {
   onSelectedWarpChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const selectedWarp = e.target.value;
     const enableWarp = e.target.value !== ':';
-    const warpFactor = 0
+    const warpFactor = 0;
     this.updateLocalAndSharedState({ selectedWarp, enableWarp, warpFactor });
   };
 
   onWarpUseNormalChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const warpNormal = e.target.checked;
-    this.updateLocalAndSharedState({ warpNormal });
+    const payload = { warpNormal };
+    if (!warpNormal) {
+      payload['warpNormalAxis'] = [0, 0, 1];
+    }
+    this.updateLocalAndSharedState(payload);
   };
 
   onWarpNormalAxisChange = (warpNormalAxis: number[]): void => {
     this.updateLocalAndSharedState({ warpNormalAxis });
   };
 
-  updateLocalAndSharedState = (
-    payload: IControlViewSharedState
-    // key: keyof IControlViewSharedState,
-    // value: ValueOf<IControlViewSharedState>
-  ): void => {
+  updateLocalAndSharedState = (payload: IControlViewSharedState): void => {
     this.setState(old => ({
       ...old,
       controlViewState: {
@@ -197,6 +202,26 @@ export default class MainView extends React.Component<IProps, IStates> {
         <div className="lm-Widget p-Widget jpview-control-panel-title">
           <h2>{this.props.filePath}</h2>
         </div>
+        <Accordion
+          expanded={this.state.datasetPanel}
+          sx={{ margin: '0px 0px' }}
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="dataSetPanela-content"
+            id="displayPanela-header"
+            sx={panelTitleStyle}
+            onClick={() => this.togglePanel('datasetPanel')}
+          >
+            <span>Dataset</span>
+          </AccordionSummary>
+          <AccordionDetails sx={panelBodyStyle}>
+            <DatasetPanel
+              clientId=""
+              controlViewState={this.state.controlViewState}
+            />
+          </AccordionDetails>
+        </Accordion>
         <Accordion expanded={this.state.displayPanel}>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
