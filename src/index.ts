@@ -39,8 +39,8 @@ const activate = (
   const widgetFactory = new JupyterViewWidgetFactory({
     name: FACTORY,
     modelName: 'jupyterview-model',
-    fileTypes: ['vtp', 'vtu'],
-    defaultFor: ['vtp', 'vtu']
+    fileTypes: ['vtp', 'vtu', 'pvd'],
+    defaultFor: ['vtp', 'vtu', 'pvd']
   });
 
   // Add the widget to the tracker when it's created
@@ -74,6 +74,14 @@ const activate = (
     mimeTypes: ['binary'],
     extensions: ['.vtu', '.VTU'],
     fileFormat: 'base64',
+    contentType: 'file'
+  });
+  app.docRegistry.addFileType({
+    name: 'pvd',
+    displayName: 'PVD',
+    mimeTypes: ['text'],
+    extensions: ['.pvd', '.PVD'],
+    fileFormat: 'text',
     contentType: 'file'
   });
   console.log('JupyterLab extension jupyterview is activated!');

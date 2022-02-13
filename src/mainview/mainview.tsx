@@ -1,42 +1,47 @@
-import * as React from 'react';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { v4 as uuid } from 'uuid';
-import { JupyterViewDoc, JupyterViewModel } from './model';
-import { CameraToolbar } from './cameraToolbar';
-import {
-  IMainMessage,
-  IWorkerMessage,
-  WorkerAction,
-  MainAction,
-  IControlViewSharedState
-} from '../types';
-import { majorAxis, moveCamera, VIEW_ORIENTATIONS } from '../tools';
 // import vtk
 import '@kitware/vtk.js/Rendering/OpenGL/Profiles/All';
-import vtkRenderWindowWithControlBar from '@kitware/vtk.js/Rendering/Misc/RenderWindowWithControlBar';
-import vtkRenderer from '@kitware/vtk.js/Rendering/Core/Renderer';
-import vtkRenderWindow from '@kitware/vtk.js/Rendering/Core/RenderWindow';
-import vtkAxesActor from '@kitware/vtk.js/Rendering/Core/AxesActor';
-import vtkOrientationMarkerWidget from '@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget';
-import vtkWidgetManager from '@kitware/vtk.js/Widgets/Core/WidgetManager';
-import vtkInteractiveOrientationWidget from '@kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget';
-import * as vtkMath from '@kitware/vtk.js/Common/Core/Math';
-import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
-import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
-import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
-import vtk from '@kitware/vtk.js/vtk';
-import vtkDataArray from '@kitware/vtk.js/Common/Core/DataArray';
-import vtkScalarBarActor from '@kitware/vtk.js/Rendering/Core/ScalarBarActor';
+
 import { readPolyDataArrayBuffer, ReadPolyDataResult } from 'itk-wasm/dist';
-import vtkPolyData from '@kitware/vtk.js/Common/DataModel/PolyData';
+import * as React from 'react';
+import { v4 as uuid } from 'uuid';
+
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { ContentsManager } from '@jupyterlab/services';
+import vtkDataArray from '@kitware/vtk.js/Common/Core/DataArray';
+import * as vtkMath from '@kitware/vtk.js/Common/Core/Math';
 import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
-import { Vector3 } from '@kitware/vtk.js/types';
+import vtkPolyData from '@kitware/vtk.js/Common/DataModel/PolyData';
+import vtkWarpScalar from '@kitware/vtk.js/Filters/General/WarpScalar';
+import vtkOrientationMarkerWidget from '@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget';
+import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
+import vtkAxesActor from '@kitware/vtk.js/Rendering/Core/AxesActor';
+import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
+import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
+import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
 import {
   ColorMode,
   ScalarMode
 } from '@kitware/vtk.js/Rendering/Core/Mapper/Constants';
-import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
-import vtkWarpScalar from '@kitware/vtk.js/Filters/General/WarpScalar';
+import vtkRenderer from '@kitware/vtk.js/Rendering/Core/Renderer';
+import vtkRenderWindow from '@kitware/vtk.js/Rendering/Core/RenderWindow';
+import vtkScalarBarActor from '@kitware/vtk.js/Rendering/Core/ScalarBarActor';
+import vtkRenderWindowWithControlBar from '@kitware/vtk.js/Rendering/Misc/RenderWindowWithControlBar';
+import { Vector3 } from '@kitware/vtk.js/types';
+import vtk from '@kitware/vtk.js/vtk';
+import vtkWidgetManager from '@kitware/vtk.js/Widgets/Core/WidgetManager';
+import vtkInteractiveOrientationWidget from '@kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget';
+
+import {
+  b64_to_utf8,
+  convertPath,
+  debounce,
+  majorAxis,
+  moveCamera,
+  VIEW_ORIENTATIONS
+} from '../tools';
+import { IControlViewSharedState } from '../types';
+import { CameraToolbar } from './cameraToolbar';
+import { JupyterViewDoc, JupyterViewModel } from './model';
 
 type THEME_TYPE = 'JupyterLab Dark' | 'JupyterLab Light';
 const DARK_THEME: THEME_TYPE = 'JupyterLab Dark';
@@ -74,6 +79,7 @@ export class MainView extends React.Component<IProps, IStates> {
     this._context = props.context;
     this._sharedModel = props.context.model.sharedModel;
     this.container = React.createRef<HTMLDivElement>();
+    this._fileData = {};
   }
 
   componentDidMount(): void {
@@ -155,17 +161,71 @@ export class MainView extends React.Component<IProps, IStates> {
         this._sharedModel.controlViewStateChanged.connect(
           this.controlStateChanged
         );
-        const fileName = this._context.path.replace(/^.*(\\|\/|:)/, '');
+        const fullPath = convertPath(this._context.path);
+        const dirPath = fullPath.substring(0, fullPath.lastIndexOf('/') + 1);
+        const fileName = fullPath.replace(/^.*(\\|\/|:)/, '');
+
         const fileContent = this._model!.toString();
-        this.stringToPolyData(fileContent, fileName)
-          .then(polyResult => this.createPipeline(polyResult))
-          .catch(e => {
-            throw e;
+        const contentPromises = this.prepareFileContent(
+          dirPath,
+          fileName,
+          fileContent
+        );
+        const entries = Object.entries(contentPromises);
+        this._counter = entries.length;
+        const firstName = entries[0][0];
+        const fileList = Object.keys(contentPromises);
+        for (const [path, promise] of entries) {
+          const name = path.split('::')[0];
+          promise.then(vtkStringContent => {
+            this.stringToPolyData(vtkStringContent, name)
+              .then(polyResult => {
+                --this._counter;
+                this._fileData[path] = polyResult;
+                if (this._counter === 0) {
+                  this.createPipeline(this._fileData[firstName]);
+                  this.setState(old => ({ ...old, loading: false }));
+                  this._sharedModel.setMainViewState({ fileList });
+                }
+              })
+              .catch(e => {
+                throw e;
+              });
           });
+        }
       });
     }, 500);
   }
 
+  prepareFileContent(
+    filePath: string,
+    fileName: string,
+    fileContent
+  ): { [key: string]: Promise<string> } {
+    const pathList = fileName.split('.');
+    const ext = pathList[pathList.length - 1];
+    const promises: { [key: string]: Promise<string> } = {};
+    if (ext.toLowerCase() === 'pvd') {
+      const xmlStr = b64_to_utf8(fileContent);
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xmlStr, 'application/xml');
+      const contents = new ContentsManager();
+      doc.querySelectorAll('DataSet').forEach(item => {
+        const timeStep = item.getAttribute('timestep');
+        const vtuPath = item.getAttribute('file');
+        const content = contents
+          .get(`${filePath}/${vtuPath}`, {
+            format: 'base64',
+            content: true,
+            type: 'file'
+          })
+          .then(iModel => iModel.content);
+        promises[`${vtuPath}::${filePath}::${timeStep}`] = content;
+      });
+      return promises;
+    }
+    return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
+  }
   async stringToPolyData(
     fileContent: string,
     filePath: string
@@ -220,20 +280,32 @@ export class MainView extends React.Component<IProps, IStates> {
     if (changed.selectedWarp) {
       const [location, colorByArrayName, indexValue] =
         changed.selectedWarp.split(':');
-      this._warpScalar.setInputArrayToProcess(0, colorByArrayName, location);
+      if (location === '') {
+        this._warpScalar.setScaleFactor(0);
+      } else {
+        this._warpScalar.setInputArrayToProcess(0, colorByArrayName, location);
+      }
       this._mapper.setInputData(this._warpScalar.getOutputData());
       needRerender = true;
     }
 
     if (changed.warpNormalAxis) {
       this._warpScalar.setNormal(changed.warpNormalAxis);
-      this._warpScalar.update()
+      this._warpScalar.update();
+      this._mapper.setInputData(this._warpScalar.getOutputData());
+      needRerender = true;
+    }
+
+    if (changed.selectedDataset) {
+      const polyResult = this._fileData[changed.selectedDataset];
+      this._source = vtk(polyResult.polyData);
+      this._warpScalar.setInputData(this._source);
       this._mapper.setInputData(this._warpScalar.getOutputData());
       needRerender = true;
     }
 
     if (needRerender) {
-      setTimeout(() => this._renderWindow.render(), 250);
+      setTimeout(() => this._renderWindow.render(), 50);
     }
   };
 
@@ -257,7 +329,7 @@ export class MainView extends React.Component<IProps, IStates> {
         this._dataRange[1] = this._dataRange[0] + 0.0000000001;
       }
       this._sharedModel.transact(() => {
-        this._sharedModel.setMainViewState('dataRange', [...this._dataRange]);
+        this._sharedModel.setMainViewState({ dataRange: [...this._dataRange] });
       });
       colorMode = ColorMode.MAP_SCALARS;
       scalarMode =
@@ -373,23 +445,17 @@ export class MainView extends React.Component<IProps, IStates> {
       useNormal: true
     });
 
-    this._warpScalar.setNormal([1, 0, 0]);
-    this._warpScalar.addInputData(this._source);
-    console.log(
-      'this._warpScalar',
-      this._warpScalar,
-      this._warpScalar.getNormal(),
-      this._warpScalar.getXyPlane()
-    );
+    this._warpScalar.setNormal([0, 0, 1]);
+    this._warpScalar.setInputData(this._source);
     const scalars = this._source.getPointData().getScalars();
     this._dataRange = scalars
       ? [scalars.getRange().min, scalars.getRange().max]
       : [0, 1];
     if (!this._sharedModel.getContent('mainViewState')) {
       const colorByOptions = this.createComponentSelector();
-      this._sharedModel.transact(() => {
-        this._sharedModel.setMainViewState('colorByOptions', colorByOptions);
-        this._sharedModel.setMainViewState('dataRange', [...this._dataRange]);
+      this._sharedModel.setMainViewState({
+        colorByOptions,
+        dataRange: [...this._dataRange]
       });
     }
     this._scalarBarActor = vtkScalarBarActor.newInstance();
@@ -553,6 +619,8 @@ export class MainView extends React.Component<IProps, IStates> {
   private _scalarBarActor: vtkScalarBarActor;
   private _inAnimation = false;
   private _warpScalar: vtkWarpScalar;
+  private _fileData: { [key: string]: any };
+  private _counter: number;
   // private _SUPPORTED_FILE: any = null;
   // private _allSource: {};
   // private _fileData: any = null;

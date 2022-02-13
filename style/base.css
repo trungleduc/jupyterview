@@ -1,3 +1,53 @@
+.jpview-Spinner {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  background: #00000075;
+}
+
+.jpview-SpinnerContent {
+  border: solid #27b9f39e;
+  margin: 50px auto;
+  text-indent: -9999em;
+  width: 6em;
+  height: 6em;
+  border-radius: 50%;
+  position: relative;
+  animation: load3 1s infinite linear, fadeIn 1s;
+}
+
+.jpview-SpinnerContent:before {
+  width: 50%;
+  height: 50%;
+  background: #f3762605;
+  border-radius: 100% 0 100% 0;
+  box-shadow: inset 6px 5px 0 1px #27b9f3;
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: '';
+}
+
+.jpview-SpinnerContent:after {
+  width: 75%;
+  height: 75%;
+  border-radius: 50%;
+  content: '';
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
 .jpview-view-toolbar {
   position: absolute;
   z-index: 1;
@@ -7,6 +57,15 @@
   border-radius: 16px;
   display: flex;
   flex-direction: column;
+}
+.jpview-button {
+  border: none;
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-content-font-color1);
+  min-width: 60px
+}
+.jpview-button:hover {
+  background-color: var(--jp-layout-color3);
 }
 .jpview-toolbar-button {
   background: none;
@@ -68,7 +127,7 @@
 .jpview-control-panel-component {
   font-size: var(--jp-ui-font-size1);
 }
-.jpview-control-panel .MuiAccordion-root.Mui-expanded   {
+.jpview-control-panel .MuiAccordion-root.Mui-expanded {
   margin: 0px 0px !important;
 }
 .jpview-control-panel .MuiAccordionSummary-contentGutters {
@@ -84,7 +143,7 @@
 .jpview-control-panel
   .MuiAccordionSummary-content.MuiAccordionSummary-contentGutters
   > span {
-  text-transform:uppercase;
+  text-transform: uppercase;
 }
 
 .jpview-input-wrapper {

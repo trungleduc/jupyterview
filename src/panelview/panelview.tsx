@@ -107,6 +107,9 @@ export default class MainView extends React.Component<IProps, IStates> {
       if (changed.dataRange) {
         newState.controlViewState.modifiedDataRange = [...changed.dataRange];
       }
+      if (changed.fileList) {
+        newState.controlViewState.selectedDataset = changed.fileList[0]
+      }
       return newState;
     });
   };
@@ -185,6 +188,10 @@ export default class MainView extends React.Component<IProps, IStates> {
     this.updateLocalAndSharedState({ warpNormalAxis });
   };
 
+  onSelectDatasetChange = (selectedDataset: string): void => {
+    this.updateLocalAndSharedState({ selectedDataset });
+  };
+
   updateLocalAndSharedState = (payload: IControlViewSharedState): void => {
     this.setState(old => ({
       ...old,
@@ -219,6 +226,8 @@ export default class MainView extends React.Component<IProps, IStates> {
             <DatasetPanel
               clientId=""
               controlViewState={this.state.controlViewState}
+              mainViewState={this.state.mainViewState}
+              onSelectDatasetChange={this.onSelectDatasetChange}
             />
           </AccordionDetails>
         </Accordion>

@@ -1,10 +1,13 @@
+import * as React from 'react';
+
 import { LabIcon } from '@jupyterlab/ui-components';
 import vtkCamera from '@kitware/vtk.js/Rendering/Core/Camera';
 import vtkRenderer from '@kitware/vtk.js/Rendering/Core/Renderer';
 import vtkRenderWindowInteractor from '@kitware/vtk.js/Rendering/Core/RenderWindowInteractor';
 import { Vector3 } from '@kitware/vtk.js/types';
+
 import jvControlLight from '../style/icons/jvc-light.svg';
-import * as React from 'react';
+
 export const jvcLightIcon = new LabIcon({
   name: 'jupyterview:control-light',
   svgstr: jvControlLight
@@ -252,3 +255,13 @@ export const debounce = (
     }, timeout);
   };
 };
+
+export function convertPath(windowsPath: string): string {
+  return windowsPath
+    .replace(/^\\\\\?\\/, '')
+    .replace(/\\/g, '/')
+    .replace(/\/\/+/g, '/');
+}
+export function b64_to_utf8(str) {
+  return decodeURIComponent(atob(str));
+}

@@ -67,6 +67,7 @@ export type Position = {
 export interface IMainViewSharedState {
   colorByOptions?: { value: string; label: string }[];
   dataRange?: number[];
+  fileList?: string[];
 }
 export interface IControlViewSharedState {
   selectedColor?: string;
@@ -79,4 +80,5 @@ export interface IControlViewSharedState {
   warpNormal?: boolean;
   warpNormalAxis?: number[];
   selectedWarp?: string;
+  selectedDataset?: string;
 }

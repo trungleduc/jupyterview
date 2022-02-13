@@ -183,8 +183,13 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
     return this._mainViewState.get(key);
   }
 
-  public setMainViewState(key: keyof IMainViewSharedState, value: any): void {
-    this._mainViewState.set(key, value);
+  public setMainViewState(payload: IMainViewSharedState): void {
+    this.transact(() => {
+      for (const key in payload) {
+        this._mainViewState.set(key, payload[key]);
+      }
+    })
+
   }
 
   public getControlViewState(): IControlViewSharedState {
