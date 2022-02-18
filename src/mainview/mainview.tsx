@@ -39,7 +39,7 @@ import {
   moveCamera,
   VIEW_ORIENTATIONS
 } from '../tools';
-import { IControlViewSharedState } from '../types';
+import { IControlViewSharedState, IDict, Position } from '../types';
 import { CameraToolbar } from './cameraToolbar';
 import { JupyterViewDoc, JupyterViewModel } from './model';
 
@@ -82,11 +82,13 @@ export class MainView extends React.Component<IProps, IStates> {
     this._sharedModel = props.context.model.sharedModel;
     this.container = React.createRef<HTMLDivElement>();
     this._fileData = {};
+    this._cameraClients = {};
   }
 
   componentDidMount(): void {
     setTimeout(() => {
       const rootContainer = this.container.current!;
+
       this._fullScreenRenderer = vtkRenderWindowWithControlBar.newInstance({
         controlSize: 0
       });
@@ -105,6 +107,7 @@ export class MainView extends React.Component<IProps, IStates> {
       orientationWidget.setMaxPixelSize(300);
 
       const camera = this._renderer.getActiveCamera();
+
       const widgetManager = vtkWidgetManager.newInstance();
       widgetManager.setRenderer(orientationWidget.getRenderer());
 
@@ -163,6 +166,7 @@ export class MainView extends React.Component<IProps, IStates> {
         this._sharedModel.controlViewStateChanged.connect(
           this.controlStateChanged
         );
+        this._model.cameraChanged.connect(this._onCameraChanged);
         const fullPath = convertPath(this._context.path);
         const dirPath = fullPath.substring(0, fullPath.lastIndexOf('/') + 1);
         const fileName = fullPath.replace(/^.*(\\|\/|:)/, '');
@@ -198,9 +202,71 @@ export class MainView extends React.Component<IProps, IStates> {
               });
           });
         }
+
+        rootContainer.addEventListener('mousedown', event => {
+          this._mouseDown = true;
+        });
+        rootContainer.addEventListener('mouseup', event => {
+          this._mouseDown = false;
+        });
+
+        rootContainer.addEventListener('mouseleave', event => {
+          this._model!.syncCamera(undefined);
+        });
+        const camera = this._renderer.getActiveCamera();
+        ['wheel', 'mousemove'].forEach(evtName => {
+          rootContainer.addEventListener(
+            evtName as any,
+            (event: MouseEvent | WheelEvent) => {
+              const position = camera.getPosition();
+              this._model!.syncCamera({
+                offsetX: event.offsetX,
+                offsetY: event.offsetY,
+                x: position[0],
+                y: position[1],
+                z: position[2]
+              });
+            }
+          );
+        });
       });
     }, 500);
   }
+
+  private _onCameraChanged = (
+    sender: JupyterViewModel,
+    clients: Map<number, any>
+  ): void => {
+    clients.forEach((client, key) => {
+      if (this._context.model.getClientId() !== key) {
+        const id = key.toString();
+        const mouse = client.mouse as Position;
+        if (mouse && this._cameraClients[id]) {
+          if (mouse.offsetX > 0) {
+            this._cameraClients[id]!.style.left = mouse.offsetX + 'px';
+          }
+          if (mouse.offsetY > 0) {
+            this._cameraClients[id]!.style.top = mouse.offsetY + 'px';
+          }
+          // if (!this._mouseDown) {
+          //   this._camera.position.set(mouse.x, mouse.y, mouse.z);
+          // }
+        } else if (mouse && !this._cameraClients[id]) {
+          const el = document.createElement('div');
+          el.className = 'jpcad-camera-client';
+          el.style.left = mouse.offsetX + 'px';
+          el.style.top = mouse.offsetY + 'px';
+          el.style.backgroundColor = client.user.color;
+          el.innerText = client.user.name;
+          this._cameraClients[id] = el;
+          this._cameraRef.current?.appendChild(el);
+        } else if (!mouse && this._cameraClients[id]) {
+          this._cameraRef.current?.removeChild(this._cameraClients[id]!);
+          this._cameraClients[id] = undefined;
+        }
+      }
+    });
+  };
 
   prepareFileContent(
     filePath: string,
@@ -594,6 +660,7 @@ export class MainView extends React.Component<IProps, IStates> {
             }}
           >{`${this.state.counter}%`}</p>
         </div>
+        <div ref={this._cameraRef}></div>
         <div
           ref={this.container}
           style={{
@@ -632,6 +699,9 @@ export class MainView extends React.Component<IProps, IStates> {
   private _inAnimation = false;
   private _warpScalar: vtkWarpScalar;
   private _fileData: { [key: string]: any };
+  private _mouseDown = false;
+  private _cameraClients: IDict<HTMLElement | undefined>;
+  private _cameraRef = React.createRef<HTMLDivElement>();
   // private _SUPPORTED_FILE: any = null;
   // private _allSource: {};
   // private _fileData: any = null;

@@ -38,9 +38,29 @@ export default class WrapPanel extends React.Component<IProps, IStates> {
     };
   }
 
+  componentDidUpdate(prevProps: IProps, prevState: IStates): void {
+    if (this.props !== prevProps) {
+      let needUpdate = false;
+      const warpNormalAxis = this.props.controlViewState.warpNormalAxis;
+      if (warpNormalAxis) {
+        needUpdate =
+          warpNormalAxis[0] !== this.state.normalX ||
+          warpNormalAxis[1] !== this.state.normalY ||
+          warpNormalAxis[2] !== this.state.normalZ;
+          if (needUpdate) {
+            this.setState(old => ({
+              ...old,
+              normalX: warpNormalAxis[0],
+              normalY: warpNormalAxis[1],
+              normalZ: warpNormalAxis[2]
+            }));
+          }
+      }
+    }
+  }
+
   onUserNormalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
-    console.log('checked', checked);
     this.props.onWarpUseNormalChange(e);
     if (!checked) {
       this.setState(old => ({
