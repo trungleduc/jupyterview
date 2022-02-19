@@ -23,7 +23,6 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     this.modelDB = modelDB || new ModelDB();
     this.sharedModel.awareness.on('change', this._onCameraChanged);
-    console.log('clientID', this.sharedModel.awareness.clientID);
   }
 
   get isDisposed(): boolean {
@@ -68,8 +67,12 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   }
 
   toString(): string {
-    const content = this.sharedModel.getContent('content') || '';
-    return content;
+    const content = this.sharedModel.getContent('content');
+    if (content) {
+      return content;
+    } else {
+      return this.modelDB.getValue('content') as string
+    }
   }
 
   fromString(data: string): void {

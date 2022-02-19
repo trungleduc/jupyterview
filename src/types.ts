@@ -62,12 +62,18 @@ export type Position = {
   x: number;
   y: number;
   z: number;
+  clientID?: number;
 };
 
 export interface IMainViewSharedState {
   colorByOptions?: { value: string; label: string }[];
   dataRange?: number[];
   fileList?: string[];
+  camera?: {
+    focalPoint: number[];
+    position: number[];
+    viewUp: number[];
+  };
 }
 export interface IControlViewSharedState {
   selectedColor?: string;

@@ -15,6 +15,7 @@ import vtkWarpScalar from '@kitware/vtk.js/Filters/General/WarpScalar';
 import vtkOrientationMarkerWidget from '@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget';
 import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
 import vtkAxesActor from '@kitware/vtk.js/Rendering/Core/AxesActor';
+import { vtkCamera } from '@kitware/vtk.js/Rendering/Core/Camera';
 import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
 import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
 import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
@@ -39,7 +40,12 @@ import {
   moveCamera,
   VIEW_ORIENTATIONS
 } from '../tools';
-import { IControlViewSharedState, IDict, Position } from '../types';
+import {
+  IControlViewSharedState,
+  IDict,
+  IMainViewSharedState,
+  Position
+} from '../types';
 import { CameraToolbar } from './cameraToolbar';
 import { JupyterViewDoc, JupyterViewModel } from './model';
 
@@ -82,7 +88,6 @@ export class MainView extends React.Component<IProps, IStates> {
     this._sharedModel = props.context.model.sharedModel;
     this.container = React.createRef<HTMLDivElement>();
     this._fileData = {};
-    this._cameraClients = {};
   }
 
   componentDidMount(): void {
@@ -106,7 +111,7 @@ export class MainView extends React.Component<IProps, IStates> {
       orientationWidget.setMinPixelSize(100);
       orientationWidget.setMaxPixelSize(300);
 
-      const camera = this._renderer.getActiveCamera();
+      const camera = (this._camera = this._renderer.getActiveCamera());
 
       const widgetManager = vtkWidgetManager.newInstance();
       widgetManager.setRenderer(orientationWidget.getRenderer());
@@ -166,7 +171,10 @@ export class MainView extends React.Component<IProps, IStates> {
         this._sharedModel.controlViewStateChanged.connect(
           this.controlStateChanged
         );
-        this._model.cameraChanged.connect(this._onCameraChanged);
+        this._sharedModel.mainViewStateChanged.connect(
+          this.mainViewStateChanged
+        );
+
         const fullPath = convertPath(this._context.path);
         const dirPath = fullPath.substring(0, fullPath.lastIndexOf('/') + 1);
         const fileName = fullPath.replace(/^.*(\\|\/|:)/, '');
@@ -203,69 +211,39 @@ export class MainView extends React.Component<IProps, IStates> {
           });
         }
 
-        rootContainer.addEventListener('mousedown', event => {
+        const renderContainer =
+          this._fullScreenRenderer.getRenderWindowContainer();
+        renderContainer.addEventListener('mousedown', event => {
           this._mouseDown = true;
         });
-        rootContainer.addEventListener('mouseup', event => {
+        renderContainer.addEventListener('mouseup', event => {
           this._mouseDown = false;
         });
 
-        rootContainer.addEventListener('mouseleave', event => {
-          this._model!.syncCamera(undefined);
+        renderContainer.addEventListener('mousemove', (event: MouseEvent) => {
+          if (this._mouseDown) {
+            this._syncCamera();
+          }
         });
-        const camera = this._renderer.getActiveCamera();
-        ['wheel', 'mousemove'].forEach(evtName => {
-          rootContainer.addEventListener(
-            evtName as any,
-            (event: MouseEvent | WheelEvent) => {
-              const position = camera.getPosition();
-              this._model!.syncCamera({
-                offsetX: event.offsetX,
-                offsetY: event.offsetY,
-                x: position[0],
-                y: position[1],
-                z: position[2]
-              });
-            }
-          );
+        renderContainer.addEventListener('wheel', (event: WheelEvent) => {
+          this._syncCamera();
         });
       });
     }, 500);
   }
 
-  private _onCameraChanged = (
-    sender: JupyterViewModel,
-    clients: Map<number, any>
+  private mainViewStateChanged = (
+    _: any,
+    changed: IMainViewSharedState
   ): void => {
-    clients.forEach((client, key) => {
-      if (this._context.model.getClientId() !== key) {
-        const id = key.toString();
-        const mouse = client.mouse as Position;
-        if (mouse && this._cameraClients[id]) {
-          if (mouse.offsetX > 0) {
-            this._cameraClients[id]!.style.left = mouse.offsetX + 'px';
-          }
-          if (mouse.offsetY > 0) {
-            this._cameraClients[id]!.style.top = mouse.offsetY + 'px';
-          }
-          // if (!this._mouseDown) {
-          //   this._camera.position.set(mouse.x, mouse.y, mouse.z);
-          // }
-        } else if (mouse && !this._cameraClients[id]) {
-          const el = document.createElement('div');
-          el.className = 'jpcad-camera-client';
-          el.style.left = mouse.offsetX + 'px';
-          el.style.top = mouse.offsetY + 'px';
-          el.style.backgroundColor = client.user.color;
-          el.innerText = client.user.name;
-          this._cameraClients[id] = el;
-          this._cameraRef.current?.appendChild(el);
-        } else if (!mouse && this._cameraClients[id]) {
-          this._cameraRef.current?.removeChild(this._cameraClients[id]!);
-          this._cameraClients[id] = undefined;
-        }
+    if (changed.camera) {
+      if (!this._mouseDown) {
+        const camera = changed.camera;
+        this._camera.set(camera);
+        this._renderer.resetCameraClippingRange();
+        this._renderWindow.render();
       }
-    });
+    }
   };
 
   prepareFileContent(
@@ -311,7 +289,7 @@ export class MainView extends React.Component<IProps, IStates> {
       });
   }
 
-  controlStateChanged = (_, changed: IControlViewSharedState): void => {
+  private controlStateChanged = (_, changed: IControlViewSharedState): void => {
     let needRerender = false;
     if (changed.selectedColor) {
       this.updateColorBy(changed.selectedColor!);
@@ -548,7 +526,16 @@ export class MainView extends React.Component<IProps, IStates> {
     this._renderer.addActor(this._scalarBarActor);
     this._renderer.addActor(this._actor);
     this._renderer.resetCamera();
-    this._renderWindow.render();
+    console.log(
+      'this._sharedModel.getControlViewState()',
+      this._sharedModel.getControlViewState()
+    );
+    const currentState = this._sharedModel.getControlViewState();
+    if (Object.keys(currentState).length > 0) {
+      this.controlStateChanged(null, currentState);
+    } else {
+      this._renderWindow.render();
+    }
   };
 
   rotate = (angle: number): void => {
@@ -585,6 +572,7 @@ export class MainView extends React.Component<IProps, IStates> {
         } else {
           clearInterval(intervalId);
           interactor.cancelAnimation(this._renderWindow);
+          this._syncCamera();
         }
       };
       intervalId = setInterval(rotate, 8);
@@ -628,6 +616,7 @@ export class MainView extends React.Component<IProps, IStates> {
         animateSteps
       ).then(() => {
         this._inAnimation = false;
+        this._syncCamera();
       });
     }
   };
@@ -636,6 +625,7 @@ export class MainView extends React.Component<IProps, IStates> {
     this._renderer.resetCamera();
     this._renderer.resetCameraClippingRange();
     setTimeout(this._renderWindow.render, 0);
+    this._syncCamera();
   };
 
   render(): JSX.Element {
@@ -660,7 +650,6 @@ export class MainView extends React.Component<IProps, IStates> {
             }}
           >{`${this.state.counter}%`}</p>
         </div>
-        <div ref={this._cameraRef}></div>
         <div
           ref={this.container}
           style={{
@@ -700,8 +689,15 @@ export class MainView extends React.Component<IProps, IStates> {
   private _warpScalar: vtkWarpScalar;
   private _fileData: { [key: string]: any };
   private _mouseDown = false;
-  private _cameraClients: IDict<HTMLElement | undefined>;
-  private _cameraRef = React.createRef<HTMLDivElement>();
+  private _camera: vtkCamera;
+  private _syncCamera = debounce(() => {
+    const position = this._camera.getPosition();
+    const focalPoint = this._camera.getFocalPoint();
+    const viewUp = this._camera.getViewUp();
+    this._sharedModel.setMainViewState({
+      camera: { position, focalPoint, viewUp }
+    });
+  }, 100);
   // private _SUPPORTED_FILE: any = null;
   // private _allSource: {};
   // private _fileData: any = null;
