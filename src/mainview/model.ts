@@ -22,6 +22,7 @@ import * as Y from 'yjs';
 export class JupyterViewModel implements DocumentRegistry.IModel {
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     this.modelDB = modelDB || new ModelDB();
+    this.sharedModel = new JupyterViewDoc()
     this.sharedModel.awareness.on('change', this._onCameraChanged);
   }
 
@@ -60,18 +61,18 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   }
 
   get readOnly(): boolean {
-    return this._readOnly;
+    return true;
   }
   set readOnly(value: boolean) {
-    this._readOnly = value;
+    this._readOnly = true;
   }
 
   toString(): string {
     const content = this.sharedModel.getContent('content');
-    if (content) {
+    if (content && content.length > 0) {
       return content;
     } else {
-      return this.modelDB.getValue('content') as string
+      throw Error('Content not found')
     }
   }
 
@@ -90,7 +91,10 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   }
 
   initialize(): void {
-    // nothing to do
+    this.sharedModel.setContent(
+      'backup',
+      this.sharedModel.getContent('content')
+    );
   }
 
   getWorker(): Worker {
@@ -122,10 +126,10 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   readonly defaultKernelName: string = '';
   readonly defaultKernelLanguage: string = '';
   readonly modelDB: IModelDB;
-  readonly sharedModel = JupyterViewDoc.create();
+  readonly sharedModel: JupyterViewDoc;
 
   private _dirty = false;
-  private _readOnly = false;
+  private _readOnly = true;
   private _isDisposed = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -191,8 +195,7 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
       for (const key in payload) {
         this._mainViewState.set(key, payload[key]);
       }
-    })
-
+    });
   }
 
   public getControlViewState(): IControlViewSharedState {
@@ -206,14 +209,12 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
     return this._controlViewState.get(key);
   }
 
-  public setControlViewState(
-    payload: IControlViewSharedState,
-  ): void {
+  public setControlViewState(payload: IControlViewSharedState): void {
     this.transact(() => {
       for (const key in payload) {
         this._controlViewState.set(key, payload[key]);
       }
-    })
+    });
   }
 
   private _mainViewStateObserver = (event: Y.YMapEvent<any>): void => {

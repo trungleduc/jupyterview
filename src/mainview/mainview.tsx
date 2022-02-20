@@ -40,12 +40,7 @@ import {
   moveCamera,
   VIEW_ORIENTATIONS
 } from '../tools';
-import {
-  IControlViewSharedState,
-  IDict,
-  IMainViewSharedState,
-  Position
-} from '../types';
+import { IControlViewSharedState, IMainViewSharedState } from '../types';
 import { CameraToolbar } from './cameraToolbar';
 import { JupyterViewDoc, JupyterViewModel } from './model';
 
@@ -115,12 +110,10 @@ export class MainView extends React.Component<IProps, IStates> {
 
       const widgetManager = vtkWidgetManager.newInstance();
       widgetManager.setRenderer(orientationWidget.getRenderer());
-
       const widget = vtkInteractiveOrientationWidget.newInstance();
       widget.placeWidget(axes.getBounds());
       widget.setBounds(axes.getBounds());
       widget.setPlaceFactor(1);
-
       const vw = widgetManager.addWidget(widget);
       vw.onOrientationChange(({ up, direction, action, event }: any) => {
         const focalPoint = camera.getFocalPoint();
@@ -149,6 +142,7 @@ export class MainView extends React.Component<IProps, IStates> {
         orientationWidget.updateMarkerOrientation();
         widgetManager.enablePicking();
         this._renderWindow.render();
+        this._syncCamera();
       });
 
       this._renderer.resetCamera();
@@ -179,7 +173,7 @@ export class MainView extends React.Component<IProps, IStates> {
         const dirPath = fullPath.substring(0, fullPath.lastIndexOf('/') + 1);
         const fileName = fullPath.replace(/^.*(\\|\/|:)/, '');
 
-        const fileContent = this._model!.toString();
+        const fileContent = this._sharedModel.getContent('content');
         const contentPromises = this.prepareFileContent(
           dirPath,
           fileName,
@@ -196,7 +190,8 @@ export class MainView extends React.Component<IProps, IStates> {
             this.stringToPolyData(vtkStringContent, name)
               .then(polyResult => {
                 counter = counter + 100 / totalItems;
-                this._fileData[path] = polyResult;
+                this._fileData[path] = vtk(polyResult.polyData);
+                polyResult.webWorker.terminate();
                 if (counter === 100) {
                   this.createPipeline(this._fileData[firstName]);
                   this.setState(old => ({ ...old, loading: false, counter }));
@@ -346,8 +341,7 @@ export class MainView extends React.Component<IProps, IStates> {
     }
 
     if (changed.selectedDataset) {
-      const polyResult = this._fileData[changed.selectedDataset];
-      this._source = vtk(polyResult.polyData);
+      this._source = this._fileData[changed.selectedDataset];
       this._warpScalar.setInputData(this._source);
       this._mapper.setInputData(this._warpScalar.getOutputData());
       needRerender = true;
@@ -471,8 +465,7 @@ export class MainView extends React.Component<IProps, IStates> {
     return option;
   };
 
-  createPipeline = (polyResult: ReadPolyDataResult): void => {
-    polyResult.webWorker.terminate();
+  createPipeline = (polyResult: vtkPolyData): void => {
     this._lookupTable = vtkColorTransferFunction.newInstance();
     this._mapper = vtkMapper.newInstance({
       interpolateScalarsBeforeMapping: true,
@@ -487,7 +480,7 @@ export class MainView extends React.Component<IProps, IStates> {
       this._renderWindow.render();
     });
 
-    this._source = vtk(polyResult.polyData);
+    this._source = polyResult;
 
     this._warpScalar = vtkWarpScalar.newInstance({
       scaleFactor: 0,
@@ -526,10 +519,6 @@ export class MainView extends React.Component<IProps, IStates> {
     this._renderer.addActor(this._scalarBarActor);
     this._renderer.addActor(this._actor);
     this._renderer.resetCamera();
-    console.log(
-      'this._sharedModel.getControlViewState()',
-      this._sharedModel.getControlViewState()
-    );
     const currentState = this._sharedModel.getControlViewState();
     if (Object.keys(currentState).length > 0) {
       this.controlStateChanged(null, currentState);
