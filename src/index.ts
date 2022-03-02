@@ -46,6 +46,7 @@ const activate = (
   // Add the widget to the tracker when it's created
   widgetFactory.widgetCreated.connect((sender, widget) => {
     // Notify the instance tracker if restore data needs to update.
+    (window as any).jupyterlabTheme = themeManager.theme
     widget.context.pathChanged.connect(() => {
       tracker.save(widget);
     });

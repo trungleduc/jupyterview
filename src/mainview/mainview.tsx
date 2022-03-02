@@ -43,20 +43,15 @@ import {
 import { IControlViewSharedState, IMainViewSharedState } from '../types';
 import { CameraToolbar } from './cameraToolbar';
 import { JupyterViewDoc, JupyterViewModel } from './model';
+import {
+  BG_COLOR,
+  DARK_THEME,
+  JUPYTER_FONT,
+  LIGHT_THEME,
+  ROTATION_STEP,
+  THEME_TYPE
+} from './utils';
 
-type THEME_TYPE = 'JupyterLab Dark' | 'JupyterLab Light';
-const DARK_THEME: THEME_TYPE = 'JupyterLab Dark';
-const LIGHT_THEME: THEME_TYPE = 'JupyterLab Light';
-
-const BG_COLOR = {
-  [DARK_THEME]: 'linear-gradient(rgb(0, 0, 42), rgb(82, 87, 110))',
-  [LIGHT_THEME]: 'linear-gradient(#000028, #ffffff)'
-};
-
-const ROTATION_STEP = 2;
-
-const JUPYTER_FONT =
-  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'";
 interface IProps {
   context: DocumentRegistry.IContext<JupyterViewModel>;
 }
@@ -72,9 +67,11 @@ interface IStates {
 export class MainView extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
+    const theme = ((window as any).jupyterlabTheme ||
+    LIGHT_THEME) as THEME_TYPE;
     this.state = {
       id: uuid(),
-      theme: LIGHT_THEME,
+      theme,
       loading: true,
       colorOption: [],
       counter: 0
@@ -162,6 +159,10 @@ export class MainView extends React.Component<IProps, IStates> {
 
       this._context.ready.then(() => {
         this._model = this._context.model as JupyterViewModel;
+        this._model.themeChanged.connect((_, arg) => {
+          this.handleThemeChange(arg.newValue as THEME_TYPE);
+        });
+
         this._sharedModel.controlViewStateChanged.connect(
           this.controlStateChanged
         );
@@ -226,6 +227,14 @@ export class MainView extends React.Component<IProps, IStates> {
       });
     }, 500);
   }
+
+  handleThemeChange = (newTheme: THEME_TYPE): void => {
+    this.setState(old => ({ ...old, theme: newTheme }), () => {
+      const style = this.state.theme === LIGHT_THEME? {fontColor: 'rgba(0, 0, 0, 0.87)'}: {fontColor: 'rgba(255, 255, 255, 0.87)'}
+      this._scalarBarActor.setTickTextStyle(style)
+      this._scalarBarActor.setAxisTextStyle(style)
+    });
+  };
 
   private mainViewStateChanged = (
     _: any,
@@ -500,14 +509,15 @@ export class MainView extends React.Component<IProps, IStates> {
         dataRange: [...this._dataRange]
       });
     }
+    const fontColor = this.state.theme === LIGHT_THEME ? 'rgba(0, 0, 0, 0.87)' : 'rgba(255, 255, 255, 0.87)'
     this._scalarBarActor = vtkScalarBarActor.newInstance();
     this._scalarBarActor.setAxisTextStyle({
-      fontColor: 'black',
+      fontColor,
       fontFamily: JUPYTER_FONT,
       fontSize: '18px'
     });
     this._scalarBarActor.setTickTextStyle({
-      fontColor: 'black',
+      fontColor,
       fontFamily: JUPYTER_FONT,
       fontSize: '12px'
     });
@@ -644,7 +654,7 @@ export class MainView extends React.Component<IProps, IStates> {
           style={{
             width: '100%',
             height: 'calc(100%)',
-            background: BG_COLOR[LIGHT_THEME] //'radial-gradient(#efeded, #8f9091)'
+            background: BG_COLOR[this.state.theme] //'radial-gradient(#efeded, #8f9091)'
           }}
         />
         <CameraToolbar
@@ -660,8 +670,6 @@ export class MainView extends React.Component<IProps, IStates> {
   private _context: DocumentRegistry.IContext<JupyterViewModel>;
   private _sharedModel: JupyterViewDoc;
   private _model: JupyterViewModel | undefined;
-  private _worker?: Worker = undefined;
-  private _messageChannel?: MessageChannel;
 
   private _fullScreenRenderer: vtkRenderWindowWithControlBar;
   private _renderer: vtkRenderer;
@@ -687,7 +695,4 @@ export class MainView extends React.Component<IProps, IStates> {
       camera: { position, focalPoint, viewUp }
     });
   }, 100);
-  // private _SUPPORTED_FILE: any = null;
-  // private _allSource: {};
-  // private _fileData: any = null;
 }
