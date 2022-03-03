@@ -87,16 +87,6 @@
     "access": "public"
   },
   "jupyterlab": {
-    "discovery": {
-      "server": {
-        "managers": [
-          "pip"
-        ],
-        "base": {
-          "name": "jupyterview"
-        }
-      }
-    },
     "extension": true,
     "outputDir": "jupyterview/labextension",
     "webpackConfig": "./extension.webpack.config.js"
