@@ -1,6 +1,22 @@
 const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
+function copyPluginPatterns(fileList) {
+  return fileList.map(file => ({
+    from: path.join(__dirname, 'node_modules', 'itk', 'PolyDataIOs', file),
+    to: path.join(
+      __dirname,
+      'jupyterview',
+      'labextension',
+      'static',
+      'itk',
+      'PolyDataIOs',
+      file
+    )
+  }));
+}
+
+const itkConfig = path.resolve(__dirname, 'lib', 'itkConfig.js')
 module.exports = {
   module: {
     rules: [
@@ -14,13 +30,23 @@ module.exports = {
   resolve: {
     extensions: ['.webpack.js', '.web.js', '.js'],
     alias: {
-      './itkConfig$': path.resolve(__dirname, 'lib', 'itkConfigJupyter.js')
+      './itkConfig$': itkConfig
+      // '../itkConfig.js': itkConfig,
+      // '../../itkConfig.js': itkConfig
     },
-    fallback: { fs: false, path: false, url: false, module: false },
+    fallback: { fs: false, path: false, url: false, module: false }
   },
   plugins: [
     new CopyPlugin({
       patterns: [
+        ...copyPluginPatterns([
+          'VTKXMLFileReader.js',
+          'VTKXMLFileReaderWasm.js',
+          'VTKXMLFileReaderWasm.wasm',
+          'VTKLegacyFileReader.js',
+          'VTKLegacyFileReaderWasm.js',
+          'VTKLegacyFileReaderWasm.wasm',
+        ]),
         {
           from: path.join(__dirname, 'node_modules', 'itk', 'WebWorkers'),
           to: path.join(
@@ -30,60 +56,6 @@ module.exports = {
             'static',
             'itk',
             'WebWorkers'
-          )
-        },
-        {
-          from: path.join(
-            __dirname,
-            'node_modules',
-            'itk',
-            'PolyDataIOs',
-            'VTKXMLFileReader.js'
-          ),
-          to: path.join(
-            __dirname,
-            'jupyterview',
-            'labextension',
-            'static',
-            'itk',
-            'PolyDataIOs',
-            'VTKXMLFileReader.js'
-          )
-        },
-        {
-          from: path.join(
-            __dirname,
-            'node_modules',
-            'itk',
-            'PolyDataIOs',
-            'VTKXMLFileReaderWasm.js'
-          ),
-          to: path.join(
-            __dirname,
-            'jupyterview',
-            'labextension',
-            'static',
-            'itk',
-            'PolyDataIOs',
-            'VTKXMLFileReaderWasm.js'
-          )
-        },
-        {
-          from: path.join(
-            __dirname,
-            'node_modules',
-            'itk',
-            'PolyDataIOs',
-            'VTKXMLFileReaderWasm.wasm'
-          ),
-          to: path.join(
-            __dirname,
-            'jupyterview',
-            'labextension',
-            'static',
-            'itk',
-            'PolyDataIOs',
-            'VTKXMLFileReaderWasm.wasm'
           )
         }
       ]

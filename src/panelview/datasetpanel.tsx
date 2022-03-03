@@ -12,14 +12,18 @@ interface IProps {
 
 interface IStates {
   clientId: string;
-  animating: boolean
-  selectedDataset: string
+  animating: boolean;
+  selectedDataset: string;
 }
 
 export default class DatasetPanel extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
-    this.state = { clientId: this.props.clientId, animating: false, selectedDataset: '' };
+    this.state = {
+      clientId: this.props.clientId,
+      animating: false,
+      selectedDataset: ''
+    };
   }
 
   switchDataset = (step = 1) => {
@@ -29,7 +33,7 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
       return;
     }
     const current = this.props.controlViewState.selectedDataset!;
-    const idx = fileList.indexOf(current);    
+    const idx = fileList.indexOf(current);
     if (idx === -1) {
       return;
     }
@@ -47,14 +51,13 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
     this.setState(old => {
       const current = old.animating;
       if (!current) {
-        this._interval = setInterval(this.switchDataset, 200)
+        this._interval = setInterval(this.switchDataset, 200);
       } else {
         clearInterval(this._interval);
       }
-      return {...old, animating: !current}
-    })
-    
-  }
+      return { ...old, animating: !current };
+    });
+  };
 
   render(): React.ReactNode {
     const fileList = (this.props.mainViewState.fileList ?? ['None']).map(
@@ -64,7 +67,8 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
     return (
       <div className="jpview-control-panel-component">
         {selectorFactory({
-          defaultValue: this.props.controlViewState.selectedDataset ?? fileList[0].value,
+          defaultValue:
+            this.props.controlViewState.selectedDataset ?? fileList[0].value,
           options: fileList,
           onChange: e => this.props.onSelectDatasetChange(e.target.value),
           label: 'Dataset'
@@ -80,7 +84,7 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
             style={{ width: '25%' }}
             className="jpview-button"
             title="Previous"
-            onClick={()=> this.switchDataset(-1)}
+            onClick={() => this.switchDataset(-1)}
           >
             Previous
           </button>
@@ -90,20 +94,19 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
             title="Play"
             onClick={this.toggleAnimation}
           >
-            {this.state.animating? 'Pause': 'Play'}
+            {this.state.animating ? 'Pause' : 'Play'}
           </button>
           <button
             style={{ width: '25%' }}
             className="jpview-button"
             title="Next"
-            onClick={()=> this.switchDataset(1)}
+            onClick={() => this.switchDataset(1)}
           >
             Next
           </button>
         </div>
       </div>
     );
-
   }
-  private _interval: any
+  private _interval: any;
 }

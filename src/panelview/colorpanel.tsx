@@ -83,7 +83,7 @@ export default class ColorPanel extends React.Component<IProps, IStates> {
       { value: ':', label: 'Solid color' }
     ];
     return (
-      <div  className='jpview-control-panel-component'>
+      <div className="jpview-control-panel-component">
         {selectorFactory({
           defaultValue: this.props.controlViewState.selectedColor,
           options: colorSelectorData,

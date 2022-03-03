@@ -1,10 +1,6 @@
 // import vtk
 import '@kitware/vtk.js/Rendering/OpenGL/Profiles/All';
 
-import { readPolyDataArrayBuffer, ReadPolyDataResult } from 'itk-wasm/dist';
-import * as React from 'react';
-import { v4 as uuid } from 'uuid';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ContentsManager } from '@jupyterlab/services';
 import vtkDataArray from '@kitware/vtk.js/Common/Core/DataArray';
@@ -31,6 +27,9 @@ import { Vector3 } from '@kitware/vtk.js/types';
 import vtk from '@kitware/vtk.js/vtk';
 import vtkWidgetManager from '@kitware/vtk.js/Widgets/Core/WidgetManager';
 import vtkInteractiveOrientationWidget from '@kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget';
+import readPolyDataArrayBuffer from 'itk/readPolyDataArrayBuffer';
+import * as React from 'react';
+import { v4 as uuid } from 'uuid';
 
 import {
   b64_to_utf8,
@@ -45,9 +44,9 @@ import { CameraToolbar } from './cameraToolbar';
 import { JupyterViewDoc, JupyterViewModel } from './model';
 import {
   BG_COLOR,
-  DARK_THEME,
   JUPYTER_FONT,
   LIGHT_THEME,
+  OBJECT_COLOR,
   ROTATION_STEP,
   THEME_TYPE
 } from './utils';
@@ -68,7 +67,7 @@ export class MainView extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
     const theme = ((window as any).jupyterlabTheme ||
-    LIGHT_THEME) as THEME_TYPE;
+      LIGHT_THEME) as THEME_TYPE;
     this.state = {
       id: uuid(),
       theme,
@@ -229,11 +228,18 @@ export class MainView extends React.Component<IProps, IStates> {
   }
 
   handleThemeChange = (newTheme: THEME_TYPE): void => {
-    this.setState(old => ({ ...old, theme: newTheme }), () => {
-      const style = this.state.theme === LIGHT_THEME? {fontColor: 'rgba(0, 0, 0, 0.87)'}: {fontColor: 'rgba(255, 255, 255, 0.87)'}
-      this._scalarBarActor.setTickTextStyle(style)
-      this._scalarBarActor.setAxisTextStyle(style)
-    });
+    this.setState(
+      old => ({ ...old, theme: newTheme }),
+      () => {
+        const style =
+          this.state.theme === LIGHT_THEME
+            ? { fontColor: 'rgba(0, 0, 0, 0.87)' }
+            : { fontColor: 'rgba(255, 255, 255, 0.87)' };
+        this._scalarBarActor.setTickTextStyle(style);
+        this._scalarBarActor.setAxisTextStyle(style);
+        this._actor.getProperty().setColor(...OBJECT_COLOR[this.state.theme]);
+      }
+    );
   };
 
   private mainViewStateChanged = (
@@ -279,10 +285,7 @@ export class MainView extends React.Component<IProps, IStates> {
     }
     return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
   }
-  async stringToPolyData(
-    fileContent: string,
-    filePath: string
-  ): Promise<ReadPolyDataResult> {
+  async stringToPolyData(fileContent: string, filePath: string): Promise<any> {
     const str = `data:application/octet-stream;base64,${fileContent}`;
     return fetch(str)
       .then(b => b.arrayBuffer())
@@ -484,7 +487,7 @@ export class MainView extends React.Component<IProps, IStates> {
     this._mapper.setLookupTable(this._lookupTable);
     this._actor = vtkActor.newInstance();
     this._actor.setMapper(this._mapper);
-
+    this._actor.getProperty().setColor(...OBJECT_COLOR[this.state.theme]);
     this._lookupTable.onModified(() => {
       this._renderWindow.render();
     });
@@ -509,7 +512,10 @@ export class MainView extends React.Component<IProps, IStates> {
         dataRange: [...this._dataRange]
       });
     }
-    const fontColor = this.state.theme === LIGHT_THEME ? 'rgba(0, 0, 0, 0.87)' : 'rgba(255, 255, 255, 0.87)'
+    const fontColor =
+      this.state.theme === LIGHT_THEME
+        ? 'rgba(0, 0, 0, 0.87)'
+        : 'rgba(255, 255, 255, 0.87)';
     this._scalarBarActor = vtkScalarBarActor.newInstance();
     this._scalarBarActor.setAxisTextStyle({
       fontColor,
@@ -578,7 +584,7 @@ export class MainView extends React.Component<IProps, IStates> {
     };
   };
 
-  updateOrientation = (mode: 'x' | 'y' | 'z') => {
+  updateOrientation = (mode: 'x' | 'y' | 'z'): void => {
     if (!this._inAnimation) {
       this._inAnimation = true;
       const { axis, orientation, viewUp } = VIEW_ORIENTATIONS[mode];

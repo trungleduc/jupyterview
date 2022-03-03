@@ -12,6 +12,14 @@ export const BG_COLOR = {
   [LIGHT_THEME]: LIGHT_BG //'linear-gradient(#000028, #ffffff)'
 };
 
+export const OBJECT_COLOR: {
+  [DARK_THEME]: [number, number, number];
+  [LIGHT_THEME]: [number, number, number];
+} = {
+  [DARK_THEME]: [0.9, 0.9, 0.9], //'linear-gradient(rgb(0, 0, 42), rgb(82, 87, 110))',
+  [LIGHT_THEME]: [0.8, 0.8, 0.8] //'linear-gradient(#000028, #ffffff)'
+};
+
 export const ROTATION_STEP = 2;
 
 export const JUPYTER_FONT =

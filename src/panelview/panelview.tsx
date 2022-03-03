@@ -71,7 +71,9 @@ export default class MainView extends React.Component<IProps, IStates> {
       this.props.sharedModel.mainViewStateChanged.disconnect(
         this.sharedMainViewModelChanged
       );
-      this.props.sharedModel.controlViewStateChanged.disconnect(this.sharedControlViewModelChanged)
+      this.props.sharedModel.controlViewStateChanged.disconnect(
+        this.sharedControlViewModelChanged
+      );
     }
   }
 
@@ -81,7 +83,9 @@ export default class MainView extends React.Component<IProps, IStates> {
     }
     if (oldProps.sharedModel) {
       oldProps.sharedModel.changed.disconnect(this.sharedMainViewModelChanged);
-      oldProps.sharedModel.controlViewStateChanged.disconnect(this.sharedControlViewModelChanged)
+      oldProps.sharedModel.controlViewStateChanged.disconnect(
+        this.sharedControlViewModelChanged
+      );
     }
     this.onSharedModelPropChange(this.props.sharedModel);
   }
@@ -89,7 +93,9 @@ export default class MainView extends React.Component<IProps, IStates> {
   onSharedModelPropChange(sharedModel?: JupyterViewDoc): void {
     if (sharedModel) {
       sharedModel.mainViewStateChanged.connect(this.sharedMainViewModelChanged);
-      sharedModel.controlViewStateChanged.connect(this.sharedControlViewModelChanged)
+      sharedModel.controlViewStateChanged.connect(
+        this.sharedControlViewModelChanged
+      );
       this.setState(old => {
         const controlViewState = sharedModel.getControlViewState();
         controlViewState.selectedColor = controlViewState.selectedColor ?? ':';
@@ -104,9 +110,15 @@ export default class MainView extends React.Component<IProps, IStates> {
     }
   }
 
-  sharedControlViewModelChanged = (_, changed: IControlViewSharedState): void => {
-    this.setState(old => ({...old, controlViewState: {...old.controlViewState, ...changed }}))
-  }
+  sharedControlViewModelChanged = (
+    _,
+    changed: IControlViewSharedState
+  ): void => {
+    this.setState(old => ({
+      ...old,
+      controlViewState: { ...old.controlViewState, ...changed }
+    }));
+  };
   sharedMainViewModelChanged = (_, changed: IMainViewSharedState): void => {
     this.setState(old => {
       const newState = {

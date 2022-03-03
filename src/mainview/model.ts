@@ -22,7 +22,7 @@ import * as Y from 'yjs';
 export class JupyterViewModel implements DocumentRegistry.IModel {
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     this.modelDB = modelDB || new ModelDB();
-    this.sharedModel = new JupyterViewDoc()
+    this.sharedModel = new JupyterViewDoc();
     this.sharedModel.awareness.on('change', this._onCameraChanged);
   }
 
@@ -72,7 +72,7 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
     if (content && content.length > 0) {
       return content;
     } else {
-      throw Error('Content not found')
+      throw Error('Content not found');
     }
   }
 

@@ -36,17 +36,18 @@ const activate = (
 
   // Creating the widget factory to register it so the document manager knows about
   // our new DocumentWidget
+  const fileTypeList = ['vtp', 'vtu', 'vtk'];
   const widgetFactory = new JupyterViewWidgetFactory({
     name: FACTORY,
     modelName: 'jupyterview-model',
-    fileTypes: ['vtp', 'vtu', 'pvd'],
-    defaultFor: ['vtp', 'vtu', 'pvd']
+    fileTypes: ['pvd', ...fileTypeList],
+    defaultFor: ['pvd', ...fileTypeList]
   });
 
   // Add the widget to the tracker when it's created
   widgetFactory.widgetCreated.connect((sender, widget) => {
     // Notify the instance tracker if restore data needs to update.
-    (window as any).jupyterlabTheme = themeManager.theme
+    (window as any).jupyterlabTheme = themeManager.theme;
     widget.context.pathChanged.connect(() => {
       tracker.save(widget);
     });
@@ -60,22 +61,16 @@ const activate = (
   // Creating and registering the model factory for our custom DocumentModel
   const modelFactory = new JupyterViewModelFactory();
   app.docRegistry.addModelFactory(modelFactory);
-  // register the filetype
-  app.docRegistry.addFileType({
-    name: 'vtp',
-    displayName: 'VTP',
-    mimeTypes: ['binary'],
-    extensions: ['.vtp', '.VTP'],
-    fileFormat: 'base64',
-    contentType: 'file'
-  });
-  app.docRegistry.addFileType({
-    name: 'vtu',
-    displayName: 'VTU',
-    mimeTypes: ['binary'],
-    extensions: ['.vtu', '.VTU'],
-    fileFormat: 'base64',
-    contentType: 'file'
+  fileTypeList.forEach((fileType: string) => {
+    const FILETYPE = fileType.toUpperCase();
+    app.docRegistry.addFileType({
+      name: fileType,
+      displayName: FILETYPE,
+      mimeTypes: ['binary'],
+      extensions: [`.${fileType}`, `.${FILETYPE}`],
+      fileFormat: 'base64',
+      contentType: 'file'
+    });
   });
   app.docRegistry.addFileType({
     name: 'pvd',

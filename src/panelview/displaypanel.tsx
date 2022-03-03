@@ -1,7 +1,5 @@
 import * as React from 'react';
-import {
-  IControlViewSharedState,
-} from '../types';
+import { IControlViewSharedState } from '../types';
 
 import { selectorFactory } from '../tools';
 
@@ -26,13 +24,13 @@ interface IStates {
 
 export default class DisplayPanel extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
-    super(props)
+    super(props);
     this.state = { clientId: this.props.clientId };
   }
 
   render(): React.ReactNode {
     return (
-      <div  className='jpview-control-panel-component'>
+      <div className="jpview-control-panel-component">
         {selectorFactory({
           defaultValue: this.props.controlViewState.displayMode,
           options: DISPLAY_MODE,

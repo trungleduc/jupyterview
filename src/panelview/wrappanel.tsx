@@ -47,14 +47,14 @@ export default class WrapPanel extends React.Component<IProps, IStates> {
           warpNormalAxis[0] !== this.state.normalX ||
           warpNormalAxis[1] !== this.state.normalY ||
           warpNormalAxis[2] !== this.state.normalZ;
-          if (needUpdate) {
-            this.setState(old => ({
-              ...old,
-              normalX: warpNormalAxis[0],
-              normalY: warpNormalAxis[1],
-              normalZ: warpNormalAxis[2]
-            }));
-          }
+        if (needUpdate) {
+          this.setState(old => ({
+            ...old,
+            normalX: warpNormalAxis[0],
+            normalY: warpNormalAxis[1],
+            normalZ: warpNormalAxis[2]
+          }));
+        }
       }
     }
   }
