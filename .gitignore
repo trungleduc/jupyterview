@@ -70,6 +70,8 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+docs/_output/
+.jupyterlite.doit.db
 
 # PyBuilder
 target/
