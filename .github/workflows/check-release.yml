@@ -2,12 +2,15 @@ name: Check Release
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
-permissions:
+env:
+  NODE_OPTIONS: --max_old_space_size=8000
+
+permissions: 
   contents: write
 
 jobs:
@@ -24,7 +27,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: '16.x'
       
       
       - name: Get pip cache dir
@@ -50,6 +53,7 @@ jobs:
           pip install --upgrade pip setuptools wheel jupyter-packaging~=0.10 --user
       - name: Install Dependencies
         run: |
+          export NODE_OPTIONS=--max_old_space_size=8000
           pip install .
       - name: Check Release
         uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1

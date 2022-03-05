@@ -14,4 +14,11 @@ build_cmd = "build:prod"
 npm = ["jlpm"]
 
 [tool.check-manifest]
-ignore = ["jupyterview/labextension/**", "yarn.lock", ".*", "package-lock.json"]
+ignore = ["jupyterview/labextension/**",
+  "yarn.lock",
+  ".*",
+  "package-lock.json",
+  "docs/**",
+  "extension.webpack.config.js",
+  "samples/**"
+]

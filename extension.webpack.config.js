@@ -31,8 +31,6 @@ module.exports = {
     extensions: ['.webpack.js', '.web.js', '.js'],
     alias: {
       './itkConfig$': itkConfig
-      // '../itkConfig.js': itkConfig,
-      // '../../itkConfig.js': itkConfig
     },
     fallback: { fs: false, path: false, url: false, module: false }
   },
@@ -63,5 +61,8 @@ module.exports = {
   ],
   performance: {
     maxAssetSize: 10000000
-  }
+  },
+  optimization: {
+    minimize: false
+  },
 };
