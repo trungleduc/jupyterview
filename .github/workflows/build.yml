@@ -48,6 +48,6 @@ jobs:
       - name: Test the extension
         run: |
           export NODE_OPTIONS=--max_old_space_size=8000
-          python -m pip install --upgrade -v .
+          python -m pip install -e .
+          jupyter labextension develop . --overwrite
           jupyter labextension list 2>&1 | grep -ie "jupyterview.*OK"
-          check-manifest -v
