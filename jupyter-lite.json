@@ -1,0 +1,24 @@
+{
+  "jupyter-config-data": {
+    "appName": "JupyterLite",
+    "appUrl": "./lab",
+    "appVersion": "0.1.0-beta.0",
+    "baseUrl": "./",
+    "faviconUrl": "./lab/favicon.ico",
+    "federated_extensions": [
+      {
+        "extension": "./extension",
+        "liteExtension": false,
+        "load": "static/remoteEntry.ab6a9a937efdcc1e7da2.js",
+        "name": "jupyterview",
+        "style": "./style"
+      }
+    ],
+    "fullLabextensionsUrl": "./extensions",
+    "fullMathjaxUrl": "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
+    "fullStaticUrl": "./build",
+    "licensesUrl": "./lab/api/licenses",
+    "mathjaxConfig": "TeX-AMS_CHTML-full,Safe"
+  },
+  "jupyter-lite-schema-version": 0
+}
