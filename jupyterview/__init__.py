@@ -1,10 +1,16 @@
-#!/usr/bin/env python
-# coding: utf-8
 
-# Copyright (c) Trung Le.
-# Distributed under the terms of the Modified BSD License.
+import json
+from pathlib import Path
 
-from .vtkwidget import VtkWidget
-from ._version import __version__, version_info
+from ._version import __version__
 
-from .nbextension import _jupyter_nbextension_paths
+HERE = Path(__file__).parent.resolve()
+
+with (HERE / "labextension" / "package.json").open() as fid:
+    data = json.load(fid)
+
+def _jupyter_labextension_paths():
+    return [{
+        "src": "labextension",
+        "dest": data["name"]
+    }]

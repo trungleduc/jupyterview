@@ -1,10 +1,21 @@
-name: jupyterview
+# a mybinder.org-ready environment for demoing jupyterview
+# this environment may also be used locally on Linux/MacOS/Windows, e.g.
+#
+#   conda env update --file binder/environment.yml
+#   conda activate jupyterview-demo
+#
+name: jupyterview-demo
+
 channels:
   - conda-forge
-  - defaults
+
 dependencies:
-  - nodejs ~=12.0
-  - python ~=3.7
-  - ipywidgets>=7.0.0
-  - jupyterlab>=2.0.0
-  - typescript
+  # runtime dependencies
+  - python >=3.8,<3.9.0a0
+  - jupyterlab >=3,<4.0.0a0
+  # labextension build dependencies
+  - nodejs >=14,<15
+  - pip
+  - wheel
+  # additional packages for demos
+  # - ipywidgets

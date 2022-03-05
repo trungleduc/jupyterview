@@ -1,21 +1,11 @@
 {
   "name": "jupyterview",
-  "version": "0.4.0",
-  "description": "VTK visualisation for jupyter lab",
+  "version": "0.1.0",
+  "description": "A Jupyterlab VTK viewer extension.",
   "keywords": [
     "jupyter",
     "jupyterlab",
-    "jupyterlab-extension",
-    "widgets"
-  ],
-  "files": [
-    "dist/*.js",
-    "dist/*.woff",
-    "dist/*.svg",
-    "dist/*.eot",
-    "dist/*.ttf",
-    "css/*.css",
-    "dist/itk/**"
+    "jupyterlab-extension"
   ],
   "homepage": "https://github.com/trungleduc/jupyterview",
   "bugs": {
@@ -26,101 +16,85 @@
     "name": "Trung Le",
     "email": "leductrungxf@gmail.com"
   },
-  "main": "dist/index.js",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/trungleduc/jupyterview"
+    "url": "https://github.com/trungleduc/jupyterview.git"
   },
   "scripts": {
-    "build": "npm run build:lib && npm run build:nbextension",
-    "build:labextension": "tsc && webpack -p && npm run clean:labextension && mkdirp jupyterview/labextension && cd jupyterview/labextension && npm pack ../..",
+    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
+    "build:prod": "jlpm run clean && jlpm run build:lib && jlpm run build:labextension",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
     "build:lib": "tsc",
-    "build:nbextension": "webpack --mode development",
-    "build:all": "npm run build:labextension && npm run build:nbextension",
-    "build:release": "npm version",
-    "clean": "npm run clean:lib && npm run clean:dist && npm run clean:nbextension",
-    "clean:lib": "rimraf lib",
-    "clean:dist": "rimraf dist",
+    "clean": "jlpm run clean:lib",
+    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
     "clean:labextension": "rimraf jupyterview/labextension",
-    "clean:nbextension": "rimraf jupyterview/nbextension/static/index.js",
-    "prepack": "npm run build:lib",
-    "test": "jest src --silent",
-    "test:chrome": "karma start --browsers=Chrome tests/karma.conf.js",
-    "test:debug": "karma start --browsers=Chrome --singleRun=false --debug=true tests/karma.conf.js",
-    "test:firefox": "karma start --browsers=Firefox tests/karma.conf.js",
-    "test:ie": "karma start --browsers=IE tests/karma.conf.js",
-    "watch": "npm-run-all -p watch:*",
-    "watch:lib": "tsc -w",
-    "watch:nbextension": "webpack --watch"
+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
+    "eslint": "eslint . --ext .ts,.tsx --fix",
+    "eslint:check": "eslint . --ext .ts,.tsx",
+    "install:extension": "jlpm run build",
+    "watch": "run-p watch:src watch:labextension",
+    "watch:src": "tsc -w",
+    "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "react-redux": "^7.2.0",
-    "redux": "^4.0.5",
-    "redux-thunk": "^2.3.0"
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@jupyterlab/application": "^3.1.0",
+    "@jupyterlab/coreutils": "^5.2.8",
+    "@jupyterlab/services": "^6.1.0",
+    "@jupyterlab/ui-components": "^3.2.8 || ^4.0.0-alpha.10",
+    "@kitware/vtk.js": "^22.4.0",
+    "@mui/icons-material": "^5.3.1",
+    "@mui/material": "^5.3.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
-    "@babel/preset-env": "^7.9.6",
-    "@babel/preset-react": "^7.9.4",
-    "@blueprintjs/core": "^3.25.0",
-    "@jupyter-widgets/base": "^3.0.0",
-    "@jupyter-widgets/controls": "^2.0.0",
-    "@jupyter-widgets/jupyterlab-manager": "^2.0.0",
-    "@jupyterlab/application": "^2.1.0",
-    "@jupyterlab/apputils": "^2.1.0",
-    "@jupyterlab/notebook": "^2.1.0",
-    "@lumino/application": "^1.8.4",
-    "@lumino/widgets": "^1.11.1",
-    "@testing-library/jest-dom": "^5.7.0",
-    "@testing-library/react": "^10.0.4",
-    "@types/jest": "^25.2.2",
-    "@types/mocha": "^5.2.5",
-    "@types/node": "^10.11.6",
-    "@types/react-redux": "^7.1.7",
-    "@types/webpack-env": "^1.13.6",
-    "autoprefixer": "^9.7.5",
-    "babel-jest": "^26.0.1",
-    "babel-loader": "^8.1.0",
-    "copy-webpack-plugin": "^5.1.1",
-    "css-loader": "^3.2.0",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.2",
-    "enzyme-to-json": "^3.4.4",
-    "file-loader": "^6.0.0",
-    "fs-extra": "^7.0.0",
-    "itk": "^12.0.0",
-    "jest": "^26.0.1",
-    "jest-fetch-mock": "^3.0.3",
-    "karma": "^3.0.0",
-    "karma-chrome-launcher": "^2.2.0",
-    "karma-firefox-launcher": "^1.1.0",
-    "karma-ie-launcher": "^1.0.0",
-    "karma-mocha": "^1.3.0",
-    "karma-mocha-reporter": "^2.2.5",
-    "karma-typescript": "^3.0.13",
-    "minimist": "^1.2.5",
-    "mkdirp": "^0.5.1",
-    "mocha": "^5.2.0",
-    "npm-run-all": "^4.1.3",
-    "re-resizable": "^6.3.2",
-    "react": "^16.13.1",
-    "react-dom": "16.9.0",
-    "react-keyed-file-browser": "^1.8.0",
-    "react-test-renderer": "^16.13.1",
-    "rimraf": "^2.6.2",
-    "semantic-ui-react": "^0.88.2",
-    "shader-loader": "^1.3.1",
-    "source-map-loader": "^0.2.4",
-    "style-loader": "^1.0.0",
-    "ts-jest": "^26.0.0",
-    "ts-loader": "^5.2.1",
-    "typescript": "^3.9.2",
-    "url-loader": "^4.1.0",
-    "vtk.js": "^13.12.3",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2"
+    "@jupyterlab/builder": "^3.1.0",
+    "@types/node": "^17.0.10",
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^4.8.1",
+    "@typescript-eslint/parser": "^4.8.1",
+    "copy-webpack-plugin": "^10.2.1",
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "itk": "^14.1.1",
+    "itk-wasm": "^1.0.0-a.10",
+    "mkdirp": "^1.0.3",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.1.1",
+    "rimraf": "^3.0.2",
+    "source-map-loader": "^3.0.1",
+    "ts-loader": "^9.2.6",
+    "typescript": "~4.1.3"
+  },
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
+  "styleModule": "style/index.js",
+  "publishConfig": {
+    "access": "public"
   },
   "jupyterlab": {
-    "extension": "dist/index"
+    "extension": true,
+    "outputDir": "jupyterview/labextension",
+    "webpackConfig": "./extension.webpack.config.js"
+  },
+  "jupyter-releaser": {
+    "hooks": {
+      "before-build-npm": [
+        "python -m pip install jupyterlab~=3.1",
+        "jlpm"
+      ]
+    }
   }
 }

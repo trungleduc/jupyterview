@@ -1,35 +1,21 @@
-include LICENSE.txt
-include README.md
+include LICENSE
+include *.md
+include pyproject.toml
+recursive-include jupyter-config *.json
 
-include setupbase.py
-include pytest.ini
-include .coverage.rc
-
-include tsconfig.json
 include package.json
-include webpack.config.js
-include jupyterview/labextension/*.tgz
+include install.json
+include ts*.json
+include yarn.lock
 
-# Documentation
-graft docs
-exclude docs/\#*
-prune docs/build
-prune docs/gh-pages
-prune docs/dist
-
-# Examples
-graft examples
-
-# Tests
-graft tests
-prune tests/build
+graft jupyterview/labextension
 
 # Javascript files
-graft jupyterview/nbextension
-#graft src
+graft src
+graft style
 prune **/node_modules
-prune coverage
 prune lib
+prune binder
 
 # Patterns to exclude from any directory
 global-exclude *~

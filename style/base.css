@@ -1,0 +1,205 @@
+.jpview-Spinner {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  background: #00000075;
+}
+
+.jpview-SpinnerContent {
+  border: solid #27b9f39e;
+  margin: 50px auto;
+  text-indent: -9999em;
+  width: 6em;
+  height: 6em;
+  border-radius: 50%;
+  position: relative;
+  animation: load3 1s infinite linear, fadeIn 1s;
+}
+
+.jpview-SpinnerContent:before {
+  width: 50%;
+  height: 50%;
+  background: #f3762605;
+  border-radius: 100% 0 100% 0;
+  box-shadow: inset 6px 5px 0 1px #27b9f3;
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: '';
+}
+
+.jpview-SpinnerContent:after {
+  width: 75%;
+  height: 75%;
+  border-radius: 50%;
+  content: '';
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.jpview-view-toolbar {
+  position: absolute;
+  z-index: 1;
+  left: 10px;
+  top: 10px;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: row;
+}
+.jpview-button {
+  border: none;
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-content-font-color1);
+  min-width: 60px
+}
+.jpview-button:hover {
+  background-color: var(--jp-layout-color3);
+}
+.jpview-toolbar-button {
+  background: none;
+  color: rgb(187, 187, 187);
+  border-radius: var(--jp-border-radius);
+  font-size: var(--jp-ui-font-size1);
+  display: inline-flex;
+  flex-direction: row;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  text-align: left;
+  vertical-align: middle;
+  min-height: 24px;
+  min-width: 12px;
+  font-size: 12px;
+  padding: 0 4px;
+}
+
+.jpview-toolbar-button.dark:hover {
+  background-color: #424242;
+}
+
+.jpview-toolbar-button:active {
+  border: none;
+  box-shadow: none;
+  background-color: var(--jp-warn-color-active, rgba(153, 153, 153, 0.2));
+}
+.jpview-control-panel-title {
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 24px;
+  height: var(--jp-debugger-header-height);
+  background-color: var(--jp-layout-color2);
+}
+
+.jpview-control-panel-title h2 {
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color1);
+  padding-left: 8px;
+  padding-right: 4px;
+}
+
+.jpview-control-panel {
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  height: 100%;
+}
+.jpview-control-panel * {
+  font-family: var(--jp-ui-font-family);
+}
+
+.jpview-control-panel-component {
+  font-size: var(--jp-ui-font-size1);
+}
+.jpview-control-panel .MuiAccordion-root.Mui-expanded {
+  margin: 0px 0px !important;
+}
+.jpview-control-panel .MuiAccordionSummary-contentGutters {
+  margin: 10px 0 !important;
+}
+.jpview-control-panel .Mui-expanded .MuiAccordionSummary-gutters {
+  min-height: 38px !important;
+}
+.jpview-control-panel .MuiAccordionSummary-root.MuiAccordionSummary-gutters {
+  min-height: 38px !important;
+}
+
+.jpview-control-panel
+  .MuiAccordionSummary-content.MuiAccordionSummary-contentGutters
+  > span {
+  text-transform: uppercase;
+}
+
+.jpview-input-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: var(--jp-layout-color1);
+  margin: 3px;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jpview-input {
+  background: transparent;
+  color: var(--jp-ui-font-color0);
+  background: var(--jp-input-background);
+  outline: none;
+  font-size: var(--jp-ui-font-size1);
+  border: var(--jp-border-width) solid var(--jp-border-color0);
+  width: 95%;
+}
+
+.jpview-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 5px;
+  background: var(--jp-layout-color3);
+  outline: none;
+}
+
+.jpview-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--jp-ui-font-color2);
+  cursor: pointer;
+}
+
+.jpview-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--jp-ui-font-color2);
+  cursor: pointer;
+}
+
+.jpcad-camera-client {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  z-index: 10;
+  background-color: var(--jp-private-notebook-active-color);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

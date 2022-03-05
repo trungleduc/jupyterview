@@ -1,23 +1,27 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "composite": true,
     "declaration": true,
-    "esModuleInterop":true,
-    "lib": ["es2017", "dom" ],
-    "module": "commonjs",
+    "esModuleInterop": true,
+    "incremental": true,
+    "jsx": "react",
+    "module": "esnext",
     "moduleResolution": "node",
     "noEmitOnError": true,
+    "noImplicitAny": false,
     "noUnusedLocals": false,
-    "outDir": "lib",
+    "preserveWatchOutput": true,
     "resolveJsonModule": true,
+    "outDir": "lib",
     "rootDir": "src",
+    "strict": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+    "target": "es2017",
+    "types": ["node"],
     "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": false,
-    "target": "es2015",
-    "jsx" : "react"
+    "lib": ["ES2019", "WebWorker", "DOM"]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-  ]
+  "include": ["src/*", "src/mainview/*", "src/panelview/*"]
 }

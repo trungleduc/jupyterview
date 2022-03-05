@@ -1,73 +1,105 @@
+# jupyterview
+
+[![Github Actions Status](https://github.com/trungleduc/jupyterview/workflows/Build/badge.svg)](https://github.com/trungleduc/jupyterview/actions/workflows/build.yml)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trungleduc/jupyterview/main?urlpath=lab)
+
+A Jupyterlab VTK viewer extension.
 
 
-# JupyterView
-
-[![build](https://github.com/trungleduc/jupyterview/workflows/build/badge.svg)](https://github.com/trungleduc/jupyterview/actions)
-[![codecov](https://codecov.io/gh/trungleduc/jupyterview/branch/master/graph/badge.svg)](https://codecov.io/gh/trungleduc/jupyterview)
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
-
-A data visualization widget for JupyterLab.
+This extension is composed of a Python package named `jupyterview`
+for the server extension and a NPM package named `jupyterview`
+for the frontend extension.
 
 
-![Screencast](https://i.postimg.cc/Z55jHvMR/jupyterview2.gif)
+## Requirements
 
-This project is under active development, the interface and behavior may change at any time.
+* JupyterLab >= 3.0
 
-## Installation
+## Install
 
-You can install using `pip`:
+To install the extension, execute:
 
 ```bash
 pip install jupyterview
 ```
 
-Install `jupyterlab-manager`, skip it if already installed
+## Uninstall
+
+To remove the extension, execute:
 
 ```bash
-jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
+pip uninstall jupyterview
 ```
 
-Rebuild JupyterLab to enable the front-end widget (nodejs required):
+
+## Troubleshoot
+
+If you are seeing the frontend extension, but it is not working, check
+that the server extension is enabled:
 
 ```bash
-jupyter lab build
+jupyter server extension list
 ```
 
-## Development
-
-### First time set up
+If the server extension is installed and enabled, but you are not seeing
+the frontend extension, check the frontend extension is installed:
 
 ```bash
-# Create a new conda environment
-conda create -n jupyterview -c conda-forge jupyterlab ipywidgets nodejs
+jupyter labextension list
+```
 
-# Activate the conda environment
-conda activate jupyterview
 
-# Install the jupyterview Python package
-python -m pip install -e .
+## Contributing
 
-# Install front-end dependencies
-jlpm install
+### Development install
 
-# Build Typescript source
-jlpm build
+Note: You will need NodeJS to build the extension package.
 
+The `jlpm` command is JupyterLab's pinned version of
+[yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
+`yarn` or `npm` in lieu of `jlpm` below.
+
+```bash
+# Clone the repo to your local environment
+# Change directory to the jupyterview directory
+# Install package in development mode
+pip install -e .
 # Link your development version of the extension with JupyterLab
-jupyter labextension link .
-
-# Rebuild JupyterLab.
-jupyter lab build
-
+jupyter labextension develop . --overwrite
+# Server extension must be manually installed in develop mode
+jupyter server extension enable jupyterview
+# Rebuild extension Typescript source after making changes
+jlpm run build
 ```
 
-### Auto-rebuild development mode
+You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
 
 ```bash
-# Run jupyterlab in watch mode, this will cause the application to incrementally rebuild when one of the linked packages changes
-jupyter lab --watch
-
-# Rebuild Typescript source after making changes
-jlpm build
-
+# Watch the source directory in one terminal, automatically rebuilding when needed
+jlpm run watch
+# Run JupyterLab in another terminal
+jupyter lab
 ```
+
+With the watch command running, every saved change will immediately be built locally and available in your running JupyterLab. Refresh JupyterLab to load the change in your browser (you may need to wait several seconds for the extension to be rebuilt).
+
+By default, the `jlpm run build` command generates the source maps for this extension to make it easier to debug using the browser dev tools. To also generate source maps for the JupyterLab core extensions, you can run the following command:
+
+```bash
+jupyter lab build --minimize=False
+```
+
+### Development uninstall
+
+```bash
+# Server extension must be manually disabled in develop mode
+jupyter server extension disable jupyterview
+pip uninstall jupyterview
+```
+
+In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
+command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
+folder is located. Then you can remove the symlink named `jupyterview` within that folder.
+
+### Packaging the extension
+
+See [RELEASE](RELEASE.md)

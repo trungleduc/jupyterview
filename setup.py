@@ -1,131 +1,102 @@
-#!/usr/bin/env python
-# coding: utf-8
+"""
+jupyterview setup
+"""
+import json
+import sys
+from pathlib import Path
 
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
+import setuptools
 
-from __future__ import print_function
-from glob import glob
-from os.path import join as pjoin
-
-
-from setupbase import (
-    create_cmdclass, install_npm, ensure_targets,
-    find_packages, combine_commands, ensure_python,
-    get_version, HERE
-)
-
-from setuptools import setup
-
+HERE = Path(__file__).parent.resolve()
 
 # The name of the project
-name = 'jupyterview'
+name = "jupyterview"
 
-# Ensure a valid python version
-ensure_python('>=3.4')
-
-# Get our version
-version = get_version(pjoin(name, '_version.py'))
-
-nb_path = pjoin(HERE, name, 'nbextension', 'static')
-lab_path = pjoin(HERE, name, 'labextension')
+lab_path = (HERE / name.replace("-", "_") / "labextension")
 
 # Representative files that should exist after a successful build
-jstargets = [
-    pjoin(nb_path, 'index.js'),
-    pjoin(HERE, 'lib', 'plugin.js'),
+ensured_targets = [
+    str(lab_path / "package.json"),
+    str(lab_path / "static/style.js")
 ]
 
-package_data_spec = {
-    name: [
-        'nbextension/static/*.*js*',
-        'labextension/*.tgz'
-    ]
-}
+labext_name = "jupyterview"
 
 data_files_spec = [
-    ('share/jupyter/nbextensions/jupyterview',
-        nb_path, '*.js*'),
-    ('share/jupyter/lab/extensions', lab_path, '*.tgz'),
-    ('etc/jupyter/nbconfig/notebook.d' , HERE, 'jupyterview.json')
+    ("share/jupyter/labextensions/%s" % labext_name, str(lab_path.relative_to(HERE)), "**"),
+    ("share/jupyter/labextensions/%s" % labext_name, str("."), "install.json"),
+    ("etc/jupyter/jupyter_server_config.d",
+     "jupyter-config/server-config", "jupyterview.json"),
+    # For backward compatibility with notebook server
+    ("etc/jupyter/jupyter_notebook_config.d",
+     "jupyter-config/nb-config", "jupyterview.json"),
 ]
 
+long_description = (HERE / "README.md").read_text()
 
-cmdclass = create_cmdclass('jsdeps', package_data_spec=package_data_spec,
-    data_files_spec=data_files_spec)
-cmdclass['jsdeps'] = combine_commands(
-    install_npm(HERE, build_cmd='build:release')
-)
-
+# Get the package info from package.json
+pkg_json = json.loads((HERE / "package.json").read_bytes())
+version = (
+    pkg_json["version"]
+    .replace("-alpha.", "a")
+    .replace("-beta.", "b")
+    .replace("-rc.", "rc")
+) 
 
 setup_args = dict(
-    name            = name,
-    description     = 'VTK visualisation for jupyter lab',
-    version         = version,
-    scripts         = glob(pjoin('scripts', '*')),
-    cmdclass        = cmdclass,
-    packages        = find_packages(),
-    author          = 'Trung Le',
-    author_email    = 'leductrungxf@gmail.com',
-    url             = 'https://github.com/trungleduc/jupyterview',
-    license         = 'BSD',
-    platforms       = "Linux, Mac OS X, Windows",
-    keywords        = ['Jupyter', 'Widgets', 'IPython'],
-    classifiers     = [
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Framework :: Jupyter',
+    name=name,
+    version=version,
+    url=pkg_json["homepage"],
+    author=pkg_json["author"]["name"],
+    author_email=pkg_json["author"]["email"],
+    description=pkg_json["description"],
+    license=pkg_json["license"],
+    license_file="LICENSE",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    packages=setuptools.find_packages(),
+    install_requires=[
+        "jupyter_server>=1.6,<2"
     ],
-    data_files = [
-        ('share/jupyter/nbextensions/jupyterview/itk/WebWorkers', [
-            pjoin(nb_path, 'itk', 'WebWorkers', 'Pipeline.worker.js'),
-            pjoin(nb_path, 'itk', 'WebWorkers', 'MeshIO.worker.js'),
-            pjoin(nb_path, 'itk','WebWorkers','ImageIO.worker.js' ), 
-        ]),
-        ('share/jupyter/nbextensions/jupyterview/itk/PolyDataIOs', [
-            # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKExodusFileReader.js'),
-            # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKExodusFileReaderWasm.js'),
-            # pjoin(nb_path, 'itk','PolyDataIOs','VTKExodusFileReaderWasm.wasm' ), 
-            # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKLegacyFileReader.js'),
-            # pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKLegacyFileReaderWasm.js'),
-            # pjoin(nb_path, 'itk','PolyDataIOs','VTKLegacyFileReaderWasm.wasm' ), 
-            pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKXMLFileReader.js'),
-            pjoin(nb_path, 'itk', 'PolyDataIOs', 'VTKXMLFileReaderWasm.js'),
-            pjoin(nb_path, 'itk','PolyDataIOs','VTKXMLFileReaderWasm.wasm' ), 
-        ]),
+    zip_safe=False,
+    include_package_data=True,
+    python_requires=">=3.6",
+    platforms="Linux, Mac OS X, Windows",
+    keywords=["Jupyter", "JupyterLab", "JupyterLab3"],
+    classifiers=[
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Framework :: Jupyter",
+        "Framework :: Jupyter :: JupyterLab",
+        "Framework :: Jupyter :: JupyterLab :: 3",
+        "Framework :: Jupyter :: JupyterLab :: Extensions",
+        "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
     ],
-
-    include_package_data = True,
-    extras_require = {
-        'test': [
-            'pytest>=3.6',
-            'pytest-cov',
-            'nbval',
-        ],
-        'examples': [
-            # Any requirements for the examples to run
-        ],
-        'docs': [
-            'sphinx>=1.5',
-            'recommonmark',
-            'sphinx_rtd_theme',
-            'nbsphinx>=0.2.13,<0.4.0',
-            'jupyter_sphinx',
-            'nbsphinx-link',
-            'pytest_check_links',
-            'pypandoc',
-        ],
-    },
-    entry_points = {
-    },
 )
 
-if __name__ == '__main__':
-    setup(**setup_args)
+try:
+    from jupyter_packaging import (
+        wrap_installers,
+        npm_builder,
+        get_data_files
+    )
+    post_develop = npm_builder(
+        build_cmd="install:extension", source_dir="src", build_dir=lab_path
+    )
+    setup_args["cmdclass"] = wrap_installers(post_develop=post_develop, ensured_targets=ensured_targets)
+    setup_args["data_files"] = get_data_files(data_files_spec)
+except ImportError as e:
+    import logging
+    logging.basicConfig(format="%(levelname)s: %(message)s")
+    logging.warning("Build tool `jupyter-packaging` is missing. Install it with pip or conda.")
+    if not ("--name" in sys.argv or "--version" in sys.argv):
+        raise e
+
+if __name__ == "__main__":
+    setuptools.setup(**setup_args)
