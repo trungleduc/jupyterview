@@ -1,13 +1,6 @@
-import {
-  caretDownIcon,
-  caretRightIcon,
-  Collapse,
-  InputGroup,
-  jupyterIcon,
-  listingsInfoIcon,
-  refreshIcon
-} from '@jupyterlab/ui-components';
 import * as React from 'react';
+
+import { focusViewIcon, rotateLeftIcon, rotateRightIcon } from '../tools';
 
 interface IProps {
   rotateHandler: (dir: 'left' | 'right') => () => void;
@@ -15,9 +8,7 @@ interface IProps {
   updateOrientation: (dir: 'x' | 'y' | 'z') => void;
 }
 
-interface IStates {}
-
-export class CameraToolbar extends React.Component<IProps, IStates> {
+export class CameraToolbar extends React.Component<IProps> {
   render(): JSX.Element {
     return (
       <div className="jpview-view-toolbar">
@@ -27,7 +18,7 @@ export class CameraToolbar extends React.Component<IProps, IStates> {
           onClick={this.props.resetCamera}
         >
           <span>
-            <i className="fa fa-bullseye"></i>
+            <focusViewIcon.react />
           </span>
         </button>
         <span></span> <span></span>
@@ -37,7 +28,7 @@ export class CameraToolbar extends React.Component<IProps, IStates> {
           onClick={this.props.rotateHandler('left')}
         >
           <span>
-            <i className="fa fa-rotate-left"></i>
+            <rotateLeftIcon.react />
           </span>
         </button>{' '}
         <span></span>
@@ -47,7 +38,7 @@ export class CameraToolbar extends React.Component<IProps, IStates> {
           onClick={this.props.rotateHandler('right')}
         >
           <span>
-            <i className="fa fa-rotate-right"></i>
+            <rotateRightIcon.react />
           </span>
         </button>{' '}
         <span></span>

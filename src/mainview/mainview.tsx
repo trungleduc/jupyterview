@@ -189,10 +189,10 @@ export class MainView extends React.Component<IProps, IStates> {
           promise.then(vtkStringContent => {
             this.stringToPolyData(vtkStringContent, name)
               .then(polyResult => {
-                counter = counter + 100 / totalItems;
+                counter = Math.round(counter + 100 / totalItems);
                 this._fileData[path] = vtk(polyResult.polyData);
                 polyResult.webWorker.terminate();
-                if (counter >= 99.99) {
+                if (counter >= 99) {
                   this.createPipeline(this._fileData[firstName]);
                   this.setState(old => ({ ...old, loading: false, counter }));
                   this._sharedModel.setMainViewState({ fileList });

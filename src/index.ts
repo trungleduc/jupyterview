@@ -57,7 +57,6 @@ const activate = (
     tracker.add(widget);
   });
   app.docRegistry.addWidgetFactory(widgetFactory);
-
   // Creating and registering the model factory for our custom DocumentModel
   const modelFactory = new JupyterViewModelFactory();
   app.docRegistry.addModelFactory(modelFactory);
@@ -118,7 +117,7 @@ const controlPanel: JupyterFrontEndPlugin<void> = {
       restorer.add(controlPanel, NAME_SPACE);
     }
 
-    app.shell.add(controlPanel, 'right', { rank: 100 });
+    app.shell.add(controlPanel, 'left');
   }
 };
 export default [plugin, controlPanel];

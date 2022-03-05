@@ -7,10 +7,25 @@ import vtkRenderWindowInteractor from '@kitware/vtk.js/Rendering/Core/RenderWind
 import { Vector3 } from '@kitware/vtk.js/types';
 
 import jvControlLight from '../style/icons/jvc-light.svg';
+import rotateRight from '../style/icons/rotate_right_white_24dp.svg';
+import rotateLeft from '../style/icons/rotate_left_white_24dp.svg';
+import focusView from '../style/icons/center_focus_weak_white_24dp.svg';
 
 export const jvcLightIcon = new LabIcon({
   name: 'jupyterview:control-light',
   svgstr: jvControlLight
+});
+export const rotateRightIcon = new LabIcon({
+  name: 'jupyterview:rotate-right',
+  svgstr: rotateRight
+});
+export const rotateLeftIcon = new LabIcon({
+  name: 'jupyterview:rotate-left',
+  svgstr: rotateLeft
+});
+export const focusViewIcon = new LabIcon({
+  name: 'jupyterview:focus-view',
+  svgstr: focusView
 });
 
 export function majorAxis(

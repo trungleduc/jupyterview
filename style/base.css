@@ -54,9 +54,8 @@
   left: 10px;
   top: 10px;
   background-color: rgba(0, 0, 0, 0.4);
-  border-radius: 16px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 .jpview-button {
   border: none;
@@ -83,7 +82,7 @@
   min-height: 24px;
   min-width: 12px;
   font-size: 12px;
-  padding: 0 7px;
+  padding: 0 4px;
 }
 
 .jpview-toolbar-button.dark:hover {

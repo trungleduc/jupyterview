@@ -11,7 +11,9 @@ export class PanelWidget extends ReactWidget {
     this._tracker = tracker;
     this._filePath = tracker.currentWidget?.context.localPath;
     this._sharedModel = tracker.currentWidget?.context.model.sharedModel;
-
+    tracker.widgetDisposed.connect((_, w) => {
+      const closedFile = w.context.localPath;
+    });
     tracker.currentChanged.connect((_, changed) => {
       if (changed) {
         this._filePath = changed.context.localPath;

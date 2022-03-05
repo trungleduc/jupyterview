@@ -98,10 +98,14 @@ export default class MainView extends React.Component<IProps, IStates> {
       );
       this.setState(old => {
         const controlViewState = sharedModel.getControlViewState();
+        const mainViewState = sharedModel.getMainViewState();
+
         controlViewState.selectedColor = controlViewState.selectedColor ?? ':';
+        controlViewState.modifiedDataRange =
+          controlViewState.modifiedDataRange ?? mainViewState.dataRange;
         return {
           ...old,
-          mainViewState: sharedModel.getMainViewState(),
+          mainViewState,
           controlViewState
         };
       });
@@ -164,10 +168,9 @@ export default class MainView extends React.Component<IProps, IStates> {
   };
 
   resetRange = (): void => {
-    const modifiedDataRange =
-      this.props.sharedModel?.getMainViewStateByKey('dataRange');
-    if (modifiedDataRange) {
-      this.updateLocalAndSharedState({ modifiedDataRange });
+    const selectedColor = this.state.controlViewState.selectedColor;
+    if (selectedColor) {
+      this.updateLocalAndSharedState({ selectedColor });
     }
   };
 
@@ -245,7 +248,7 @@ export default class MainView extends React.Component<IProps, IStates> {
           </AccordionSummary>
           <AccordionDetails sx={panelBodyStyle}>
             <DatasetPanel
-              clientId=""
+              clientId={this.props.filePath}
               controlViewState={this.state.controlViewState}
               mainViewState={this.state.mainViewState}
               onSelectDatasetChange={this.onSelectDatasetChange}

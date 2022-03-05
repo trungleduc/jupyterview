@@ -4,14 +4,14 @@ import { selectorFactory } from '../tools';
 import { IControlViewSharedState, IMainViewSharedState } from '../types';
 
 interface IProps {
-  clientId: string;
+  clientId?: string;
   controlViewState: IControlViewSharedState;
   mainViewState: IMainViewSharedState;
   onSelectDatasetChange: (name: string) => void;
 }
 
 interface IStates {
-  clientId: string;
+  clientId?: string;
   animating: boolean;
   selectedDataset: string;
 }
@@ -24,6 +24,32 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
       animating: false,
       selectedDataset: ''
     };
+  }
+  componentDidUpdate(oldProps: IProps, oldState: IStates): void {
+    if (!this.props.clientId && oldState.animating) {
+      clearInterval(this._interval);
+      this.setState(old => ({
+        ...old,
+        animating: false
+      }));
+      return;
+    }
+    if (!oldState.clientId && this.props.clientId) {
+      this.setState(old => ({ ...old, clientId: this.props.clientId }));
+    } else if (
+      oldState.clientId &&
+      this.props.clientId &&
+      oldState.clientId !== this.props.clientId
+    ) {
+      if (this.state.animating) {
+        clearInterval(this._interval);
+      }
+      this.setState(old => ({
+        ...old,
+        clientId: this.props.clientId,
+        animating: false
+      }));
+    }
   }
 
   switchDataset = (step = 1) => {
@@ -38,7 +64,7 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
       return;
     }
     let next = idx + step;
-    if (next == length) {
+    if (next === length) {
       next = 0;
     } else if (next < 0) {
       next = length - 1;
@@ -47,7 +73,7 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
     this.props.onSelectDatasetChange(fileList[next]);
   };
 
-  toggleAnimation = () => {
+  toggleAnimation = (): void => {
     this.setState(old => {
       const current = old.animating;
       if (!current) {
