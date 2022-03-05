@@ -97,15 +97,6 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
     );
   }
 
-  getWorker(): Worker {
-    // if (!JupyterViewModel.worker) {
-    //   JupyterViewModel.worker = new Worker(
-    //     new URL('./worker', (import.meta as any).url)
-    //   );
-    // }
-    return JupyterViewModel.worker;
-  }
-
   syncCamera(pos: Position | undefined): void {
     this.sharedModel.awareness.setLocalStateField('mouse', pos);
   }
@@ -135,7 +126,7 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _themeChanged = new Signal<this, IChangedArgs<any>>(this);
   private _cameraChanged = new Signal<this, Map<number, any>>(this);
-  static worker: Worker;
+
 }
 
 export type JupyterViewDocChange = {
