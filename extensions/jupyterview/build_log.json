@@ -679,6 +679,9 @@
     "entry": {},
     "performance": {
       "maxAssetSize": 10000000
+    },
+    "optimization": {
+      "minimize": false
     }
   }
 ]
