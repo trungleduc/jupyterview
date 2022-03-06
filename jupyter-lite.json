@@ -9,7 +9,7 @@
       {
         "extension": "./extension",
         "liteExtension": false,
-        "load": "static/remoteEntry.ab6a9a937efdcc1e7da2.js",
+        "load": "static/remoteEntry.c63f44f5b786bb028622.js",
         "name": "jupyterview",
         "style": "./style"
       }
