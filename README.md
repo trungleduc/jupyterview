@@ -1,14 +1,24 @@
-# jupyterview
+<h1 align="center">jupyterview</h1>
 
-[![Github Actions Status](https://github.com/trungleduc/jupyterview/workflows/Build/badge.svg)](https://github.com/trungleduc/jupyterview/actions/workflows/build.yml)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trungleduc/jupyterview/master?urlpath=lab)
+[![Github Actions Status](https://github.com/trungleduc/jupyterview/workflows/Build/badge.svg)](https://github.com/trungleduc/jupyterview/actions/workflows/build.yml) [![Lite](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://trungleduc.github.io/jupyterview) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trungleduc/jupyterview/master?urlpath=lab) [![GitHub license](https://badgen.net/github/license/trungleduc/jupyterview)](https://github.com/trungleduc/jupyterview/blob/master/LICENSE) [![PyPI version](https://badge.fury.io/py/jupyterview.svg)](https://badge.fury.io/py/jupyterview) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/jupyterview.svg)](https://anaconda.org/conda-forge/jupyterview)
 
-A Jupyterlab VTK viewer extension.
+<h2 align="center"> VTK Data visualization extension for JupyterLab</h2>
 
 
-This extension is composed of a Python package named `jupyterview`
-for the server extension and a NPM package named `jupyterview`
-for the frontend extension.
+**jupyterview** is an extension that adds the `VTK` data visualization capability to JupyterLab.
 
+Powered by Kitware's `vtk.js` and `itk-wasm` library, **jupyterview** is a pure frontend extension, it does not require any kernel to operate and fully supports the Real-Time Collaboration feature of JupyterLab.
+
+**jupyterview** is fully compatible with `jupyterlite`, it is available online at [jupyterview demo link](https://trungleduc.github.io/jupyterview).
+
+## Features
+
+- Visualize structured and unstructured data (`.vtu`, `.vtp`, `.vtk` flies).
+- Visualize and animate `.pvd` files.
+- Real-time collaborative visualization.
+- Multiple display modes: `Surface`, `Surface with Edge`, `Wireframe` and `Points`
+- Color scale and isocolor effet.
+- Warp by scalar effet.
 
 ## Requirements
 
@@ -21,32 +31,11 @@ To install the extension, execute:
 ```bash
 pip install jupyterview
 ```
-
-## Uninstall
-
-To remove the extension, execute:
+or with mamba/conda
 
 ```bash
-pip uninstall jupyterview
+mamba install jupyterview -c conda-forge
 ```
-
-
-## Troubleshoot
-
-If you are seeing the frontend extension, but it is not working, check
-that the server extension is enabled:
-
-```bash
-jupyter server extension list
-```
-
-If the server extension is installed and enabled, but you are not seeing
-the frontend extension, check the frontend extension is installed:
-
-```bash
-jupyter labextension list
-```
-
 
 ## Contributing
 
@@ -65,8 +54,6 @@ The `jlpm` command is JupyterLab's pinned version of
 pip install -e .
 # Link your development version of the extension with JupyterLab
 jupyter labextension develop . --overwrite
-# Server extension must be manually installed in develop mode
-jupyter server extension enable jupyterview
 # Rebuild extension Typescript source after making changes
 jlpm run build
 ```
@@ -91,8 +78,6 @@ jupyter lab build --minimize=False
 ### Development uninstall
 
 ```bash
-# Server extension must be manually disabled in develop mode
-jupyter server extension disable jupyterview
 pip uninstall jupyterview
 ```
 
