@@ -14,8 +14,17 @@ Powered by Kitware's `vtk.js` and `itk-wasm` library, **jupyterview** is a pure 
 ## Features
 
 - Visualize structured and unstructured data (`.vtu`, `.vtp`, `.vtk` flies).
+
+![vtu](https://user-images.githubusercontent.com/4451292/157323037-f0d8149c-410b-483b-812a-3a4e3d524552.gif)
+
 - Visualize and animate `.pvd` files.
+
+![pvd](https://user-images.githubusercontent.com/4451292/157324587-0b89159d-f4db-4227-b58b-437c75f69855.gif)
+
 - Real-time collaborative visualization.
+
+![colab](https://user-images.githubusercontent.com/4451292/157325576-c79c9ee8-6428-4e96-afa6-827467e70438.gif)
+
 - Multiple display modes: `Surface`, `Surface with Edge`, `Wireframe` and `Points`
 - Color scale and isocolor effet.
 - Warp by scalar effet.
