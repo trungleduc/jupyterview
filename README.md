@@ -43,7 +43,7 @@ pip install jupyterview
 or with mamba/conda
 
 ```bash
-mamba install jupyterview -c conda-forge
+  coming soon!
 ```
 
 ## Contributing
@@ -97,3 +97,9 @@ folder is located. Then you can remove the symlink named `jupyterview` within th
 ### Packaging the extension
 
 See [RELEASE](RELEASE.md)
+
+## Thanks
+The following libraries / open-source projects were used or inspired in the development of jupyterview:
+ * [vtk.js](https://github.com/Kitware/vtk-js)
+ * [itk-wasm](https://github.com/InsightSoftwareConsortium/itk-wasm)
+ * [paraview-glance](https://github.com/Kitware/paraview-glance)
