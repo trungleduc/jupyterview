@@ -43,7 +43,7 @@ pip install jupyterview
 or with mamba/conda
 
 ```bash
-  coming soon!
+  conda install -c conda-forge  jupyterview
 ```
 
 ## Contributing
