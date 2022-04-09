@@ -10,6 +10,7 @@ import {
   JupyterViewWidgetFactory,
   JupyterViewModelFactory
 } from './mainview/factory';
+import { KernelExecutor } from './mainview/kernel';
 import { JupyterViewWidget } from './mainview/widget';
 import { PanelWidget } from './panelview/widget';
 import { IJupyterViewDocTracker, IVtkTracker } from './token';
@@ -36,7 +37,7 @@ const activate = (
 
   // Creating the widget factory to register it so the document manager knows about
   // our new DocumentWidget
-  const fileTypeList = ['vtp', 'vtu', 'vtk'];
+  const fileTypeList = ['vtp', 'vtu', 'vtk', 'inp'];
   const widgetFactory = new JupyterViewWidgetFactory({
     name: FACTORY,
     modelName: 'jupyterview-model',

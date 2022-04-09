@@ -282,6 +282,10 @@ export class MainView extends React.Component<IProps, IStates> {
         promises[`${vtuPath}::${filePath}::${timeStep}`] = content;
       });
       return promises;
+    } else if (ext.toLowerCase() === 'inp') {
+      const content = b64_to_utf8(fileContent);
+      console.log('received', fileName, filePath);
+      return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
     }
     return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
   }
