@@ -11,6 +11,7 @@ import {
   JupyterViewModelFactory
 } from './mainview/factory';
 import { KernelExecutor } from './mainview/kernel';
+import { JupyterViewModel } from './mainview/model';
 import { JupyterViewWidget } from './mainview/widget';
 import { PanelWidget } from './panelview/widget';
 import { IJupyterViewDocTracker, IVtkTracker } from './token';
@@ -26,7 +27,7 @@ const activate = (
   shell: ILabShell
 ): IVtkTracker => {
   const tracker = new VtkTracker({ namespace: NAME_SPACE });
-
+  JupyterViewModel.kernel = new KernelExecutor({manager: app.serviceManager})
   if (restorer) {
     restorer.restore(tracker, {
       command: 'docmanager:open',

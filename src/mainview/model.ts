@@ -18,6 +18,7 @@ import {
 } from '../types';
 
 import * as Y from 'yjs';
+import { KernelExecutor } from './kernel';
 
 export class JupyterViewModel implements DocumentRegistry.IModel {
   constructor(languagePreference?: string, modelDB?: IModelDB) {
@@ -114,6 +115,11 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
     this._cameraChanged.emit(clients);
   };
 
+  getKernel(): KernelExecutor {
+    return JupyterViewModel.kernel;
+  }
+
+
   readonly defaultKernelName: string = '';
   readonly defaultKernelLanguage: string = '';
   readonly modelDB: IModelDB;
@@ -126,6 +132,8 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _themeChanged = new Signal<this, IChangedArgs<any>>(this);
   private _cameraChanged = new Signal<this, Map<number, any>>(this);
+
+  static kernel: KernelExecutor
 
 }
 

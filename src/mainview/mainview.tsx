@@ -50,6 +50,7 @@ import {
   ROTATION_STEP,
   THEME_TYPE
 } from './utils';
+import { KernelExecutor } from './kernel';
 
 interface IProps {
   context: DocumentRegistry.IContext<JupyterViewModel>;
@@ -156,8 +157,9 @@ export class MainView extends React.Component<IProps, IStates> {
         .querySelector('body')!
         .removeEventListener('keyup', interactor.handleKeyUp);
 
-      this._context.ready.then(() => {
+      this._context.ready.then( () => {
         this._model = this._context.model as JupyterViewModel;
+        this._kernel = this._model.getKernel()
         this._model.themeChanged.connect((_, arg) => {
           this.handleThemeChange(arg.newValue as THEME_TYPE);
         });
@@ -283,9 +285,12 @@ export class MainView extends React.Component<IProps, IStates> {
       });
       return promises;
     } else if (ext.toLowerCase() === 'inp') {
-      const content = b64_to_utf8(fileContent);
-      console.log('received', fileName, filePath);
-      return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
+      const content = this._kernel.startKernel().then(() => {
+        const path = `${filePath}${fileName}`
+        const result = this._kernel.execute(path)
+        return result
+      })
+      return { [`${fileName}.vtu::${filePath}::0`]: content };
     }
     return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
   }
@@ -680,6 +685,7 @@ export class MainView extends React.Component<IProps, IStates> {
   private _context: DocumentRegistry.IContext<JupyterViewModel>;
   private _sharedModel: JupyterViewDoc;
   private _model: JupyterViewModel | undefined;
+  private _kernel: KernelExecutor;
 
   private _fullScreenRenderer: vtkRenderWindowWithControlBar;
   private _renderer: vtkRenderer;
