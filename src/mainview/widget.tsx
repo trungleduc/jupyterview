@@ -9,6 +9,7 @@ import { Signal } from '@lumino/signaling';
 import { JupyterViewModel } from './model';
 
 import { MainView } from './mainview';
+import { IJupyterViewParser } from '../reader/types';
 
 export class JupyterViewWidget extends DocumentWidget<
   JupyterViewPanel,
@@ -40,7 +41,10 @@ export class JupyterViewPanel extends ReactWidget {
    *
    * @param context - The documents context.
    */
-  constructor(context: DocumentRegistry.IContext<JupyterViewModel>) {
+  constructor(
+    context: DocumentRegistry.IContext<JupyterViewModel>,
+    private parsers: { [key: string]: IJupyterViewParser }
+  ) {
     super();
     this.addClass('jp-jupyterview-panel');
     this._context = context;
@@ -58,7 +62,7 @@ export class JupyterViewPanel extends ReactWidget {
   }
 
   render(): JSX.Element {
-    return <MainView context={this._context} />;
+    return <MainView context={this._context} parsers={this.parsers} />;
   }
 
   private _context: DocumentRegistry.IContext<JupyterViewModel>;

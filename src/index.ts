@@ -1,19 +1,22 @@
 import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin,
+  ILabShell,
   ILayoutRestorer,
-  ILabShell
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IThemeManager } from '@jupyterlab/apputils';
 
+import { KernelExecutor } from './kernel';
 import {
-  JupyterViewWidgetFactory,
-  JupyterViewModelFactory
+  JupyterViewModelFactory,
+  JupyterViewWidgetFactory
 } from './mainview/factory';
-import { KernelExecutor } from './mainview/kernel';
 import { JupyterViewModel } from './mainview/model';
 import { JupyterViewWidget } from './mainview/widget';
 import { PanelWidget } from './panelview/widget';
+import { ParserManager } from './reader/manager';
+import { MeshIOParser } from './reader/meshioParser';
+import { VtkParser } from './reader/vtkParser';
 import { IJupyterViewDocTracker, IVtkTracker } from './token';
 import { jvcLightIcon } from './tools';
 import { VtkTracker } from './vtkTracker';
@@ -27,7 +30,7 @@ const activate = (
   shell: ILabShell
 ): IVtkTracker => {
   const tracker = new VtkTracker({ namespace: NAME_SPACE });
-  JupyterViewModel.kernel = new KernelExecutor({manager: app.serviceManager})
+  JupyterViewModel.kernel = new KernelExecutor({ manager: app.serviceManager });
   if (restorer) {
     restorer.restore(tracker, {
       command: 'docmanager:open',
@@ -35,16 +38,24 @@ const activate = (
       name: widget => widget.context.path
     });
   }
+  const parserManager = new ParserManager();
+  const vtkParser = new VtkParser();
+  parserManager.registerParser(vtkParser);
+  const meshioParser = new MeshIOParser();
+  parserManager.registerParser(meshioParser);
 
+  const supportedFormat = parserManager.supportedFormat();
   // Creating the widget factory to register it so the document manager knows about
   // our new DocumentWidget
-  const fileTypeList = ['vtp', 'vtu', 'vtk', 'inp'];
-  const widgetFactory = new JupyterViewWidgetFactory({
-    name: FACTORY,
-    modelName: 'jupyterview-model',
-    fileTypes: ['pvd', ...fileTypeList],
-    defaultFor: ['pvd', ...fileTypeList]
-  });
+  const widgetFactory = new JupyterViewWidgetFactory(
+    {
+      name: FACTORY,
+      modelName: 'jupyterview-model',
+      fileTypes: ['pvd', ...supportedFormat],
+      defaultFor: ['pvd', ...supportedFormat]
+    },
+    parserManager.parser
+  );
 
   // Add the widget to the tracker when it's created
   widgetFactory.widgetCreated.connect((sender, widget) => {
@@ -62,7 +73,7 @@ const activate = (
   // Creating and registering the model factory for our custom DocumentModel
   const modelFactory = new JupyterViewModelFactory();
   app.docRegistry.addModelFactory(modelFactory);
-  fileTypeList.forEach((fileType: string) => {
+  supportedFormat.forEach((fileType: string) => {
     const FILETYPE = fileType.toUpperCase();
     app.docRegistry.addFileType({
       name: fileType,

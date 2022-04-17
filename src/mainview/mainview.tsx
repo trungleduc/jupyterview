@@ -50,10 +50,12 @@ import {
   ROTATION_STEP,
   THEME_TYPE
 } from './utils';
-import { KernelExecutor } from './kernel';
+import { KernelExecutor } from '../kernel';
+import { IJupyterViewParser, IParserResult } from '../reader/types';
 
 interface IProps {
   context: DocumentRegistry.IContext<JupyterViewModel>;
+  parsers: { [key: string]: IJupyterViewParser };
 }
 
 interface IStates {
@@ -157,9 +159,9 @@ export class MainView extends React.Component<IProps, IStates> {
         .querySelector('body')!
         .removeEventListener('keyup', interactor.handleKeyUp);
 
-      this._context.ready.then( () => {
+      this._context.ready.then(() => {
         this._model = this._context.model as JupyterViewModel;
-        this._kernel = this._model.getKernel()
+        this._kernel = this._model.getKernel();
         this._model.themeChanged.connect((_, arg) => {
           this.handleThemeChange(arg.newValue as THEME_TYPE);
         });
@@ -188,8 +190,11 @@ export class MainView extends React.Component<IProps, IStates> {
         const fileList = Object.keys(contentPromises);
         for (const [path, promise] of entries) {
           const name = path.split('::')[0];
-          promise.then(vtkStringContent => {
-            this.stringToPolyData(vtkStringContent, name)
+          promise.then(vtkParsedContent => {
+            this.stringToPolyData(
+              vtkParsedContent.binary,
+              `${name}.${vtkParsedContent.type}`
+            )
               .then(polyResult => {
                 counter = Math.round(counter + 100 / totalItems);
                 this._fileData[path] = vtk(polyResult.polyData);
@@ -262,37 +267,42 @@ export class MainView extends React.Component<IProps, IStates> {
     filePath: string,
     fileName: string,
     fileContent
-  ): { [key: string]: Promise<string> } {
+  ): { [key: string]: Promise<IParserResult> } {
     const pathList = fileName.split('.');
     const ext = pathList[pathList.length - 1];
-    const promises: { [key: string]: Promise<string> } = {};
+    const promises: { [key: string]: Promise<IParserResult> } = {};
     if (ext.toLowerCase() === 'pvd') {
       const xmlStr = b64_to_utf8(fileContent);
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(xmlStr, 'application/xml');
+      const xmlParser = new DOMParser();
+      const doc = xmlParser.parseFromString(xmlStr, 'application/xml');
       const contents = new ContentsManager();
       doc.querySelectorAll('DataSet').forEach(item => {
         const timeStep = item.getAttribute('timestep');
         const vtuPath = item.getAttribute('file');
-        const content = contents
+        const content: Promise<IParserResult> = contents
           .get(`${filePath}/${vtuPath}`, {
             format: 'base64',
             content: true,
             type: 'file'
           })
-          .then(iModel => iModel.content);
+          .then(iModel => ({ type: 'vtu', binary: iModel.content }));
         promises[`${vtuPath}::${filePath}::${timeStep}`] = content;
       });
       return promises;
-    } else if (ext.toLowerCase() === 'inp') {
-      const content = this._kernel.startKernel().then(() => {
-        const path = `${filePath}${fileName}`
-        const result = this._kernel.execute(path)
-        return result
-      })
-      return { [`${fileName}.vtu::${filePath}::0`]: content };
+    } else {
+      const fileExt = ext.toLowerCase();
+      const path = `${filePath}${fileName}`;
+      const parser = this.props.parsers[fileExt];
+      const content = parser.readFile(fileContent, fileExt, path, this._kernel);
+      let output: string;
+      if (parser.nativeSupport) {
+        output = `${fileName}::${filePath}::0`;
+      } else {
+        output = `${fileName}.vtk::${filePath}::0`;
+      }
+      return { [output]: content };
     }
-    return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
+    // return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
   }
   async stringToPolyData(fileContent: string, filePath: string): Promise<any> {
     const str = `data:application/octet-stream;base64,${fileContent}`;
