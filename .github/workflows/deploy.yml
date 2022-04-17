@@ -30,6 +30,8 @@ jobs:
           cp ./samples/cow.vtp ./docs/files/
           cp ./samples/diskout-stream-binary-zlib.vtp ./docs/files/
           cp ./samples/piston.vtu ./docs/files/
+          cp ./samples/mesh/abaqus.inp ./docs/files/
+          cp ./samples/mesh/aster_mesh.med ./docs/files/
           cd docs
           jupyter lite build
           cp -R ./_output/extensions ./_output/lab
