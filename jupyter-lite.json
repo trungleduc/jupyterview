@@ -2,14 +2,21 @@
   "jupyter-config-data": {
     "appName": "JupyterLite",
     "appUrl": "./lab",
-    "appVersion": "0.1.0-beta.4",
+    "appVersion": "0.1.0-beta.8",
     "baseUrl": "./",
     "faviconUrl": "./lab/favicon.ico",
     "federated_extensions": [
       {
         "extension": "./extension",
         "liteExtension": false,
-        "load": "static/remoteEntry.d0506817b56ee0148577.js",
+        "load": "static/remoteEntry.aa1060b2d1221f8e5688.js",
+        "name": "jupyterlab_pygments",
+        "style": "./style"
+      },
+      {
+        "extension": "./extension",
+        "liteExtension": false,
+        "load": "static/remoteEntry.d489263d7b4724337aa8.js",
         "name": "jupyterview",
         "style": "./style"
       }

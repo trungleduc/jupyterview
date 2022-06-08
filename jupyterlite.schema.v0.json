@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://jupyterlite.readthedocs.org/en/latest/schema-v0.html#",
+  "$id": "https://jupyterlite.readthedocs.org/en/latest/reference/schema-v0.html#",
   "title": "JupyterLite Schema v0",
   "description": "a schema for user-serviceable customizaton of a JupyterLite",
   "$ref": "#/definitions/top",
@@ -87,7 +87,7 @@
             "type": "string",
             "format": "uri"
           },
-          "description": "WebSocket URLs to use for finding WebRTC peers",
+          "description": "WebSocket URLs to use for finding WebRTC peers. Requires `jupyterlab-webrtc-docprovider`.",
           "default": [
             "wss://signaling.yjs.dev",
             "wss://y-webrtc-signaling-eu.herokuapp.com",
@@ -202,7 +202,7 @@
         "pyodideUrl": {
           "description": "The path to the main pyodide.js entry point",
           "type": "string",
-          "default": "https://cdn.jsdelivr.net/pyodide/v0.19.1/full/pyodide.js",
+          "default": "https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js",
           "format": "uri"
         },
         "disablePyPIFallback": {
