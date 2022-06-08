@@ -7,7 +7,7 @@ import { Contents } from '@jupyterlab/services';
 import { JupyterViewWidget, JupyterViewPanel } from './widget';
 
 import { JupyterViewModel } from './model';
-import { IJupyterViewParser } from '../reader/types';
+import { ParserManager } from '../reader/manager';
 
 export class JupyterViewWidgetFactory extends ABCWidgetFactory<
   JupyterViewWidget,
@@ -15,7 +15,7 @@ export class JupyterViewWidgetFactory extends ABCWidgetFactory<
 > {
   constructor(
     options: DocumentRegistry.IWidgetFactoryOptions,
-    private parsers: { [key: string]: IJupyterViewParser }
+    private parsers: ParserManager
   ) {
     super(options);
   }

@@ -9,7 +9,7 @@ import { Signal } from '@lumino/signaling';
 import { JupyterViewModel } from './model';
 
 import { MainView } from './mainview';
-import { IJupyterViewParser } from '../reader/types';
+import { ParserManager } from '../reader/manager';
 
 export class JupyterViewWidget extends DocumentWidget<
   JupyterViewPanel,
@@ -43,7 +43,7 @@ export class JupyterViewPanel extends ReactWidget {
    */
   constructor(
     context: DocumentRegistry.IContext<JupyterViewModel>,
-    private parsers: { [key: string]: IJupyterViewParser }
+    private parsers: ParserManager
   ) {
     super();
     this.addClass('jp-jupyterview-panel');

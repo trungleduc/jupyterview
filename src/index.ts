@@ -30,7 +30,11 @@ const activate = (
   shell: ILabShell
 ): IVtkTracker => {
   const tracker = new VtkTracker({ namespace: NAME_SPACE });
-  JupyterViewModel.kernel = new KernelExecutor({ manager: app.serviceManager });
+
+  JupyterViewModel.kernel = new KernelExecutor({
+    manager: app.serviceManager,
+    jupyterLite: !!document.getElementById('jupyter-lite-main')
+  });
   if (restorer) {
     restorer.restore(tracker, {
       command: 'docmanager:open',
@@ -54,7 +58,7 @@ const activate = (
       fileTypes: ['pvd', ...supportedFormat],
       defaultFor: ['pvd', ...supportedFormat]
     },
-    parserManager.parser
+    parserManager
   );
 
   // Add the widget to the tracker when it's created

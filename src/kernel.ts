@@ -28,13 +28,16 @@ export class KernelExecutor implements IDisposable {
     if (model) {
       this._sessionConnection = sessionManager.connectTo({ model });
     } else {
+      await this.options.manager.kernelspecs.ready;
+      const specs = this.options.manager.kernelspecs.specs!;
       this._sessionConnection = await sessionManager.startNew({
         name: KERNEL_NAME,
         path: UUID.uuid4(),
-        type: ''
+        kernel: {
+          name:specs.default
+        },
+        type: "notebook"
       });
-      await this.options.manager.kernelspecs.ready;
-      const specs = this.options.manager.kernelspecs.specs!;
       const kernelModel = {
         name: specs.kernelspecs[specs.default]!.name
       } as Kernel.IModel;
@@ -48,6 +51,11 @@ export class KernelExecutor implements IDisposable {
 
   codeGenerator(filePath: string): string {
     const writeFile = `
+      try:
+        import piplite
+        await piplite.install('meshio')
+      except:
+        pass
       import base64,  meshio, tempfile 
       mesh = meshio.read("${filePath}")
       c = tempfile.NamedTemporaryFile()
@@ -66,17 +74,50 @@ export class KernelExecutor implements IDisposable {
     return writeFile;
   }
 
-  async execute(filePath: string): Promise<{ type: string; binary: string }> {
+  fileGenerator(filePath: string, content: string): {path:string, code: string} {
+    const path = 'foo.inp'
+    const code = `
+    import base64
+    message = """${content}"""
+    base64_bytes = message.encode('ascii')
+    message_bytes = base64.b64decode(base64_bytes)
+    with open("${path}", 'wb') as f:
+      f.write(message_bytes)
+    path = 'foo bar'
+    path
+    `
+    console.log('filePath', filePath);
+    
+    return {path, code}
+  }
+
+  async execute(filePath: string, fileContent: string): Promise<{ type: string; binary: string }> {
     const stopOnError = true;
-    const code = this.codeGenerator(filePath);
-    const content: KernelMessage.IExecuteRequestMsg['content'] = {
-      code,
-      stop_on_error: stopOnError
-    };
+    let path = filePath
+    
     const kernel = this._sessionConnection?.kernel;
     if (!kernel) {
       throw new Error('Session has no kernel.');
     }
+
+    if (this.options.jupyterLite) { // tODO
+      const fileGeneratorCode = this.fileGenerator(filePath, fileContent)
+      const future = kernel.requestExecute({code: fileGeneratorCode.code}, false, undefined);
+      future.onIOPub = msg => {
+        console.log('msg', msg);
+        
+      }
+      const msg = await future.done
+      console.log('done create file', msg);
+      path = fileGeneratorCode.path
+    }
+    const code = this.codeGenerator(path);
+    const content: KernelMessage.IExecuteRequestMsg['content'] = {
+      code,
+      stop_on_error: stopOnError
+    };
+    console.log('start promise', code);
+    
     const promise = new Promise<{ type: string; binary: string }>(
       (resolve, reject) => {
         const future = kernel.requestExecute(content, false, undefined);
@@ -85,7 +126,7 @@ export class KernelExecutor implements IDisposable {
           if (msgType === 'execute_result') {
             const content = (msg as KernelMessage.IExecuteResultMsg).content
               .data['text/plain'] as string;
-            // Remove `b'` and `'` from content. Need improvement!!!
+            //Remove `b'` and `'` from content. TODO Need improvement!!!
             const type = content[1] === '0' ? 'vtu' : 'vtk';
             const binary = content.slice(6, -2);
             resolve({ type, binary });
@@ -112,5 +153,6 @@ export class KernelExecutor implements IDisposable {
 export namespace KernelExecutor {
   export interface IOptions {
     manager: ServiceManager;
+    jupyterLite: boolean
   }
 }

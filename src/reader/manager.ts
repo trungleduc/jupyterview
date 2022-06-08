@@ -1,21 +1,26 @@
 import { IJupyterViewParser } from './types';
 
 export class ParserManager {
-  private _parser: { [key: string]: IJupyterViewParser };
+  private _parser: Map<string, IJupyterViewParser>;
   constructor() {
-    this._parser = {};
+    this._parser = new Map(); 
   }
   registerParser(parser: IJupyterViewParser) {
     parser.supportedType.forEach(ext => {
-      if (!(ext in this._parser)) {
-        this._parser[ext] = parser;
+      if (!this._parser.has(ext)) {
+        this._parser.set(ext, parser);
       }
     });
   }
-  get parser(): { [key: string]: IJupyterViewParser } {
+  get parser(): Map<string, IJupyterViewParser> {
     return this._parser;
   }
+
   supportedFormat(): string[] {
-    return Object.keys(this._parser);
+    return Array.from(this._parser.keys());
+  }
+
+  getParser(ext: string): IJupyterViewParser | undefined {
+    return this._parser.get(ext);
   }
 }

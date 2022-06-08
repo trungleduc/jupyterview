@@ -19,8 +19,9 @@ export class MeshIOParser implements IJupyterViewParser {
     if (!fullPath) {
       throw Error('Full path is required for this file');
     }
+    
     const content = kernel.startKernel().then(() => {
-      const result = kernel.execute(fullPath);
+      const result = kernel.execute(fullPath, fileContent);
       return result;
     });
     return content;

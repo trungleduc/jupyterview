@@ -51,11 +51,12 @@ import {
   THEME_TYPE
 } from './utils';
 import { KernelExecutor } from '../kernel';
-import { IJupyterViewParser, IParserResult } from '../reader/types';
+import { IParserResult } from '../reader/types';
+import { ParserManager } from '../reader/manager';
 
 interface IProps {
   context: DocumentRegistry.IContext<JupyterViewModel>;
-  parsers: { [key: string]: IJupyterViewParser };
+  parsers: ParserManager;
 }
 
 interface IStates {
@@ -292,7 +293,10 @@ export class MainView extends React.Component<IProps, IStates> {
     } else {
       const fileExt = ext.toLowerCase();
       const path = `${filePath}${fileName}`;
-      const parser = this.props.parsers[fileExt];
+      const parser = this.props.parsers.getParser(fileExt);
+      if (!parser) {
+        throw Error('Parser not found')
+      }
       const content = parser.readFile(fileContent, fileExt, path, this._kernel);
       let output: string;
       if (parser.nativeSupport) {
