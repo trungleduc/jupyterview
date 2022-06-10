@@ -31,7 +31,10 @@ jobs:
           cp ./samples/diskout-stream-binary-zlib.vtp ./docs/files/
           cp ./samples/piston.vtu ./docs/files/
           cp ./samples/mesh/abaqus.inp ./docs/files/
-          cp ./samples/mesh/aster_mesh.med ./docs/files/
+          cp ./samples/mesh/ansys_mesh.msh ./docs/files/
+          cp ./samples/mesh/dolfin_mesh.xml ./docs/files/
+          cp ./samples/mesh/gmsh_mesh.msh ./docs/files/
+          cp ./samples/mesh/NETGEN_mesh.vol ./docs/files/
           cd docs
           jupyter lite build
           cp -R ./_output/extensions ./_output/lab
