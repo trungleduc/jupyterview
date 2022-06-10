@@ -7,12 +7,16 @@ import { Contents } from '@jupyterlab/services';
 import { JupyterViewWidget, JupyterViewPanel } from './widget';
 
 import { JupyterViewModel } from './model';
+import { ParserManager } from '../reader/manager';
 
 export class JupyterViewWidgetFactory extends ABCWidgetFactory<
   JupyterViewWidget,
   JupyterViewModel
 > {
-  constructor(options: DocumentRegistry.IWidgetFactoryOptions) {
+  constructor(
+    options: DocumentRegistry.IWidgetFactoryOptions,
+    private parsers: ParserManager
+  ) {
     super(options);
   }
 
@@ -27,7 +31,7 @@ export class JupyterViewWidgetFactory extends ABCWidgetFactory<
   ): JupyterViewWidget {
     return new JupyterViewWidget({
       context,
-      content: new JupyterViewPanel(context)
+      content: new JupyterViewPanel(context, this.parsers)
     });
   }
 }

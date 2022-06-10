@@ -1,5 +1,8 @@
-// import vtk
 import '@kitware/vtk.js/Rendering/OpenGL/Profiles/All';
+
+import readPolyDataArrayBuffer from 'itk/readPolyDataArrayBuffer';
+import * as React from 'react';
+import { v4 as uuid } from 'uuid';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ContentsManager } from '@jupyterlab/services';
@@ -27,10 +30,10 @@ import { Vector3 } from '@kitware/vtk.js/types';
 import vtk from '@kitware/vtk.js/vtk';
 import vtkWidgetManager from '@kitware/vtk.js/Widgets/Core/WidgetManager';
 import vtkInteractiveOrientationWidget from '@kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget';
-import readPolyDataArrayBuffer from 'itk/readPolyDataArrayBuffer';
-import * as React from 'react';
-import { v4 as uuid } from 'uuid';
 
+import { KernelExecutor } from '../kernel';
+import { ParserManager } from '../reader/manager';
+import { IParserResult } from '../reader/types';
 import {
   b64_to_utf8,
   convertPath,
@@ -53,6 +56,7 @@ import {
 
 interface IProps {
   context: DocumentRegistry.IContext<JupyterViewModel>;
+  parsers: ParserManager;
 }
 
 interface IStates {
@@ -158,6 +162,7 @@ export class MainView extends React.Component<IProps, IStates> {
 
       this._context.ready.then(() => {
         this._model = this._context.model as JupyterViewModel;
+        this._kernel = this._model.getKernel();
         this._model.themeChanged.connect((_, arg) => {
           this.handleThemeChange(arg.newValue as THEME_TYPE);
         });
@@ -174,6 +179,7 @@ export class MainView extends React.Component<IProps, IStates> {
         const fileName = fullPath.replace(/^.*(\\|\/|:)/, '');
 
         const fileContent = this._sharedModel.getContent('content');
+
         const contentPromises = this.prepareFileContent(
           dirPath,
           fileName,
@@ -186,8 +192,12 @@ export class MainView extends React.Component<IProps, IStates> {
         const fileList = Object.keys(contentPromises);
         for (const [path, promise] of entries) {
           const name = path.split('::')[0];
-          promise.then(vtkStringContent => {
-            this.stringToPolyData(vtkStringContent, name)
+
+          promise.then(vtkParsedContent => {
+            this.stringToPolyData(
+              vtkParsedContent.binary,
+              `${name}.${vtkParsedContent.type}`
+            )
               .then(polyResult => {
                 counter = Math.round(counter + 100 / totalItems);
                 this._fileData[path] = vtk(polyResult.polyData);
@@ -195,6 +205,7 @@ export class MainView extends React.Component<IProps, IStates> {
                 if (counter >= 99) {
                   this.createPipeline(this._fileData[firstName]);
                   this.setState(old => ({ ...old, loading: false, counter }));
+
                   this._sharedModel.setMainViewState({ fileList });
                 } else {
                   this.setState(old => ({ ...old, counter }));
@@ -260,30 +271,45 @@ export class MainView extends React.Component<IProps, IStates> {
     filePath: string,
     fileName: string,
     fileContent
-  ): { [key: string]: Promise<string> } {
+  ): { [key: string]: Promise<IParserResult> } {
     const pathList = fileName.split('.');
     const ext = pathList[pathList.length - 1];
-    const promises: { [key: string]: Promise<string> } = {};
+    const promises: { [key: string]: Promise<IParserResult> } = {};
     if (ext.toLowerCase() === 'pvd') {
       const xmlStr = b64_to_utf8(fileContent);
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(xmlStr, 'application/xml');
+      const xmlParser = new DOMParser();
+      const doc = xmlParser.parseFromString(xmlStr, 'application/xml');
       const contents = new ContentsManager();
       doc.querySelectorAll('DataSet').forEach(item => {
         const timeStep = item.getAttribute('timestep');
         const vtuPath = item.getAttribute('file');
-        const content = contents
+        const content: Promise<IParserResult> = contents
           .get(`${filePath}/${vtuPath}`, {
             format: 'base64',
             content: true,
             type: 'file'
           })
-          .then(iModel => iModel.content);
+          .then(iModel => ({ type: 'vtu', binary: iModel.content }));
         promises[`${vtuPath}::${filePath}::${timeStep}`] = content;
       });
       return promises;
+    } else {
+      const fileExt = ext.toLowerCase();
+      const path = `${filePath}${fileName}`;
+      const parser = this.props.parsers.getParser(fileExt);
+      if (!parser) {
+        throw Error('Parser not found');
+      }
+      const content = parser.readFile(fileContent, fileExt, path, this._kernel);
+      let output: string;
+      if (parser.nativeSupport) {
+        output = `${fileName}::${filePath}::0::${fileName}`;
+      } else {
+        output = `${fileName}.vtk::${filePath}::0::${fileName}`;
+      }
+      return { [output]: content };
     }
-    return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
+    // return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
   }
   async stringToPolyData(fileContent: string, filePath: string): Promise<any> {
     const str = `data:application/octet-stream;base64,${fileContent}`;
@@ -676,6 +702,7 @@ export class MainView extends React.Component<IProps, IStates> {
   private _context: DocumentRegistry.IContext<JupyterViewModel>;
   private _sharedModel: JupyterViewDoc;
   private _model: JupyterViewModel | undefined;
+  private _kernel: KernelExecutor;
 
   private _fullScreenRenderer: vtkRenderWindowWithControlBar;
   private _renderer: vtkRenderer;
