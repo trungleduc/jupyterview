@@ -87,7 +87,10 @@ export default class DatasetPanel extends React.Component<IProps, IStates> {
 
   render(): React.ReactNode {
     const fileList = (this.props.mainViewState.fileList ?? ['None']).map(
-      item => ({ label: item.split('::')[0], value: item })
+      item => {
+        const labelList = item.split('::');
+        return { label: labelList[3] ?? labelList[0], value: item };
+      }
     );
 
     return (

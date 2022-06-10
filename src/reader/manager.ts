@@ -3,7 +3,7 @@ import { IJupyterViewParser } from './types';
 export class ParserManager {
   private _parser: Map<string, IJupyterViewParser>;
   constructor() {
-    this._parser = new Map(); 
+    this._parser = new Map();
   }
   registerParser(parser: IJupyterViewParser) {
     parser.supportedType.forEach(ext => {

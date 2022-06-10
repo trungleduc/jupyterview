@@ -1,5 +1,8 @@
-// import vtk
 import '@kitware/vtk.js/Rendering/OpenGL/Profiles/All';
+
+import readPolyDataArrayBuffer from 'itk/readPolyDataArrayBuffer';
+import * as React from 'react';
+import { v4 as uuid } from 'uuid';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ContentsManager } from '@jupyterlab/services';
@@ -27,10 +30,10 @@ import { Vector3 } from '@kitware/vtk.js/types';
 import vtk from '@kitware/vtk.js/vtk';
 import vtkWidgetManager from '@kitware/vtk.js/Widgets/Core/WidgetManager';
 import vtkInteractiveOrientationWidget from '@kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget';
-import readPolyDataArrayBuffer from 'itk/readPolyDataArrayBuffer';
-import * as React from 'react';
-import { v4 as uuid } from 'uuid';
 
+import { KernelExecutor } from '../kernel';
+import { ParserManager } from '../reader/manager';
+import { IParserResult } from '../reader/types';
 import {
   b64_to_utf8,
   convertPath,
@@ -50,9 +53,6 @@ import {
   ROTATION_STEP,
   THEME_TYPE
 } from './utils';
-import { KernelExecutor } from '../kernel';
-import { IParserResult } from '../reader/types';
-import { ParserManager } from '../reader/manager';
 
 interface IProps {
   context: DocumentRegistry.IContext<JupyterViewModel>;
@@ -179,6 +179,7 @@ export class MainView extends React.Component<IProps, IStates> {
         const fileName = fullPath.replace(/^.*(\\|\/|:)/, '');
 
         const fileContent = this._sharedModel.getContent('content');
+
         const contentPromises = this.prepareFileContent(
           dirPath,
           fileName,
@@ -191,6 +192,7 @@ export class MainView extends React.Component<IProps, IStates> {
         const fileList = Object.keys(contentPromises);
         for (const [path, promise] of entries) {
           const name = path.split('::')[0];
+
           promise.then(vtkParsedContent => {
             this.stringToPolyData(
               vtkParsedContent.binary,
@@ -203,6 +205,7 @@ export class MainView extends React.Component<IProps, IStates> {
                 if (counter >= 99) {
                   this.createPipeline(this._fileData[firstName]);
                   this.setState(old => ({ ...old, loading: false, counter }));
+
                   this._sharedModel.setMainViewState({ fileList });
                 } else {
                   this.setState(old => ({ ...old, counter }));
@@ -295,14 +298,14 @@ export class MainView extends React.Component<IProps, IStates> {
       const path = `${filePath}${fileName}`;
       const parser = this.props.parsers.getParser(fileExt);
       if (!parser) {
-        throw Error('Parser not found')
+        throw Error('Parser not found');
       }
       const content = parser.readFile(fileContent, fileExt, path, this._kernel);
       let output: string;
       if (parser.nativeSupport) {
-        output = `${fileName}::${filePath}::0`;
+        output = `${fileName}::${filePath}::0::${fileName}`;
       } else {
-        output = `${fileName}.vtk::${filePath}::0`;
+        output = `${fileName}.vtk::${filePath}::0::${fileName}`;
       }
       return { [output]: content };
     }

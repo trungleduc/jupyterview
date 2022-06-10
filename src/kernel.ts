@@ -1,12 +1,13 @@
-import { toArray, find } from '@lumino/algorithm';
 import {
+  Kernel,
   KernelMessage,
   ServiceManager,
-  Kernel,
   Session
 } from '@jupyterlab/services';
-import { IDisposable } from '@lumino/disposable';
+import { find } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+
 const KERNEL_NAME = 'JupyterView Kernel';
 
 export class KernelExecutor implements IDisposable {
@@ -34,9 +35,9 @@ export class KernelExecutor implements IDisposable {
         name: KERNEL_NAME,
         path: UUID.uuid4(),
         kernel: {
-          name:specs.default
+          name: specs.default
         },
-        type: "notebook"
+        type: 'notebook'
       });
       const kernelModel = {
         name: specs.kernelspecs[specs.default]!.name
@@ -68,74 +69,88 @@ export class KernelExecutor implements IDisposable {
       with open(c.name,'rb') as f:
           content = f.read()
       c.close()
+      try:
+        os.remove("${filePath}")
+      except:
+        pass
       base64_bytes = base64.b64encode(content)
       {ext: base64_bytes}
       `;
     return writeFile;
   }
 
-  fileGenerator(filePath: string, content: string): {path:string, code: string} {
-    const path = 'foo.inp'
+  fileGenerator(
+    filePath: string,
+    content: string
+  ): { ext: string; code: string } {
+    const ext = filePath.split('.').pop() as string;
     const code = `
-    import base64
+    import base64, tempfile
+    tempPath = tempfile.NamedTemporaryFile(suffix=".${ext}",delete=False)
     message = """${content}"""
     base64_bytes = message.encode('ascii')
     message_bytes = base64.b64decode(base64_bytes)
-    with open("${path}", 'wb') as f:
+    with open(tempPath.name, 'wb') as f:
       f.write(message_bytes)
-    path = 'foo bar'
-    path
-    `
-    console.log('filePath', filePath);
-    
-    return {path, code}
+    tempPath.name
+    `;
+    return { ext, code };
   }
 
-  async execute(filePath: string, fileContent: string): Promise<{ type: string; binary: string }> {
+  async executeCode(
+    code: KernelMessage.IExecuteRequestMsg['content']
+  ): Promise<string> {
+    const kernel = this._sessionConnection?.kernel;
+    if (!kernel) {
+      throw new Error('Session has no kernel.');
+    }
+    return new Promise<string>((resolve, reject) => {
+      const future = kernel.requestExecute(code, false, undefined);
+      future.onIOPub = (msg: KernelMessage.IIOPubMessage): void => {
+        const msgType = msg.header.msg_type;
+        if (msgType === 'execute_result') {
+          const content = (msg as KernelMessage.IExecuteResultMsg).content.data[
+            'text/plain'
+          ] as string;
+          resolve(content);
+        } else if (msgType === 'error') {
+          console.error('Kernel operation failed', msg.content);
+          reject(msg.content);
+        }
+      };
+    });
+  }
+  async convertFile(
+    filePath: string,
+    fileContent: string
+  ): Promise<{ type: string; binary: string }> {
     const stopOnError = true;
-    let path = filePath
-    
+    let path = filePath;
+    let format: string | undefined;
     const kernel = this._sessionConnection?.kernel;
     if (!kernel) {
       throw new Error('Session has no kernel.');
     }
 
-    if (this.options.jupyterLite) { // tODO
-      const fileGeneratorCode = this.fileGenerator(filePath, fileContent)
-      const future = kernel.requestExecute({code: fileGeneratorCode.code}, false, undefined);
-      future.onIOPub = msg => {
-        console.log('msg', msg);
-        
-      }
-      const msg = await future.done
-      console.log('done create file', msg);
-      path = fileGeneratorCode.path
+    if (this.options.jupyterLite) {
+      const fileGeneratorCode = this.fileGenerator(filePath, fileContent);
+      const tempPath = await this.executeCode({ code: fileGeneratorCode.code });
+      path = tempPath.slice(1, -1);
+      format = fileGeneratorCode.ext;
     }
     const code = this.codeGenerator(path);
     const content: KernelMessage.IExecuteRequestMsg['content'] = {
       code,
       stop_on_error: stopOnError
     };
-    console.log('start promise', code);
-    
-    const promise = new Promise<{ type: string; binary: string }>(
-      (resolve, reject) => {
-        const future = kernel.requestExecute(content, false, undefined);
-        future.onIOPub = (msg: KernelMessage.IIOPubMessage): void => {
-          const msgType = msg.header.msg_type;
-          if (msgType === 'execute_result') {
-            const content = (msg as KernelMessage.IExecuteResultMsg).content
-              .data['text/plain'] as string;
-            //Remove `b'` and `'` from content. TODO Need improvement!!!
-            const type = content[1] === '0' ? 'vtu' : 'vtk';
-            const binary = content.slice(6, -2);
-            resolve({ type, binary });
-          } else if (msgType === 'error') {
-            console.error('MeshIO operation failed', msg.content);
-          }
-        };
-      }
-    );
+
+    const promise: Promise<{ type: string; binary: string }> = this.executeCode(
+      content
+    ).then(content => {
+      const type = content[1] === '0' ? 'vtu' : 'vtk';
+      const binary = content.slice(6, -2);
+      return { type, binary };
+    });
 
     return promise;
   }
@@ -153,6 +168,6 @@ export class KernelExecutor implements IDisposable {
 export namespace KernelExecutor {
   export interface IOptions {
     manager: ServiceManager;
-    jupyterLite: boolean
+    jupyterLite: boolean;
   }
 }
