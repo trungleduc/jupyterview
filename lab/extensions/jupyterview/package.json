@@ -89,7 +89,7 @@
     "outputDir": "jupyterview/labextension",
     "webpackConfig": "./extension.webpack.config.js",
     "_build": {
-      "load": "static/remoteEntry.d489263d7b4724337aa8.js",
+      "load": "static/remoteEntry.2badaf6da569cf3a10c1.js",
       "extension": "./extension",
       "style": "./style"
     }

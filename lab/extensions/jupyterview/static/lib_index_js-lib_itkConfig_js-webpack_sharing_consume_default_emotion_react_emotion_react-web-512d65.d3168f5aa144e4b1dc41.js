@@ -15,12 +15,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _jupyterlab_application__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_application__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jupyterlab/apputils */ "webpack/sharing/consume/default/@jupyterlab/apputils");
 /* harmony import */ var _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _mainview_factory__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./mainview/factory */ "./lib/mainview/factory.js");
-/* harmony import */ var _mainview_widget__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./mainview/widget */ "./lib/mainview/widget.js");
-/* harmony import */ var _panelview_widget__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./panelview/widget */ "./lib/panelview/widget.js");
-/* harmony import */ var _token__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./token */ "./lib/token.js");
-/* harmony import */ var _tools__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tools */ "./lib/tools.js");
+/* harmony import */ var _kernel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./kernel */ "./lib/kernel.js");
+/* harmony import */ var _mainview_factory__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./mainview/factory */ "./lib/mainview/factory.js");
+/* harmony import */ var _mainview_model__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./mainview/model */ "./lib/mainview/model.js");
+/* harmony import */ var _mainview_widget__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./mainview/widget */ "./lib/mainview/widget.js");
+/* harmony import */ var _panelview_widget__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./panelview/widget */ "./lib/panelview/widget.js");
+/* harmony import */ var _reader_manager__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./reader/manager */ "./lib/reader/manager.js");
+/* harmony import */ var _reader_meshioParser__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./reader/meshioParser */ "./lib/reader/meshioParser.js");
+/* harmony import */ var _reader_vtkParser__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./reader/vtkParser */ "./lib/reader/vtkParser.js");
+/* harmony import */ var _token__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./token */ "./lib/token.js");
+/* harmony import */ var _tools__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./tools */ "./lib/tools.js");
 /* harmony import */ var _vtkTracker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./vtkTracker */ "./lib/vtkTracker.js");
+
+
+
+
+
 
 
 
@@ -33,6 +43,10 @@ const FACTORY = 'Jupyterview Factory';
 const NAME_SPACE = 'jupyterview';
 const activate = (app, restorer, themeManager, shell) => {
     const tracker = new _vtkTracker__WEBPACK_IMPORTED_MODULE_2__.VtkTracker({ namespace: NAME_SPACE });
+    _mainview_model__WEBPACK_IMPORTED_MODULE_3__.JupyterViewModel.kernel = new _kernel__WEBPACK_IMPORTED_MODULE_4__.KernelExecutor({
+        manager: app.serviceManager,
+        jupyterLite: !!document.getElementById('jupyter-lite-main')
+    });
     if (restorer) {
         restorer.restore(tracker, {
             command: 'docmanager:open',
@@ -40,15 +54,20 @@ const activate = (app, restorer, themeManager, shell) => {
             name: widget => widget.context.path
         });
     }
+    const parserManager = new _reader_manager__WEBPACK_IMPORTED_MODULE_5__.ParserManager();
+    const vtkParser = new _reader_vtkParser__WEBPACK_IMPORTED_MODULE_6__.VtkParser();
+    parserManager.registerParser(vtkParser);
+    const meshioParser = new _reader_meshioParser__WEBPACK_IMPORTED_MODULE_7__.MeshIOParser();
+    parserManager.registerParser(meshioParser);
+    const supportedFormat = parserManager.supportedFormat();
     // Creating the widget factory to register it so the document manager knows about
     // our new DocumentWidget
-    const fileTypeList = ['vtp', 'vtu', 'vtk'];
-    const widgetFactory = new _mainview_factory__WEBPACK_IMPORTED_MODULE_3__.JupyterViewWidgetFactory({
+    const widgetFactory = new _mainview_factory__WEBPACK_IMPORTED_MODULE_8__.JupyterViewWidgetFactory({
         name: FACTORY,
         modelName: 'jupyterview-model',
-        fileTypes: ['pvd', ...fileTypeList],
-        defaultFor: ['pvd', ...fileTypeList]
-    });
+        fileTypes: ['pvd', ...supportedFormat],
+        defaultFor: ['pvd', ...supportedFormat]
+    }, parserManager);
     // Add the widget to the tracker when it's created
     widgetFactory.widgetCreated.connect((sender, widget) => {
         // Notify the instance tracker if restore data needs to update.
@@ -61,9 +80,9 @@ const activate = (app, restorer, themeManager, shell) => {
     });
     app.docRegistry.addWidgetFactory(widgetFactory);
     // Creating and registering the model factory for our custom DocumentModel
-    const modelFactory = new _mainview_factory__WEBPACK_IMPORTED_MODULE_3__.JupyterViewModelFactory();
+    const modelFactory = new _mainview_factory__WEBPACK_IMPORTED_MODULE_8__.JupyterViewModelFactory();
     app.docRegistry.addModelFactory(modelFactory);
-    fileTypeList.forEach((fileType) => {
+    supportedFormat.forEach((fileType) => {
         const FILETYPE = fileType.toUpperCase();
         app.docRegistry.addFileType({
             name: fileType,
@@ -85,7 +104,7 @@ const activate = (app, restorer, themeManager, shell) => {
     console.log('JupyterLab extension jupyterview is activated!');
     shell.currentChanged.connect((shell, change) => {
         const widget = change.newValue;
-        if (widget instanceof _mainview_widget__WEBPACK_IMPORTED_MODULE_4__.JupyterViewWidget) {
+        if (widget instanceof _mainview_widget__WEBPACK_IMPORTED_MODULE_9__.JupyterViewWidget) {
             window.dispatchEvent(new Event('resize'));
         }
     });
@@ -98,18 +117,18 @@ const plugin = {
     id: 'jupyterview:plugin',
     autoStart: true,
     requires: [_jupyterlab_application__WEBPACK_IMPORTED_MODULE_0__.ILayoutRestorer, _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.IThemeManager, _jupyterlab_application__WEBPACK_IMPORTED_MODULE_0__.ILabShell],
-    provides: _token__WEBPACK_IMPORTED_MODULE_5__.IJupyterViewDocTracker,
+    provides: _token__WEBPACK_IMPORTED_MODULE_10__.IJupyterViewDocTracker,
     activate
 };
 const controlPanel = {
     id: 'jupyterview:controlpanel',
     autoStart: true,
-    requires: [_jupyterlab_application__WEBPACK_IMPORTED_MODULE_0__.ILayoutRestorer, _jupyterlab_application__WEBPACK_IMPORTED_MODULE_0__.ILabShell, _token__WEBPACK_IMPORTED_MODULE_5__.IJupyterViewDocTracker],
+    requires: [_jupyterlab_application__WEBPACK_IMPORTED_MODULE_0__.ILayoutRestorer, _jupyterlab_application__WEBPACK_IMPORTED_MODULE_0__.ILabShell, _token__WEBPACK_IMPORTED_MODULE_10__.IJupyterViewDocTracker],
     activate: (app, restorer, shell, tracker) => {
-        const controlPanel = new _panelview_widget__WEBPACK_IMPORTED_MODULE_6__.PanelWidget(tracker);
+        const controlPanel = new _panelview_widget__WEBPACK_IMPORTED_MODULE_11__.PanelWidget(tracker);
         controlPanel.id = 'jupyterview::controlPanel';
         controlPanel.title.caption = 'JupyterView Control Panel';
-        controlPanel.title.icon = _tools__WEBPACK_IMPORTED_MODULE_7__.jvcLightIcon;
+        controlPanel.title.icon = _tools__WEBPACK_IMPORTED_MODULE_12__.jvcLightIcon;
         if (restorer) {
             restorer.add(controlPanel, NAME_SPACE);
         }
@@ -144,6 +163,160 @@ const itkConfig = {
     itkModulesPath: _public_path__ + 'itk'
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (itkConfig);
+
+
+/***/ }),
+
+/***/ "./lib/kernel.js":
+/*!***********************!*\
+  !*** ./lib/kernel.js ***!
+  \***********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "KernelExecutor": () => (/* binding */ KernelExecutor)
+/* harmony export */ });
+/* harmony import */ var _lumino_algorithm__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @lumino/algorithm */ "webpack/sharing/consume/default/@lumino/algorithm");
+/* harmony import */ var _lumino_algorithm__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_lumino_algorithm__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _lumino_coreutils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @lumino/coreutils */ "webpack/sharing/consume/default/@lumino/coreutils");
+/* harmony import */ var _lumino_coreutils__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_lumino_coreutils__WEBPACK_IMPORTED_MODULE_1__);
+
+
+const KERNEL_NAME = 'JupyterView Kernel';
+class KernelExecutor {
+    constructor(options) {
+        this.options = options;
+        this._kernelStarted = false;
+    }
+    async startKernel() {
+        var _a;
+        if (this._kernelStarted) {
+            return;
+        }
+        const sessionManager = this.options.manager.sessions;
+        await sessionManager.ready;
+        await sessionManager.refreshRunning();
+        const model = (0,_lumino_algorithm__WEBPACK_IMPORTED_MODULE_0__.find)(sessionManager.running(), item => {
+            return item.name === KERNEL_NAME;
+        });
+        if (model) {
+            this._sessionConnection = sessionManager.connectTo({ model });
+        }
+        else {
+            await this.options.manager.kernelspecs.ready;
+            const specs = this.options.manager.kernelspecs.specs;
+            this._sessionConnection = await sessionManager.startNew({
+                name: KERNEL_NAME,
+                path: _lumino_coreutils__WEBPACK_IMPORTED_MODULE_1__.UUID.uuid4(),
+                kernel: {
+                    name: specs.default
+                },
+                type: 'notebook'
+            });
+            const kernelModel = {
+                name: specs.kernelspecs[specs.default].name
+            };
+            await this._sessionConnection.changeKernel(kernelModel);
+        }
+        (_a = this._sessionConnection.kernel) === null || _a === void 0 ? void 0 : _a.disposed.connect(() => (this._kernelStarted = false));
+        this._kernelStarted = true;
+    }
+    codeGenerator(filePath) {
+        const writeFile = `
+      try:
+        import piplite
+        await piplite.install('meshio')
+      except:
+        pass
+      import base64,  meshio, tempfile 
+      mesh = meshio.read("${filePath}")
+      c = tempfile.NamedTemporaryFile()
+      try:
+        ext = 0
+        mesh.write(c.name,'vtu')
+      except:
+        ext = 1
+        mesh.write(c.name,'vtk')
+      with open(c.name,'rb') as f:
+          content = f.read()
+      c.close()
+      try:
+        os.remove("${filePath}")
+      except:
+        pass
+      base64_bytes = base64.b64encode(content)
+      {ext: base64_bytes}
+      `;
+        return writeFile;
+    }
+    fileGenerator(filePath, content) {
+        const ext = filePath.split('.').pop();
+        const code = `
+    import base64, tempfile
+    tempPath = tempfile.NamedTemporaryFile(suffix=".${ext}",delete=False)
+    message = """${content}"""
+    base64_bytes = message.encode('ascii')
+    message_bytes = base64.b64decode(base64_bytes)
+    with open(tempPath.name, 'wb') as f:
+      f.write(message_bytes)
+    tempPath.name
+    `;
+        return { ext, code };
+    }
+    async executeCode(code) {
+        var _a;
+        const kernel = (_a = this._sessionConnection) === null || _a === void 0 ? void 0 : _a.kernel;
+        if (!kernel) {
+            throw new Error('Session has no kernel.');
+        }
+        return new Promise((resolve, reject) => {
+            const future = kernel.requestExecute(code, false, undefined);
+            future.onIOPub = (msg) => {
+                const msgType = msg.header.msg_type;
+                if (msgType === 'execute_result') {
+                    const content = msg.content.data['text/plain'];
+                    resolve(content);
+                }
+                else if (msgType === 'error') {
+                    console.error('Kernel operation failed', msg.content);
+                    reject(msg.content);
+                }
+            };
+        });
+    }
+    async convertFile(filePath, fileContent) {
+        var _a;
+        const stopOnError = true;
+        let path = filePath;
+        let format;
+        const kernel = (_a = this._sessionConnection) === null || _a === void 0 ? void 0 : _a.kernel;
+        if (!kernel) {
+            throw new Error('Session has no kernel.');
+        }
+        if (this.options.jupyterLite) {
+            const fileGeneratorCode = this.fileGenerator(filePath, fileContent);
+            const tempPath = await this.executeCode({ code: fileGeneratorCode.code });
+            path = tempPath.slice(1, -1);
+            format = fileGeneratorCode.ext;
+        }
+        const code = this.codeGenerator(path);
+        const content = {
+            code,
+            stop_on_error: stopOnError
+        };
+        const promise = this.executeCode(content).then(content => {
+            const type = content[1] === '0' ? 'vtu' : 'vtk';
+            const binary = content.slice(6, -2);
+            return { type, binary };
+        });
+        return promise;
+    }
+    dispose() {
+        this._sessionConnection.dispose();
+    }
+}
 
 
 /***/ }),
@@ -219,8 +392,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class JupyterViewWidgetFactory extends _jupyterlab_docregistry__WEBPACK_IMPORTED_MODULE_0__.ABCWidgetFactory {
-    constructor(options) {
+    constructor(options, parsers) {
         super(options);
+        this.parsers = parsers;
     }
     /**
      * Create a new widget given a context.
@@ -231,7 +405,7 @@ class JupyterViewWidgetFactory extends _jupyterlab_docregistry__WEBPACK_IMPORTED
     createNewWidget(context) {
         return new _widget__WEBPACK_IMPORTED_MODULE_1__.JupyterViewWidget({
             context,
-            content: new _widget__WEBPACK_IMPORTED_MODULE_1__.JupyterViewPanel(context)
+            content: new _widget__WEBPACK_IMPORTED_MODULE_1__.JupyterViewPanel(context, this.parsers)
         });
     }
 }
@@ -317,32 +491,31 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MainView": () => (/* binding */ MainView)
 /* harmony export */ });
 /* harmony import */ var _kitware_vtk_js_Rendering_OpenGL_Profiles_All__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/OpenGL/Profiles/All */ "./node_modules/@kitware/vtk.js/Rendering/OpenGL/Profiles/All.js");
-/* harmony import */ var _jupyterlab_services__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jupyterlab/services */ "webpack/sharing/consume/default/@jupyterlab/services");
-/* harmony import */ var _jupyterlab_services__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_services__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/Math */ "./node_modules/@kitware/vtk.js/Common/Core/Math.js");
-/* harmony import */ var _kitware_vtk_js_Common_Core_MatrixBuilder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/MatrixBuilder */ "./node_modules/@kitware/vtk.js/Common/Core/MatrixBuilder.js");
-/* harmony import */ var _kitware_vtk_js_Filters_General_WarpScalar__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/WarpScalar */ "./node_modules/@kitware/vtk.js/Filters/General/WarpScalar.js");
-/* harmony import */ var _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget */ "./node_modules/@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_AxesActor__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/AxesActor */ "./node_modules/@kitware/vtk.js/Rendering/Core/AxesActor.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ColorTransferFunction */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ColorTransferFunction_ColorMaps__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper/Constants */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper/Constants.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Core_ScalarBarActor__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ScalarBarActor */ "./node_modules/@kitware/vtk.js/Rendering/Core/ScalarBarActor.js");
-/* harmony import */ var _kitware_vtk_js_Rendering_Misc_RenderWindowWithControlBar__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/RenderWindowWithControlBar */ "./node_modules/@kitware/vtk.js/Rendering/Misc/RenderWindowWithControlBar.js");
-/* harmony import */ var _kitware_vtk_js_vtk__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/vtk */ "./node_modules/@kitware/vtk.js/vtk.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
-/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_InteractiveOrientationWidget__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget.js");
-/* harmony import */ var itk_readPolyDataArrayBuffer__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! itk/readPolyDataArrayBuffer */ "./node_modules/itk/readPolyDataArrayBuffer.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! react */ "webpack/sharing/consume/default/react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_18___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_18__);
-/* harmony import */ var uuid__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! uuid */ "webpack/sharing/consume/default/uuid/uuid");
-/* harmony import */ var uuid__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(uuid__WEBPACK_IMPORTED_MODULE_19__);
+/* harmony import */ var itk_readPolyDataArrayBuffer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! itk/readPolyDataArrayBuffer */ "./node_modules/itk/readPolyDataArrayBuffer.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "webpack/sharing/consume/default/react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var uuid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! uuid */ "webpack/sharing/consume/default/uuid/uuid");
+/* harmony import */ var uuid__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(uuid__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _jupyterlab_services__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jupyterlab/services */ "webpack/sharing/consume/default/@jupyterlab/services");
+/* harmony import */ var _jupyterlab_services__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_services__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/Math */ "./node_modules/@kitware/vtk.js/Common/Core/Math.js");
+/* harmony import */ var _kitware_vtk_js_Common_Core_MatrixBuilder__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @kitware/vtk.js/Common/Core/MatrixBuilder */ "./node_modules/@kitware/vtk.js/Common/Core/MatrixBuilder.js");
+/* harmony import */ var _kitware_vtk_js_Filters_General_WarpScalar__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @kitware/vtk.js/Filters/General/WarpScalar */ "./node_modules/@kitware/vtk.js/Filters/General/WarpScalar.js");
+/* harmony import */ var _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget */ "./node_modules/@kitware/vtk.js/Interaction/Widgets/OrientationMarkerWidget.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Actor */ "./node_modules/@kitware/vtk.js/Rendering/Core/Actor.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_AxesActor__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/AxesActor */ "./node_modules/@kitware/vtk.js/Rendering/Core/AxesActor.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ColorTransferFunction */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ColorTransferFunction_ColorMaps__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps */ "./node_modules/@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/Mapper/Constants */ "./node_modules/@kitware/vtk.js/Rendering/Core/Mapper/Constants.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Core_ScalarBarActor__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Core/ScalarBarActor */ "./node_modules/@kitware/vtk.js/Rendering/Core/ScalarBarActor.js");
+/* harmony import */ var _kitware_vtk_js_Rendering_Misc_RenderWindowWithControlBar__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @kitware/vtk.js/Rendering/Misc/RenderWindowWithControlBar */ "./node_modules/@kitware/vtk.js/Rendering/Misc/RenderWindowWithControlBar.js");
+/* harmony import */ var _kitware_vtk_js_vtk__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @kitware/vtk.js/vtk */ "./node_modules/@kitware/vtk.js/vtk.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Core/WidgetManager */ "./node_modules/@kitware/vtk.js/Widgets/Core/WidgetManager.js");
+/* harmony import */ var _kitware_vtk_js_Widgets_Widgets3D_InteractiveOrientationWidget__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget */ "./node_modules/@kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget.js");
 /* harmony import */ var _tools__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../tools */ "./lib/tools.js");
 /* harmony import */ var _cameraToolbar__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./cameraToolbar */ "./lib/mainview/cameraToolbar.js");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./utils */ "./lib/mainview/utils.js");
-// import vtk
 
 
 
@@ -366,7 +539,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
+class MainView extends react__WEBPACK_IMPORTED_MODULE_2__.Component {
     constructor(props) {
         super(props);
         this.handleThemeChange = (newTheme) => {
@@ -451,8 +624,8 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
         this.updateColorBy = (color) => {
             const [location, colorByArrayName, indexValue] = color.split(':');
             const interpolateScalarsBeforeMapping = location === 'PointData';
-            let colorMode = _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_11__.ColorMode.DEFAULT;
-            let scalarMode = _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_11__.ScalarMode.DEFAULT;
+            let colorMode = _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_14__.ColorMode.DEFAULT;
+            let scalarMode = _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_14__.ScalarMode.DEFAULT;
             const scalarVisibility = location.length > 0;
             if (scalarVisibility) {
                 const newArray = this._source[`get${location}`]().getArrayByName(colorByArrayName);
@@ -467,11 +640,11 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
                 this._sharedModel.transact(() => {
                     this._sharedModel.setMainViewState({ dataRange: [...this._dataRange] });
                 });
-                colorMode = _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_11__.ColorMode.MAP_SCALARS;
+                colorMode = _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_14__.ColorMode.MAP_SCALARS;
                 scalarMode =
                     location === 'PointData'
-                        ? _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_11__.ScalarMode.USE_POINT_FIELD_DATA
-                        : _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_11__.ScalarMode.USE_CELL_FIELD_DATA;
+                        ? _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_14__.ScalarMode.USE_POINT_FIELD_DATA
+                        : _kitware_vtk_js_Rendering_Core_Mapper_Constants__WEBPACK_IMPORTED_MODULE_14__.ScalarMode.USE_CELL_FIELD_DATA;
                 if (this._mapper.getLookupTable()) {
                     const lut = this._mapper.getLookupTable();
                     if (selectedComp === -1) {
@@ -503,7 +676,7 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
             if (!options.dataRange) {
                 options.dataRange = this._dataRange;
             }
-            const preset = _kitware_vtk_js_Rendering_Core_ColorTransferFunction_ColorMaps__WEBPACK_IMPORTED_MODULE_9__["default"].getPresetByName(options.colorSchema);
+            const preset = _kitware_vtk_js_Rendering_Core_ColorTransferFunction_ColorMaps__WEBPACK_IMPORTED_MODULE_12__["default"].getPresetByName(options.colorSchema);
             this._lookupTable.applyColorMap(preset);
             this._lookupTable.setMappingRange(options.dataRange[0], options.dataRange[1]);
             this._lookupTable.updateRange();
@@ -548,21 +721,21 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
             return option;
         };
         this.createPipeline = (polyResult) => {
-            this._lookupTable = _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_8__["default"].newInstance();
-            this._mapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance({
+            this._lookupTable = _kitware_vtk_js_Rendering_Core_ColorTransferFunction__WEBPACK_IMPORTED_MODULE_11__["default"].newInstance();
+            this._mapper = _kitware_vtk_js_Rendering_Core_Mapper__WEBPACK_IMPORTED_MODULE_13__["default"].newInstance({
                 interpolateScalarsBeforeMapping: true,
                 useLookupTableScalarRange: true,
                 scalarVisibility: false
             });
             this._mapper.setLookupTable(this._lookupTable);
-            this._actor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_6__["default"].newInstance();
+            this._actor = _kitware_vtk_js_Rendering_Core_Actor__WEBPACK_IMPORTED_MODULE_9__["default"].newInstance();
             this._actor.setMapper(this._mapper);
             this._actor.getProperty().setColor(..._utils__WEBPACK_IMPORTED_MODULE_20__.OBJECT_COLOR[this.state.theme]);
             this._lookupTable.onModified(() => {
                 this._renderWindow.render();
             });
             this._source = polyResult;
-            this._warpScalar = _kitware_vtk_js_Filters_General_WarpScalar__WEBPACK_IMPORTED_MODULE_4__["default"].newInstance({
+            this._warpScalar = _kitware_vtk_js_Filters_General_WarpScalar__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance({
                 scaleFactor: 0,
                 useNormal: true
             });
@@ -582,7 +755,7 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
             const fontColor = this.state.theme === _utils__WEBPACK_IMPORTED_MODULE_20__.LIGHT_THEME
                 ? 'rgba(0, 0, 0, 0.87)'
                 : 'rgba(255, 255, 255, 0.87)';
-            this._scalarBarActor = _kitware_vtk_js_Rendering_Core_ScalarBarActor__WEBPACK_IMPORTED_MODULE_12__["default"].newInstance();
+            this._scalarBarActor = _kitware_vtk_js_Rendering_Core_ScalarBarActor__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance();
             this._scalarBarActor.setAxisTextStyle({
                 fontColor,
                 fontFamily: _utils__WEBPACK_IMPORTED_MODULE_20__.JUPYTER_FONT,
@@ -619,7 +792,7 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
                 focalPoint[1] - position[1],
                 focalPoint[2] - position[2]
             ];
-            _kitware_vtk_js_Common_Core_MatrixBuilder__WEBPACK_IMPORTED_MODULE_3__["default"].buildFromDegree()
+            _kitware_vtk_js_Common_Core_MatrixBuilder__WEBPACK_IMPORTED_MODULE_6__["default"].buildFromDegree()
                 .rotate(Number.isNaN(angle) ? 90 : angle, axis)
                 .apply(viewUp);
             camera.setViewUp(...viewUp);
@@ -698,7 +871,7 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
         const theme = (window.jupyterlabTheme ||
             _utils__WEBPACK_IMPORTED_MODULE_20__.LIGHT_THEME);
         this.state = {
-            id: (0,uuid__WEBPACK_IMPORTED_MODULE_19__.v4)(),
+            id: (0,uuid__WEBPACK_IMPORTED_MODULE_3__.v4)(),
             theme,
             loading: true,
             colorOption: [],
@@ -706,21 +879,21 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
         };
         this._context = props.context;
         this._sharedModel = props.context.model.sharedModel;
-        this.container = react__WEBPACK_IMPORTED_MODULE_18__.createRef();
+        this.container = react__WEBPACK_IMPORTED_MODULE_2__.createRef();
         this._fileData = {};
     }
     componentDidMount() {
         setTimeout(() => {
             const rootContainer = this.container.current;
-            this._fullScreenRenderer = _kitware_vtk_js_Rendering_Misc_RenderWindowWithControlBar__WEBPACK_IMPORTED_MODULE_13__["default"].newInstance({
+            this._fullScreenRenderer = _kitware_vtk_js_Rendering_Misc_RenderWindowWithControlBar__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance({
                 controlSize: 0
             });
             this._fullScreenRenderer.setContainer(rootContainer);
             this._renderer = this._fullScreenRenderer.getRenderer();
             this._renderer.setBackground([0, 0, 0, 0]);
             this._renderWindow = this._fullScreenRenderer.getRenderWindow();
-            const axes = _kitware_vtk_js_Rendering_Core_AxesActor__WEBPACK_IMPORTED_MODULE_7__["default"].newInstance();
-            const orientationWidget = _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_5__["default"].newInstance({
+            const axes = _kitware_vtk_js_Rendering_Core_AxesActor__WEBPACK_IMPORTED_MODULE_10__["default"].newInstance();
+            const orientationWidget = _kitware_vtk_js_Interaction_Widgets_OrientationMarkerWidget__WEBPACK_IMPORTED_MODULE_8__["default"].newInstance({
                 actor: axes,
                 interactor: this._renderWindow.getInteractor()
             });
@@ -729,9 +902,9 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
             orientationWidget.setMinPixelSize(100);
             orientationWidget.setMaxPixelSize(300);
             const camera = (this._camera = this._renderer.getActiveCamera());
-            const widgetManager = _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_15__["default"].newInstance();
+            const widgetManager = _kitware_vtk_js_Widgets_Core_WidgetManager__WEBPACK_IMPORTED_MODULE_18__["default"].newInstance();
             widgetManager.setRenderer(orientationWidget.getRenderer());
-            const widget = _kitware_vtk_js_Widgets_Widgets3D_InteractiveOrientationWidget__WEBPACK_IMPORTED_MODULE_16__["default"].newInstance();
+            const widget = _kitware_vtk_js_Widgets_Widgets3D_InteractiveOrientationWidget__WEBPACK_IMPORTED_MODULE_19__["default"].newInstance();
             widget.placeWidget(axes.getBounds());
             widget.setBounds(axes.getBounds());
             widget.setPlaceFactor(1);
@@ -740,7 +913,7 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
                 const focalPoint = camera.getFocalPoint();
                 const position = camera.getPosition();
                 const viewUp = camera.getViewUp();
-                const distance = Math.sqrt(_kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_2__.distance2BetweenPoints(position, focalPoint));
+                const distance = Math.sqrt(_kitware_vtk_js_Common_Core_Math__WEBPACK_IMPORTED_MODULE_5__.distance2BetweenPoints(position, focalPoint));
                 camera.setPosition(focalPoint[0] + direction[0] * distance, focalPoint[1] + direction[1] * distance, focalPoint[2] + direction[2] * distance);
                 let axis = [];
                 if (direction[0]) {
@@ -773,6 +946,7 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
                 .removeEventListener('keyup', interactor.handleKeyUp);
             this._context.ready.then(() => {
                 this._model = this._context.model;
+                this._kernel = this._model.getKernel();
                 this._model.themeChanged.connect((_, arg) => {
                     this.handleThemeChange(arg.newValue);
                 });
@@ -790,11 +964,11 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
                 const fileList = Object.keys(contentPromises);
                 for (const [path, promise] of entries) {
                     const name = path.split('::')[0];
-                    promise.then(vtkStringContent => {
-                        this.stringToPolyData(vtkStringContent, name)
+                    promise.then(vtkParsedContent => {
+                        this.stringToPolyData(vtkParsedContent.binary, `${name}.${vtkParsedContent.type}`)
                             .then(polyResult => {
                             counter = Math.round(counter + 100 / totalItems);
-                            this._fileData[path] = (0,_kitware_vtk_js_vtk__WEBPACK_IMPORTED_MODULE_14__["default"])(polyResult.polyData);
+                            this._fileData[path] = (0,_kitware_vtk_js_vtk__WEBPACK_IMPORTED_MODULE_17__["default"])(polyResult.polyData);
                             polyResult.webWorker.terminate();
                             if (counter >= 99) {
                                 this.createPipeline(this._fileData[firstName]);
@@ -834,9 +1008,9 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
         const promises = {};
         if (ext.toLowerCase() === 'pvd') {
             const xmlStr = (0,_tools__WEBPACK_IMPORTED_MODULE_21__.b64_to_utf8)(fileContent);
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(xmlStr, 'application/xml');
-            const contents = new _jupyterlab_services__WEBPACK_IMPORTED_MODULE_1__.ContentsManager();
+            const xmlParser = new DOMParser();
+            const doc = xmlParser.parseFromString(xmlStr, 'application/xml');
+            const contents = new _jupyterlab_services__WEBPACK_IMPORTED_MODULE_4__.ContentsManager();
             doc.querySelectorAll('DataSet').forEach(item => {
                 const timeStep = item.getAttribute('timestep');
                 const vtuPath = item.getAttribute('file');
@@ -846,42 +1020,59 @@ class MainView extends react__WEBPACK_IMPORTED_MODULE_18__.Component {
                     content: true,
                     type: 'file'
                 })
-                    .then(iModel => iModel.content);
+                    .then(iModel => ({ type: 'vtu', binary: iModel.content }));
                 promises[`${vtuPath}::${filePath}::${timeStep}`] = content;
             });
             return promises;
         }
-        return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
+        else {
+            const fileExt = ext.toLowerCase();
+            const path = `${filePath}${fileName}`;
+            const parser = this.props.parsers.getParser(fileExt);
+            if (!parser) {
+                throw Error('Parser not found');
+            }
+            const content = parser.readFile(fileContent, fileExt, path, this._kernel);
+            let output;
+            if (parser.nativeSupport) {
+                output = `${fileName}::${filePath}::0::${fileName}`;
+            }
+            else {
+                output = `${fileName}.vtk::${filePath}::0::${fileName}`;
+            }
+            return { [output]: content };
+        }
+        // return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
     }
     async stringToPolyData(fileContent, filePath) {
         const str = `data:application/octet-stream;base64,${fileContent}`;
         return fetch(str)
             .then(b => b.arrayBuffer())
-            .then(buff => (0,itk_readPolyDataArrayBuffer__WEBPACK_IMPORTED_MODULE_17__["default"])(null, buff, filePath, ''))
+            .then(buff => (0,itk_readPolyDataArrayBuffer__WEBPACK_IMPORTED_MODULE_1__["default"])(null, buff, filePath, ''))
             .then(polyResult => {
             polyResult.webWorker.terminate();
             return polyResult;
         });
     }
     render() {
-        return (react__WEBPACK_IMPORTED_MODULE_18__.createElement("div", { style: {
+        return (react__WEBPACK_IMPORTED_MODULE_2__.createElement("div", { style: {
                 width: '100%',
                 height: 'calc(100%)'
             } },
-            react__WEBPACK_IMPORTED_MODULE_18__.createElement("div", { className: 'jpview-Spinner', style: { display: this.state.loading ? 'flex' : 'none' } },
-                react__WEBPACK_IMPORTED_MODULE_18__.createElement("div", { className: 'jpview-SpinnerContent' }),
-                react__WEBPACK_IMPORTED_MODULE_18__.createElement("p", { style: {
+            react__WEBPACK_IMPORTED_MODULE_2__.createElement("div", { className: 'jpview-Spinner', style: { display: this.state.loading ? 'flex' : 'none' } },
+                react__WEBPACK_IMPORTED_MODULE_2__.createElement("div", { className: 'jpview-SpinnerContent' }),
+                react__WEBPACK_IMPORTED_MODULE_2__.createElement("p", { style: {
                         position: 'relative',
                         right: '50%',
                         fontSize: 'var(--jp-ui-font-size2)',
                         color: '#27b9f3'
                     } }, `${this.state.counter}%`)),
-            react__WEBPACK_IMPORTED_MODULE_18__.createElement("div", { ref: this.container, style: {
+            react__WEBPACK_IMPORTED_MODULE_2__.createElement("div", { ref: this.container, style: {
                     width: '100%',
                     height: 'calc(100%)',
                     background: _utils__WEBPACK_IMPORTED_MODULE_20__.BG_COLOR[this.state.theme] //'radial-gradient(#efeded, #8f9091)'
                 } }),
-            react__WEBPACK_IMPORTED_MODULE_18__.createElement(_cameraToolbar__WEBPACK_IMPORTED_MODULE_22__.CameraToolbar, { rotateHandler: this.rotateWithAnimation, resetCamera: this.resetCamera, updateOrientation: this.updateOrientation })));
+            react__WEBPACK_IMPORTED_MODULE_2__.createElement(_cameraToolbar__WEBPACK_IMPORTED_MODULE_22__.CameraToolbar, { rotateHandler: this.rotateWithAnimation, resetCamera: this.resetCamera, updateOrientation: this.updateOrientation })));
     }
 }
 
@@ -990,6 +1181,9 @@ class JupyterViewModel {
     }
     get cameraChanged() {
         return this._cameraChanged;
+    }
+    getKernel() {
+        return JupyterViewModel.kernel;
     }
 }
 class JupyterViewDoc extends _jupyterlab_shared_models__WEBPACK_IMPORTED_MODULE_2__.YDocument {
@@ -1158,8 +1352,9 @@ class JupyterViewPanel extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_2__
      *
      * @param context - The documents context.
      */
-    constructor(context) {
+    constructor(context, parsers) {
         super();
+        this.parsers = parsers;
         this.addClass('jp-jupyterview-panel');
         this._context = context;
     }
@@ -1174,7 +1369,7 @@ class JupyterViewPanel extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_2__
         super.dispose();
     }
     render() {
-        return react__WEBPACK_IMPORTED_MODULE_1__.createElement(_mainview__WEBPACK_IMPORTED_MODULE_4__.MainView, { context: this._context });
+        return react__WEBPACK_IMPORTED_MODULE_1__.createElement(_mainview__WEBPACK_IMPORTED_MODULE_4__.MainView, { context: this._context, parsers: this.parsers });
     }
 }
 
@@ -1333,7 +1528,11 @@ class DatasetPanel extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
     }
     render() {
         var _a, _b;
-        const fileList = ((_a = this.props.mainViewState.fileList) !== null && _a !== void 0 ? _a : ['None']).map(item => ({ label: item.split('::')[0], value: item }));
+        const fileList = ((_a = this.props.mainViewState.fileList) !== null && _a !== void 0 ? _a : ['None']).map(item => {
+            var _a;
+            const labelList = item.split('::');
+            return { label: (_a = labelList[3]) !== null && _a !== void 0 ? _a : labelList[0], value: item };
+        });
         return (react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { className: "jpview-control-panel-component" },
             (0,_tools__WEBPACK_IMPORTED_MODULE_1__.selectorFactory)({
                 defaultValue: (_b = this.props.controlViewState.selectedDataset) !== null && _b !== void 0 ? _b : fileList[0].value,
@@ -1763,6 +1962,105 @@ class WrapPanel extends react__WEBPACK_IMPORTED_MODULE_0__.Component {
 
 /***/ }),
 
+/***/ "./lib/reader/manager.js":
+/*!*******************************!*\
+  !*** ./lib/reader/manager.js ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ParserManager": () => (/* binding */ ParserManager)
+/* harmony export */ });
+class ParserManager {
+    constructor() {
+        this._parser = new Map();
+    }
+    registerParser(parser) {
+        parser.supportedType.forEach(ext => {
+            if (!this._parser.has(ext)) {
+                this._parser.set(ext, parser);
+            }
+        });
+    }
+    get parser() {
+        return this._parser;
+    }
+    supportedFormat() {
+        return Array.from(this._parser.keys());
+    }
+    getParser(ext) {
+        return this._parser.get(ext);
+    }
+}
+
+
+/***/ }),
+
+/***/ "./lib/reader/meshioParser.js":
+/*!************************************!*\
+  !*** ./lib/reader/meshioParser.js ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "MeshIOParser": () => (/* binding */ MeshIOParser)
+/* harmony export */ });
+class MeshIOParser {
+    constructor() {
+        this.supportedType = ['inp', 'msh', 'vol', 'med', 'xml'];
+    }
+    readFile(fileContent, fileExtension, fullPath, kernel) {
+        if (!this.supportedType.includes(fileExtension)) {
+            throw Error('Not supported file');
+        }
+        if (!kernel) {
+            throw Error('Kernel is required for this file');
+        }
+        if (!fullPath) {
+            throw Error('Full path is required for this file');
+        }
+        const content = kernel.startKernel().then(() => {
+            const result = kernel.convertFile(fullPath, fileContent);
+            return result;
+        });
+        return content;
+    }
+}
+
+
+/***/ }),
+
+/***/ "./lib/reader/vtkParser.js":
+/*!*********************************!*\
+  !*** ./lib/reader/vtkParser.js ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "VtkParser": () => (/* binding */ VtkParser)
+/* harmony export */ });
+class VtkParser {
+    constructor() {
+        this.supportedType = ['vtu', 'vtk', 'vtp'];
+        this.nativeSupport = true;
+    }
+    readFile(fileContent, fileExtension) {
+        if (!this.supportedType.includes(fileExtension)) {
+            throw Error('Not supported file');
+        }
+        return Promise.resolve({ binary: fileContent, type: fileExtension });
+    }
+}
+
+
+/***/ }),
+
 /***/ "./lib/token.js":
 /*!**********************!*\
   !*** ./lib/token.js ***!
@@ -2123,4 +2421,4 @@ __webpack_require__.r(__webpack_exports__);
 /***/ })
 
 }]);
-//# sourceMappingURL=lib_index_js-lib_itkConfig_js-webpack_sharing_consume_default_emotion_react_emotion_react-web-512d65.4ee6ac78ab374675eaca.js.map
+//# sourceMappingURL=lib_index_js-lib_itkConfig_js-webpack_sharing_consume_default_emotion_react_emotion_react-web-512d65.d3168f5aa144e4b1dc41.js.map
