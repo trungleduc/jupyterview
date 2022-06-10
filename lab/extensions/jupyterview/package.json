@@ -1,6 +1,6 @@
 {
   "name": "jupyterview",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A Jupyterlab VTK viewer extension.",
   "keywords": [
     "jupyter",
@@ -89,7 +89,7 @@
     "outputDir": "jupyterview/labextension",
     "webpackConfig": "./extension.webpack.config.js",
     "_build": {
-      "load": "static/remoteEntry.2badaf6da569cf3a10c1.js",
+      "load": "static/remoteEntry.f07ea6e9047d64a18abb.js",
       "extension": "./extension",
       "style": "./style"
     }
