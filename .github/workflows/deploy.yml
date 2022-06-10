@@ -32,7 +32,6 @@ jobs:
           cp ./samples/piston.vtu ./docs/files/
           cp ./samples/mesh/abaqus.inp ./docs/files/
           cp ./samples/mesh/ansys_mesh.msh ./docs/files/
-          cp ./samples/mesh/dolfin_mesh.xml ./docs/files/
           cp ./samples/mesh/gmsh_mesh.msh ./docs/files/
           cp ./samples/mesh/NETGEN_mesh.vol ./docs/files/
           cd docs
