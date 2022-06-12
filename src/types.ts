@@ -1,3 +1,9 @@
+import { ISignal } from '@lumino/signaling';
+import { KernelExecutor } from './kernel';
+import { JupyterViewDoc } from './mainview/model';
+import { ParserManager } from './reader/manager';
+import { IParserResult } from './reader/types';
+
 export interface IDict<T = any> {
   [key: string]: T;
 }
@@ -57,4 +63,20 @@ export interface IControlViewSharedState {
   warpNormalAxis?: number[];
   selectedWarp?: string;
   selectedDataset?: string;
+}
+
+export interface IBaseViewModel {
+  ready: Promise<void>;
+  controlViewStateChanged?: ISignal<any, IControlViewSharedState>;
+  mainViewStateChanged?: ISignal<any, IMainViewSharedState>;
+  sharedModel?: JupyterViewDoc;
+  contentPromises(): {
+    [key: string]: Promise<IParserResult>;
+  };
+  prepareFileContent(
+    filePath: string,
+    fileName: string,
+    fileContent
+  ): { [key: string]: Promise<IParserResult> };
+  stringToPolyData(fileContent: string, filePath: string): Promise<any>;
 }

@@ -54,7 +54,7 @@ const STOCK_STATE = {
   }
 };
 
-export default class MainView extends React.Component<IProps, IStates> {
+export default class MainPanelView extends React.Component<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
     this.updateSharedState = debounce((payload: IControlViewSharedState) => {

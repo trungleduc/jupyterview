@@ -1,11 +1,5 @@
 import '@kitware/vtk.js/Rendering/OpenGL/Profiles/All';
 
-import readPolyDataArrayBuffer from 'itk/readPolyDataArrayBuffer';
-import * as React from 'react';
-import { v4 as uuid } from 'uuid';
-
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { ContentsManager } from '@jupyterlab/services';
 import vtkDataArray from '@kitware/vtk.js/Common/Core/DataArray';
 import * as vtkMath from '@kitware/vtk.js/Common/Core/Math';
 import vtkMatrixBuilder from '@kitware/vtk.js/Common/Core/MatrixBuilder';
@@ -30,21 +24,17 @@ import { Vector3 } from '@kitware/vtk.js/types';
 import vtk from '@kitware/vtk.js/vtk';
 import vtkWidgetManager from '@kitware/vtk.js/Widgets/Core/WidgetManager';
 import vtkInteractiveOrientationWidget from '@kitware/vtk.js/Widgets/Widgets3D/InteractiveOrientationWidget';
+import * as React from 'react';
+import { v4 as uuid } from 'uuid';
 
-import { KernelExecutor } from '../kernel';
-import { ParserManager } from '../reader/manager';
-import { IParserResult } from '../reader/types';
+import { debounce, majorAxis, moveCamera, VIEW_ORIENTATIONS } from '../tools';
 import {
-  b64_to_utf8,
-  convertPath,
-  debounce,
-  majorAxis,
-  moveCamera,
-  VIEW_ORIENTATIONS
-} from '../tools';
-import { IControlViewSharedState, IMainViewSharedState } from '../types';
+  IBaseViewModel,
+  IControlViewSharedState,
+  IMainViewSharedState
+} from '../types';
 import { CameraToolbar } from './cameraToolbar';
-import { JupyterViewDoc, JupyterViewModel } from './model';
+import { JupyterViewDoc } from './model';
 import {
   BG_COLOR,
   JUPYTER_FONT,
@@ -55,8 +45,7 @@ import {
 } from './utils';
 
 interface IProps {
-  context: DocumentRegistry.IContext<JupyterViewModel>;
-  parsers: ParserManager;
+  model: IBaseViewModel;
 }
 
 interface IStates {
@@ -79,8 +68,8 @@ export class MainView extends React.Component<IProps, IStates> {
       colorOption: [],
       counter: 0
     };
-    this._context = props.context;
-    this._sharedModel = props.context.model.sharedModel;
+    this._viewModel = props.model;
+    this._sharedModel = this._viewModel.sharedModel ?? new JupyterViewDoc();
     this.container = React.createRef<HTMLDivElement>();
     this._fileData = {};
   }
@@ -160,31 +149,24 @@ export class MainView extends React.Component<IProps, IStates> {
         .querySelector('body')!
         .removeEventListener('keyup', interactor.handleKeyUp);
 
-      this._context.ready.then(() => {
-        this._model = this._context.model as JupyterViewModel;
-        this._kernel = this._model.getKernel();
-        this._model.themeChanged.connect((_, arg) => {
-          this.handleThemeChange(arg.newValue as THEME_TYPE);
-        });
+      this._viewModel.ready.then(() => {
+        // this._model = this._context.model as JupyterViewModel;
+        // this._kernel = this._model.getKernel();
+        // this._model.themeChanged.connect((_, arg) => {
+        //   this.handleThemeChange(arg.newValue as THEME_TYPE);
+        // });
+        if (this._viewModel.controlViewStateChanged) {
+          this._viewModel.controlViewStateChanged.connect(
+            this.controlStateChanged
+          );
+        }
+        if (this._viewModel.mainViewStateChanged) {
+          this._viewModel.mainViewStateChanged.connect(
+            this.mainViewStateChanged
+          );
+        }
 
-        this._sharedModel.controlViewStateChanged.connect(
-          this.controlStateChanged
-        );
-        this._sharedModel.mainViewStateChanged.connect(
-          this.mainViewStateChanged
-        );
-
-        const fullPath = convertPath(this._context.path);
-        const dirPath = fullPath.substring(0, fullPath.lastIndexOf('/') + 1);
-        const fileName = fullPath.replace(/^.*(\\|\/|:)/, '');
-
-        const fileContent = this._sharedModel.getContent('content');
-
-        const contentPromises = this.prepareFileContent(
-          dirPath,
-          fileName,
-          fileContent
-        );
+        const contentPromises = this._viewModel.contentPromises();
         let counter = 0;
         const entries = Object.entries(contentPromises);
         const totalItems = entries.length;
@@ -194,10 +176,11 @@ export class MainView extends React.Component<IProps, IStates> {
           const name = path.split('::')[0];
 
           promise.then(vtkParsedContent => {
-            this.stringToPolyData(
-              vtkParsedContent.binary,
-              `${name}.${vtkParsedContent.type}`
-            )
+            this._viewModel
+              .stringToPolyData(
+                vtkParsedContent.binary,
+                `${name}.${vtkParsedContent.type}`
+              )
               .then(polyResult => {
                 counter = Math.round(counter + 100 / totalItems);
                 this._fileData[path] = vtk(polyResult.polyData);
@@ -266,61 +249,6 @@ export class MainView extends React.Component<IProps, IStates> {
       }
     }
   };
-
-  prepareFileContent(
-    filePath: string,
-    fileName: string,
-    fileContent
-  ): { [key: string]: Promise<IParserResult> } {
-    const pathList = fileName.split('.');
-    const ext = pathList[pathList.length - 1];
-    const promises: { [key: string]: Promise<IParserResult> } = {};
-    if (ext.toLowerCase() === 'pvd') {
-      const xmlStr = b64_to_utf8(fileContent);
-      const xmlParser = new DOMParser();
-      const doc = xmlParser.parseFromString(xmlStr, 'application/xml');
-      const contents = new ContentsManager();
-      doc.querySelectorAll('DataSet').forEach(item => {
-        const timeStep = item.getAttribute('timestep');
-        const vtuPath = item.getAttribute('file');
-        const content: Promise<IParserResult> = contents
-          .get(`${filePath}/${vtuPath}`, {
-            format: 'base64',
-            content: true,
-            type: 'file'
-          })
-          .then(iModel => ({ type: 'vtu', binary: iModel.content }));
-        promises[`${vtuPath}::${filePath}::${timeStep}`] = content;
-      });
-      return promises;
-    } else {
-      const fileExt = ext.toLowerCase();
-      const path = `${filePath}${fileName}`;
-      const parser = this.props.parsers.getParser(fileExt);
-      if (!parser) {
-        throw Error('Parser not found');
-      }
-      const content = parser.readFile(fileContent, fileExt, path, this._kernel);
-      let output: string;
-      if (parser.nativeSupport) {
-        output = `${fileName}::${filePath}::0::${fileName}`;
-      } else {
-        output = `${fileName}.vtk::${filePath}::0::${fileName}`;
-      }
-      return { [output]: content };
-    }
-    // return { [`${fileName}::${filePath}::0`]: Promise.resolve(fileContent) };
-  }
-  async stringToPolyData(fileContent: string, filePath: string): Promise<any> {
-    const str = `data:application/octet-stream;base64,${fileContent}`;
-    return fetch(str)
-      .then(b => b.arrayBuffer())
-      .then(buff => readPolyDataArrayBuffer(null, buff, filePath, ''))
-      .then(polyResult => {
-        polyResult.webWorker.terminate();
-        return polyResult;
-      });
-  }
 
   private controlStateChanged = (_, changed: IControlViewSharedState): void => {
     let needRerender = false;
@@ -699,11 +627,10 @@ export class MainView extends React.Component<IProps, IStates> {
   }
 
   private container: React.RefObject<HTMLDivElement>; // Reference of render div
-  private _context: DocumentRegistry.IContext<JupyterViewModel>;
+  private _viewModel: IBaseViewModel;
+  // private _model: JupyterViewModel | undefined;
+  // private _kernel: KernelExecutor;
   private _sharedModel: JupyterViewDoc;
-  private _model: JupyterViewModel | undefined;
-  private _kernel: KernelExecutor;
-
   private _fullScreenRenderer: vtkRenderWindowWithControlBar;
   private _renderer: vtkRenderer;
   private _source: vtkPolyData;

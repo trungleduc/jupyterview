@@ -9,3 +9,4 @@ export interface IVtkTracker extends IWidgetTracker<JupyterViewWidget> {
 export const IJupyterViewDocTracker = new Token<IVtkTracker>(
   'jupyterViewDocTracker'
 );
+

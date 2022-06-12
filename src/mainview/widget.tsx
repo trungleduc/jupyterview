@@ -10,6 +10,8 @@ import { JupyterViewModel } from './model';
 
 import { MainView } from './mainview';
 import { ParserManager } from '../reader/manager';
+import { IBaseViewModel } from '../types';
+import { MainViewModel } from './mainviewmodel';
 
 export class JupyterViewWidget extends DocumentWidget<
   JupyterViewPanel,
@@ -48,6 +50,11 @@ export class JupyterViewPanel extends ReactWidget {
     super();
     this.addClass('jp-jupyterview-panel');
     this._context = context;
+    this._model = new MainViewModel({
+      context,
+      parserManager: this.parsers,
+      kernel: context.model.getKernel()
+    });
   }
 
   /**
@@ -62,8 +69,9 @@ export class JupyterViewPanel extends ReactWidget {
   }
 
   render(): JSX.Element {
-    return <MainView context={this._context} parsers={this.parsers} />;
+    return <MainView model={this._model} />;
   }
 
   private _context: DocumentRegistry.IContext<JupyterViewModel>;
+  private _model: IBaseViewModel;
 }
