@@ -5,8 +5,12 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IThemeManager } from '@jupyterlab/apputils';
-
+import { Application, IPlugin } from '@lumino/application';
+import { Widget } from '@lumino/widgets';
 import { KernelExecutor } from './kernel';
+import { IJupyterWidgetRegistry } from '@jupyter-widgets/base';
+import * as widgetExports from './ipywidget';
+import { MODULE_NAME, MODULE_VERSION } from './version';
 import {
   JupyterViewModelFactory,
   JupyterViewWidgetFactory
@@ -137,4 +141,24 @@ const controlPanel: JupyterFrontEndPlugin<void> = {
     app.shell.add(controlPanel, 'left');
   }
 };
-export default [plugin, controlPanel];
+
+const widget: IPlugin<Application<Widget>, void> = {
+  id: 'jupyterview:widget',
+  requires: [IJupyterWidgetRegistry],
+  activate: (
+    app: Application<Widget>,
+    registry: IJupyterWidgetRegistry
+  ): void => {
+    registry.registerWidget({
+      name: MODULE_NAME,
+      version: MODULE_VERSION,
+      exports: widgetExports as any
+    });
+  },
+  autoStart: true
+};
+
+export * from './version';
+export * from './ipywidget';
+
+export default [plugin, controlPanel, widget];

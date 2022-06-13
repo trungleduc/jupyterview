@@ -51,6 +51,7 @@
     "@jupyterlab/coreutils": "^5.2.8",
     "@jupyterlab/services": "^6.1.0",
     "@jupyterlab/ui-components": "^3.2.8 || ^4.0.0-alpha.10",
+    "@jupyter-widgets/base": "^1.1.10 || ^2.0.0 || ^3.0.0 || ^4.0.0",
     "@kitware/vtk.js": "^22.4.0",
     "@mui/icons-material": "^5.3.1",
     "@mui/material": "^5.3.1",
