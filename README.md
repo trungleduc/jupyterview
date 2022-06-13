@@ -21,7 +21,7 @@ Powered by Kitware's `vtk.js` and `itk-wasm` library, **jupyterview** is a pure 
 
 ![pvd](https://user-images.githubusercontent.com/4451292/157324587-0b89159d-f4db-4227-b58b-437c75f69855.gif)
 
-- Visualize mesh supported by `meshio` library.
+- Visualize mesh supported by `meshio` library. Full list of supported formats is available at https://github.com/nschloe/meshio
 
 https://user-images.githubusercontent.com/4451292/173418573-1839d689-763f-42ba-add3-4eaac4c87d7e.mp4
 
