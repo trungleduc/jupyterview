@@ -21,6 +21,10 @@ Powered by Kitware's `vtk.js` and `itk-wasm` library, **jupyterview** is a pure 
 
 ![pvd](https://user-images.githubusercontent.com/4451292/157324587-0b89159d-f4db-4227-b58b-437c75f69855.gif)
 
+- Visualize mesh supported by `meshio` library.
+
+https://user-images.githubusercontent.com/4451292/173418573-1839d689-763f-42ba-add3-4eaac4c87d7e.mp4
+
 - Real-time collaborative visualization.
 
 ![colab](https://user-images.githubusercontent.com/4451292/157325576-c79c9ee8-6428-4e96-afa6-827467e70438.gif)
