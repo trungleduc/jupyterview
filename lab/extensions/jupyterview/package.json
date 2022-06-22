@@ -38,6 +38,7 @@
     "clean:labextension": "rimraf jupyterview/labextension",
     "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "eslint": "eslint . --ext .ts,.tsx --fix",
+    "prettier": "prettier --write \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
     "eslint:check": "eslint . --ext .ts,.tsx",
     "install:extension": "jlpm run build",
     "watch": "run-p watch:src watch:labextension",
@@ -89,7 +90,7 @@
     "outputDir": "jupyterview/labextension",
     "webpackConfig": "./extension.webpack.config.js",
     "_build": {
-      "load": "static/remoteEntry.f07ea6e9047d64a18abb.js",
+      "load": "static/remoteEntry.32e25bad52c23cebb5db.js",
       "extension": "./extension",
       "style": "./style"
     }
