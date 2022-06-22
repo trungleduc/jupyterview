@@ -641,7 +641,7 @@
             "@mui/material": {},
             "uuid": {},
             "jupyterview": {
-              "version": "0.5.0",
+              "version": "0.5.1",
               "singleton": true,
               "import": "/home/runner/work/jupyterview/jupyterview/lib/index.js"
             }
