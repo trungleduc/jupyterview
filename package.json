@@ -38,6 +38,7 @@
     "clean:labextension": "rimraf jupyterview/labextension",
     "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "eslint": "eslint . --ext .ts,.tsx --fix",
+    "prettier": "prettier --write \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
     "eslint:check": "eslint . --ext .ts,.tsx",
     "install:extension": "jlpm run build",
     "watch": "run-p watch:src watch:labextension",

@@ -103,6 +103,7 @@ export default class MainView extends React.Component<IProps, IStates> {
         controlViewState.selectedColor = controlViewState.selectedColor ?? ':';
         controlViewState.modifiedDataRange =
           controlViewState.modifiedDataRange ?? mainViewState.dataRange;
+        controlViewState.displayMode = controlViewState.displayMode ?? '1:2:0';
         return {
           ...old,
           mainViewState,

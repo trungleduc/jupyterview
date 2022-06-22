@@ -8,7 +8,7 @@
 
 ### Enhancements made
 
-- Read mesh  files using MeshIO [#34](https://github.com/trungleduc/jupyterview/pull/34) ([@trungleduc](https://github.com/trungleduc))
+- Read mesh files using MeshIO [#34](https://github.com/trungleduc/jupyterview/pull/34) ([@trungleduc](https://github.com/trungleduc))
 - Install `jupyterlite` from PyPI [#31](https://github.com/trungleduc/jupyterview/pull/31) ([@jtpio](https://github.com/jtpio))
 
 ### Other merged PRs
