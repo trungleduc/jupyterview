@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.5.1
+
+([Full Changelog](https://github.com/trungleduc/jupyterview/compare/v0.5.0...620a550154d0a69a9e700a04dd022cfed2f1ca68))
+
+### Enhancements made
+
+- Update meshio format [#40](https://github.com/trungleduc/jupyterview/pull/40) ([@trungleduc](https://github.com/trungleduc))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/trungleduc/jupyterview/graphs/contributors?from=2022-06-10&to=2022-06-22&type=c))
+
+[@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Atrungleduc+updated%3A2022-06-10..2022-06-22&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.5.0
 
 ([Full Changelog](https://github.com/trungleduc/jupyterview/compare/v0.4.0...a390c8e11729feba8819712ee2bada58a26b922f))
@@ -23,8 +39,6 @@
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterview/graphs/contributors?from=2022-03-06&to=2022-06-10&type=c))
 
 [@dependabot](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Adependabot+updated%3A2022-03-06..2022-06-10&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Ajtpio+updated%3A2022-03-06..2022-06-10&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Atrungleduc+updated%3A2022-03-06..2022-06-10&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.4.0
 
