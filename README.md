@@ -4,7 +4,6 @@
 
 <h2 align="center"> VTK Data visualization extension for JupyterLab</h2>
 
-
 **jupyterview** is an extension that adds the `VTK` data visualization capability to JupyterLab.
 
 Powered by Kitware's `vtk.js` and `itk-wasm` library, **jupyterview** is a pure frontend extension, it does not require any kernel to operate and fully supports the Real-Time Collaboration feature of JupyterLab.
@@ -35,7 +34,7 @@ https://user-images.githubusercontent.com/4451292/173418573-1839d689-763f-42ba-a
 
 ## Requirements
 
-* JupyterLab >= 3.0
+- JupyterLab >= 3.0
 
 ## Install
 
@@ -44,6 +43,7 @@ To install the extension, execute:
 ```bash
 pip install jupyterview
 ```
+
 or with mamba/conda
 
 ```bash
@@ -103,7 +103,9 @@ folder is located. Then you can remove the symlink named `jupyterview` within th
 See [RELEASE](RELEASE.md)
 
 ## Thanks
+
 The following libraries / open-source projects were used or inspired in the development of jupyterview:
- * [vtk.js](https://github.com/Kitware/vtk-js)
- * [itk-wasm](https://github.com/InsightSoftwareConsortium/itk-wasm)
- * [paraview-glance](https://github.com/Kitware/paraview-glance)
+
+- [vtk.js](https://github.com/Kitware/vtk-js)
+- [itk-wasm](https://github.com/InsightSoftwareConsortium/itk-wasm)
+- [paraview-glance](https://github.com/Kitware/paraview-glance)

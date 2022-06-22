@@ -16,7 +16,7 @@ function copyPluginPatterns(fileList) {
   }));
 }
 
-const itkConfig = path.resolve(__dirname, 'lib', 'itkConfig.js')
+const itkConfig = path.resolve(__dirname, 'lib', 'itkConfig.js');
 module.exports = {
   module: {
     rules: [
@@ -43,7 +43,7 @@ module.exports = {
           'VTKXMLFileReaderWasm.wasm',
           'VTKLegacyFileReader.js',
           'VTKLegacyFileReaderWasm.js',
-          'VTKLegacyFileReaderWasm.wasm',
+          'VTKLegacyFileReaderWasm.wasm'
         ]),
         {
           from: path.join(__dirname, 'node_modules', 'itk', 'WebWorkers'),
@@ -64,5 +64,5 @@ module.exports = {
   },
   optimization: {
     minimize: false
-  },
+  }
 };
