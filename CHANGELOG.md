@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.5.2
+
+([Full Changelog](https://github.com/trungleduc/jupyterview/compare/v0.5.1...ce58e28c36138b1a3fa34523e3759ab099093921))
+
+### Bugs fixed
+
+- Fix tempfile issue with Windows [#42](https://github.com/trungleduc/jupyterview/pull/42) ([@trungleduc](https://github.com/trungleduc))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/trungleduc/jupyterview/graphs/contributors?from=2022-06-22&to=2022-06-23&type=c))
+
+[@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Atrungleduc+updated%3A2022-06-22..2022-06-23&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.5.1
 
 ([Full Changelog](https://github.com/trungleduc/jupyterview/compare/v0.5.0...620a550154d0a69a9e700a04dd022cfed2f1ca68))
@@ -15,8 +31,6 @@
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterview/graphs/contributors?from=2022-06-10&to=2022-06-22&type=c))
 
 [@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Atrungleduc+updated%3A2022-06-10..2022-06-22&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.5.0
 
