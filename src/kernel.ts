@@ -59,7 +59,7 @@ export class KernelExecutor implements IDisposable {
         pass
       import base64,  meshio, tempfile 
       mesh = meshio.read("${filePath}")
-      c = tempfile.NamedTemporaryFile()
+      c = tempfile.NamedTemporaryFile(delete=False)
       try:
         ext = 0
         mesh.write(c.name,'vtu')
@@ -71,6 +71,7 @@ export class KernelExecutor implements IDisposable {
       c.close()
       try:
         os.remove("${filePath}")
+        os.remove(c.name)
       except:
         pass
       base64_bytes = base64.b64encode(content)
