@@ -16,7 +16,7 @@
       {
         "extension": "./extension",
         "liteExtension": false,
-        "load": "static/remoteEntry.47e9fe5419b0e55c2218.js",
+        "load": "static/remoteEntry.fbf589e9d11e63ee987c.js",
         "name": "jupyterview",
         "style": "./style"
       }

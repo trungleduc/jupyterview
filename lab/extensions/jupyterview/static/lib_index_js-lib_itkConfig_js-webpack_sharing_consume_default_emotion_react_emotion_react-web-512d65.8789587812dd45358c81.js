@@ -232,7 +232,7 @@ class KernelExecutor {
         pass
       import base64,  meshio, tempfile 
       mesh = meshio.read("${filePath}")
-      c = tempfile.NamedTemporaryFile()
+      c = tempfile.NamedTemporaryFile(delete=False)
       try:
         ext = 0
         mesh.write(c.name,'vtu')
@@ -244,6 +244,7 @@ class KernelExecutor {
       c.close()
       try:
         os.remove("${filePath}")
+        os.remove(c.name)
       except:
         pass
       base64_bytes = base64.b64encode(content)
@@ -2461,4 +2462,4 @@ __webpack_require__.r(__webpack_exports__);
 /***/ })
 
 }]);
-//# sourceMappingURL=lib_index_js-lib_itkConfig_js-webpack_sharing_consume_default_emotion_react_emotion_react-web-512d65.18daa8e13e4f1434476d.js.map
+//# sourceMappingURL=lib_index_js-lib_itkConfig_js-webpack_sharing_consume_default_emotion_react_emotion_react-web-512d65.8789587812dd45358c81.js.map
