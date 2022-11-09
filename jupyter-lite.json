@@ -2,7 +2,7 @@
   "jupyter-config-data": {
     "appName": "JupyterLite",
     "appUrl": "./lab",
-    "appVersion": "0.1.0-beta.11",
+    "appVersion": "0.1.0-beta.14",
     "baseUrl": "./",
     "defaultKernelName": "python",
     "faviconUrl": "./lab/favicon.ico",
@@ -17,7 +17,7 @@
       {
         "extension": "./extension",
         "liteExtension": false,
-        "load": "static/remoteEntry.db74ae7309a8f6d00772.js",
+        "load": "static/remoteEntry.b96414f936100fc85397.js",
         "name": "jupyterview",
         "style": "./style"
       }
