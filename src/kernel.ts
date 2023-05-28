@@ -51,6 +51,9 @@ export class KernelExecutor implements IDisposable {
   }
 
   codeGenerator(filePath: string): string {
+    if (filePath.startsWith('RTC:')) {
+      filePath = filePath.split(':')[1];
+    }
     const writeFile = `
       try:
         import piplite
@@ -127,7 +130,6 @@ export class KernelExecutor implements IDisposable {
   ): Promise<{ type: string; binary: string }> {
     const stopOnError = true;
     let path = filePath;
-    let format: string | undefined;
     const kernel = this._sessionConnection?.kernel;
     if (!kernel) {
       throw new Error('Session has no kernel.');
@@ -137,7 +139,6 @@ export class KernelExecutor implements IDisposable {
       const fileGeneratorCode = this.fileGenerator(filePath, fileContent);
       const tempPath = await this.executeCode({ code: fileGeneratorCode.code });
       path = tempPath.slice(1, -1);
-      format = fileGeneratorCode.ext;
     }
     const code = this.codeGenerator(path);
     const content: KernelMessage.IExecuteRequestMsg['content'] = {
@@ -168,7 +169,7 @@ export class KernelExecutor implements IDisposable {
 
 export namespace KernelExecutor {
   export interface IOptions {
-    manager: ServiceManager;
+    manager: ServiceManager.IManager;
     jupyterLite: boolean;
   }
 }

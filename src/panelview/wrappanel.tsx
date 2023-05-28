@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { IControlViewSharedState, IMainViewSharedState } from '../types';
-import Switch from '@mui/material/Switch';
+
 import { selectorFactory } from '../tools';
+import { IControlViewSharedState, IMainViewSharedState } from '../types';
 
 interface IProps {
   clientId: string;

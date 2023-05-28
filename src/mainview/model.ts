@@ -1,14 +1,12 @@
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
-
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { PartialJSONObject } from '@lumino/coreutils';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
-import { YDocument, MapChange } from '@jupyterlab/shared-models';
+import { YDocument, MapChange, StateChange } from '@jupyter/ydoc';
 
 import {
   IControlViewSharedState,
@@ -20,11 +18,27 @@ import {
 import * as Y from 'yjs';
 import { KernelExecutor } from '../kernel';
 
+interface IOptions {
+  sharedModel?: JupyterViewDoc;
+  languagePreference?: string;
+}
+
 export class JupyterViewModel implements DocumentRegistry.IModel {
-  constructor(languagePreference?: string, modelDB?: IModelDB) {
-    this.modelDB = modelDB || new ModelDB();
-    this.sharedModel = new JupyterViewDoc();
-    this.sharedModel.awareness.on('change', this._onCameraChanged);
+  constructor(options: IOptions) {
+    const { sharedModel } = options;
+    if (sharedModel) {
+      this._sharedModel = sharedModel;
+    } else {
+      this._sharedModel = JupyterViewDoc.create();
+    }
+
+    this._sharedModel.awareness.on('change', this._onCameraChanged);
+  }
+
+  readonly collaborative = true;
+
+  get sharedModel(): JupyterViewDoc {
+    return this._sharedModel;
   }
 
   get isDisposed(): boolean {
@@ -62,7 +76,7 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
   }
 
   get readOnly(): boolean {
-    return true;
+    return this._readOnly;
   }
   set readOnly(value: boolean) {
     this._readOnly = true;
@@ -121,8 +135,7 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
 
   readonly defaultKernelName: string = '';
   readonly defaultKernelLanguage: string = '';
-  readonly modelDB: IModelDB;
-  readonly sharedModel: JupyterViewDoc;
+  readonly _sharedModel: JupyterViewDoc;
 
   private _dirty = false;
   private _readOnly = true;
@@ -139,6 +152,7 @@ export type JupyterViewDocChange = {
   contextChange?: MapChange;
   contentChange?: string;
   mainViewStateChange?: IDict;
+  stateChange?: StateChange<any>[];
 };
 
 export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
@@ -150,6 +164,11 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
     this._controlViewState = this.ydoc.getMap('controlViewState');
     this._controlViewState.observe(this._controlViewStateObserver);
   }
+
+  /**
+   * Document version
+   */
+  readonly version: string = '1.0.0';
 
   dispose(): void {
     this._mainViewState.unobserve(this._mainViewStateObserver);

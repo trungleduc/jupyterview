@@ -276,6 +276,9 @@ export class MainView extends React.Component<IProps, IStates> {
     const ext = pathList[pathList.length - 1];
     const promises: { [key: string]: Promise<IParserResult> } = {};
     if (ext.toLowerCase() === 'pvd') {
+      if (filePath.startsWith('RTC:')) {
+        filePath = filePath.split(':')[1];
+      }
       const xmlStr = b64_to_utf8(fileContent);
       const xmlParser = new DOMParser();
       const doc = xmlParser.parseFromString(xmlStr, 'application/xml');
@@ -360,8 +363,7 @@ export class MainView extends React.Component<IProps, IStates> {
     }
 
     if (changed.selectedWarp) {
-      const [location, colorByArrayName, indexValue] =
-        changed.selectedWarp.split(':');
+      const [location, colorByArrayName] = changed.selectedWarp.split(':');
       if (location === '') {
         this._warpScalar.setScaleFactor(0);
       } else {
@@ -709,7 +711,6 @@ export class MainView extends React.Component<IProps, IStates> {
   private _source: vtkPolyData;
   private _renderWindow: vtkRenderWindow;
   private _mapper: vtkMapper;
-  private _container: any = null;
   private _dataRange: number[];
   private _activeArray: vtkDataArray;
   private _lookupTable: vtkColorTransferFunction;
