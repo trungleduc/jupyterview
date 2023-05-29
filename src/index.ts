@@ -5,7 +5,10 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IThemeManager } from '@jupyterlab/apputils';
-
+import {
+  ICollaborativeDrive
+  // SharedDocumentFactory
+} from '@jupyter/docprovider';
 import { KernelExecutor } from './kernel';
 import {
   JupyterViewModelFactory,
@@ -27,7 +30,8 @@ const activate = (
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
-  shell: ILabShell
+  shell: ILabShell,
+  drive: ICollaborativeDrive
 ): IVtkTracker => {
   const tracker = new VtkTracker({ namespace: NAME_SPACE });
 
@@ -77,6 +81,9 @@ const activate = (
   // Creating and registering the model factory for our custom DocumentModel
   const modelFactory = new JupyterViewModelFactory();
   app.docRegistry.addModelFactory(modelFactory);
+  // const vtkSharedModelFactory: SharedDocumentFactory = () => {
+  //   return new JupyterViewDoc();
+  // };
   supportedFormat.forEach((fileType: string) => {
     const FILETYPE = fileType.toUpperCase();
     app.docRegistry.addFileType({
@@ -96,6 +103,12 @@ const activate = (
     fileFormat: 'text',
     contentType: 'file'
   });
+
+  // drive.sharedModelFactory.registerDocumentFactory(
+  //   'pvd',
+  //   vtkSharedModelFactory
+  // );
+
   console.log('JupyterLab extension jupyterview is activated!');
   shell.currentChanged.connect((shell, change) => {
     const widget = change.newValue;
@@ -111,7 +124,7 @@ const activate = (
 const plugin: JupyterFrontEndPlugin<IVtkTracker> = {
   id: 'jupyterview:plugin',
   autoStart: true,
-  requires: [ILayoutRestorer, IThemeManager, ILabShell],
+  requires: [ILayoutRestorer, IThemeManager, ILabShell, ICollaborativeDrive],
   provides: IJupyterViewDocTracker,
   activate
 };

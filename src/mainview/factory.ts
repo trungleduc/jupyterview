@@ -1,13 +1,9 @@
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
-
-import { IModelDB } from '@jupyterlab/observables';
-
 import { Contents } from '@jupyterlab/services';
 
-import { JupyterViewWidget, JupyterViewPanel } from './widget';
-
-import { JupyterViewModel } from './model';
 import { ParserManager } from '../reader/manager';
+import { JupyterViewDoc, JupyterViewModel } from './model';
+import { JupyterViewPanel, JupyterViewWidget } from './widget';
 
 export class JupyterViewWidgetFactory extends ABCWidgetFactory<
   JupyterViewWidget,
@@ -97,13 +93,9 @@ export class JupyterViewModelFactory
 
   /**
    * Create a new instance of JupyterViewModel.
-   *
-   * @param languagePreference Language
-   * @param modelDB Model database
-   * @returns The model
    */
-  createNew(languagePreference?: string, modelDB?: IModelDB): JupyterViewModel {
-    const model = new JupyterViewModel(languagePreference, modelDB);
+  createNew(options: { sharedModel: JupyterViewDoc }): JupyterViewModel {
+    const model = new JupyterViewModel(options);
     return model;
   }
 

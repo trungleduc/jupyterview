@@ -7,11 +7,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 
 import { JupyterViewDoc } from '../mainview/model';
 import { debounce } from '../tools';
-import {
-  IControlViewSharedState,
-  IMainViewSharedState,
-  ValueOf
-} from '../types';
+import { IControlViewSharedState, IMainViewSharedState } from '../types';
 import ColorPanel from './colorpanel';
 import DatasetPanel from './datasetpanel';
 import DisplayPanel, { DISPLAY_MODE } from './displaypanel';
