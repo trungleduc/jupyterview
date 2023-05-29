@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.6.0
+
+([Full Changelog](https://github.com/trungleduc/jupyterview/compare/v0.5.2...d1e48f31c2fff2a1719df370cb4ced29f77f84bd))
+
+### Enhancements made
+
+- Update to lab4 [#55](https://github.com/trungleduc/jupyterview/pull/55) ([@trungleduc](https://github.com/trungleduc))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/trungleduc/jupyterview/graphs/contributors?from=2022-06-23&to=2023-05-29&type=c))
+
+[@github-actions](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Agithub-actions+updated%3A2022-06-23..2023-05-29&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Atrungleduc+updated%3A2022-06-23..2023-05-29&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.5.2
 
 ([Full Changelog](https://github.com/trungleduc/jupyterview/compare/v0.5.1...ce58e28c36138b1a3fa34523e3759ab099093921))
@@ -15,8 +31,6 @@
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterview/graphs/contributors?from=2022-06-22&to=2022-06-23&type=c))
 
 [@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Atrungleduc+updated%3A2022-06-22..2022-06-23&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.5.1
 

@@ -4038,6 +4038,7 @@ __metadata:
     ts-loader: ^9.2.6
     typescript: ~5.0.2
     uuid: ^8.3.2
+    yjs: ^13.5.0
   languageName: unknown
   linkType: soft
 
@@ -6647,7 +6648,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yjs@npm:^13.5.40":
+"yjs@npm:^13.5.0, yjs@npm:^13.5.40":
   version: 13.6.1
   resolution: "yjs@npm:13.6.1"
   dependencies:
