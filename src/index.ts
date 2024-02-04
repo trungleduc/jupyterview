@@ -5,10 +5,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IThemeManager } from '@jupyterlab/apputils';
-import {
-  ICollaborativeDrive
-  // SharedDocumentFactory
-} from '@jupyter/docprovider';
 import { KernelExecutor } from './kernel';
 import {
   JupyterViewModelFactory,
@@ -30,8 +26,7 @@ const activate = (
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
-  shell: ILabShell,
-  drive: ICollaborativeDrive
+  shell: ILabShell
 ): IVtkTracker => {
   const tracker = new VtkTracker({ namespace: NAME_SPACE });
 
@@ -124,7 +119,7 @@ const activate = (
 const plugin: JupyterFrontEndPlugin<IVtkTracker> = {
   id: 'jupyterview:plugin',
   autoStart: true,
-  requires: [ILayoutRestorer, IThemeManager, ILabShell, ICollaborativeDrive],
+  requires: [ILayoutRestorer, IThemeManager, ILabShell],
   provides: IJupyterViewDocTracker,
   activate
 };

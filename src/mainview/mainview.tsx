@@ -597,7 +597,7 @@ export class MainView extends React.Component<IProps, IStates> {
       const interactor = this._renderWindow.getInteractor();
       interactor.requestAnimation(this._renderWindow);
       let count = 0;
-      let intervalId: NodeJS.Timer;
+      let intervalId: any = undefined;
       const rotate = () => {
         if (count < 90) {
           count += ROTATION_STEP;

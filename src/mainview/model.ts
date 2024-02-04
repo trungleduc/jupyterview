@@ -35,7 +35,7 @@ export class JupyterViewModel implements DocumentRegistry.IModel {
     this._sharedModel.awareness.on('change', this._onCameraChanged);
   }
 
-  readonly collaborative = true;
+  readonly collaborative = false;
 
   get sharedModel(): JupyterViewDoc {
     return this._sharedModel;
