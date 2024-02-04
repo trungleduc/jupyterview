@@ -167,7 +167,7 @@ export function moveCamera(
     const now = performance.now().toString();
     const animationRequester = `moveCamera.${now}`;
     interactor.requestAnimation(animationRequester);
-    let intervalId: NodeJS.Timer;
+    let intervalId: any = undefined;
     const consumeAnimationStack = () => {
       if (animationStack.length) {
         const {

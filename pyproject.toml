@@ -24,8 +24,7 @@ classifiers = [
 
 dependencies = [
   "meshio",
-  "jupyter_server>=1.21,<3",
-  "jupyter_collaboration>=1.0.0a8",
+  "jupyter_server>=1.21,<3"
 ]
 
 dynamic = ["version", "description", "authors", "urls", "keywords"]
