@@ -48,7 +48,7 @@
     "dependencies": {
         "@emotion/react": "^11.7.1",
         "@emotion/styled": "^11.6.0",
-        "@jupyter/ydoc": "^1.0.2",
+        "@jupyter/ydoc": "^1.0.2 || ^2.0.0 || ^3.0.0 || ^4.0.0",
         "@jupyterlab/application": "^4.0.0",
         "@jupyterlab/coreutils": "^6.0.0",
         "@jupyterlab/services": "^7.0.0",
