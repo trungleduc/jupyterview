@@ -2,7 +2,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { PartialJSONObject } from '@lumino/coreutils';
+import { PartialJSONObject, JSONObject } from '@lumino/coreutils';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
@@ -173,6 +173,27 @@ export class JupyterViewDoc extends YDocument<JupyterViewDocChange> {
   dispose(): void {
     this._mainViewState.unobserve(this._mainViewStateObserver);
     this._controlViewState.unobserve(this._controlViewStateObserver);
+  }
+
+  getSource(): JSONObject | string {
+    return this._content.toJSON();
+  }
+
+  setSource(source: JSONObject | string): void {
+    let value: JSONObject;
+    if (!source) {
+      return;
+    }
+    if (typeof source === 'string') {
+      value = JSON.parse(source);
+    } else {
+      value = source;
+    }
+    this.transact(() => {
+      Object.entries(value).forEach(([key, value]) => {
+        this._content.set(key, value);
+      });
+    });
   }
 
   public static create(): JupyterViewDoc {
