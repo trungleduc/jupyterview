@@ -3,7 +3,7 @@ name: Lite Deploy
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
       - '*'
@@ -44,7 +44,7 @@ jobs:
           path: ./docs/_output
 
   deploy:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     needs: [build]
     runs-on: ubuntu-latest
     steps:
