@@ -86,31 +86,6 @@
           "default": "./extensions",
           "$ref": "#/definitions/non-trailing-slash-uri"
         },
-        "fullMathjaxUrl": {
-          "type": "string",
-          "description": "path to MathJax2 assets",
-          "default": "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
-          "format": "uri"
-        },
-        "fullWebRtcSignalingUrls": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uri"
-          },
-          "description": "WebSocket URLs to use for finding WebRTC peers. Requires `jupyterlab-webrtc-docprovider`.",
-          "default": [
-            "wss://signaling.yjs.dev",
-            "wss://y-webrtc-signaling-eu.herokuapp.com",
-            "wss://y-webrtc-signaling-us.herokuapp.com"
-          ],
-          "minItems": 1
-        },
-        "mathjaxConfig": {
-          "type": "string",
-          "default": "TeX-AMS_CHTML-full,Safe",
-          "description": "a valid MathJax configuration blob, a comma-delimited list of MathJax profiles"
-        },
         "fullStaticUrl": {
           "description": "relative path to built static assets",
           "default": "./build",
@@ -173,24 +148,19 @@
           "type": "object",
           "additionalProperties": {
             "type": "object"
-          },
-          "properties": {
-            "@jupyterlite/pyolite-kernel-extension:kernel": {
-              "$ref": "#/definitions/pyolite-settings"
-            }
           }
         },
-        "retroPage": {
+        "notebookPage": {
           "description": "The page corresponding the named Notebook Classic UI section",
           "anyOf": [
             {
               "type": "string",
-              "description": "an unknown retro page"
+              "description": "an unknown notebook page"
             },
             {
               "type": "string",
               "enum": ["consoles", "notebooks", "edit", "tree"],
-              "description": "a well-known retro page"
+              "description": "a well-known notebook page"
             }
           ]
         },
@@ -199,36 +169,10 @@
           "type": "boolean",
           "default": false
         },
-        "collaborative": {
-          "description": "Whether to enable collaborative editing over WebRTC. Should be paired with the ``?room=<room name>`` URL parameter",
+        "enableServiceWorkerCache": {
+          "description": "Whether to enable the service worker cache",
           "type": "boolean",
           "default": false
-        }
-      }
-    },
-    "pyolite-settings": {
-      "description": "Pyodide-specific configuration values. Will be defined in another location in the future.",
-      "type": "object",
-      "properties": {
-        "pyodideUrl": {
-          "description": "The path to the main pyodide.js entry point",
-          "type": "string",
-          "default": "https://cdn.jsdelivr.net/pyodide/v0.22.0/full/pyodide.js",
-          "format": "uri"
-        },
-        "disablePyPIFallback": {
-          "description": "Disable the piplite behavior of falling back to https://pypi.org/pypi/",
-          "default": false,
-          "type": "boolean"
-        },
-        "pipliteUrls": {
-          "description": "Paths to PyPI-compatible API endpoints for wheels. If ending in ``all.json``, assumed to be an aggregate, keyed by package name, with relative paths",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "format": "uri"
         }
       }
     },

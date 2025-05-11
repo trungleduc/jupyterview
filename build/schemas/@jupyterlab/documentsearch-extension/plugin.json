@@ -1,6 +1,8 @@
 {
   "title": "Document Search",
   "description": "Document search plugin.",
+  "jupyter.lab.setting-icon": "ui-components:search",
+  "jupyter.lab.setting-icon-label": "Document Search",
   "jupyter.lab.menus": {
     "main": [
       {
@@ -45,6 +47,16 @@
       "command": "documentsearch:highlightPrevious",
       "keys": ["Accel Shift G"],
       "selector": ".jp-mod-searchable"
+    },
+    {
+      "command": "documentsearch:toggleSearchInSelection",
+      "keys": ["Alt L"],
+      "selector": ".jp-mod-search-active"
+    },
+    {
+      "command": "documentsearch:end",
+      "keys": ["Escape"],
+      "selector": ".jp-mod-search-active"
     }
   ],
   "properties": {
@@ -54,6 +66,13 @@
       "type": "number",
       "default": 500,
       "minimum": 0
+    },
+    "autoSearchInSelection": {
+      "title": "Search in selection automatically",
+      "description": "When starting search, the 'search in selection' mode will be enabled if `any` text/cell is selected, or when `multiple` lines or cells are selected, or `never`.",
+      "type": "string",
+      "enum": ["never", "multiple-selected", "any-selected"],
+      "default": "never"
     }
   },
   "additionalProperties": false,
