@@ -2,6 +2,34 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.8.0
+
+([Full Changelog](https://github.com/trungleduc/jupyterview/compare/v0.7.0...415533f1466092c00580f0737eb57c710bfb234f))
+
+### Bugs fixed
+
+- fix: pvd with path [#79](https://github.com/trungleduc/jupyterview/pull/79) ([@trungleduc](https://github.com/trungleduc))
+
+### Maintenance and upkeep improvements
+
+- bump jupyterlite [#75](https://github.com/trungleduc/jupyterview/pull/75) ([@trungleduc](https://github.com/trungleduc))
+- Bump actions [#74](https://github.com/trungleduc/jupyterview/pull/74) ([@trungleduc](https://github.com/trungleduc))
+- Bump micromatch from 4.0.5 to 4.0.8 [#70](https://github.com/trungleduc/jupyterview/pull/70) ([@trungleduc](https://github.com/trungleduc))
+- Bump actions/download-artifact from 2 to 4.1.7 in /.github/workflows [#69](https://github.com/trungleduc/jupyterview/pull/69) ([@trungleduc](https://github.com/trungleduc))
+- Bump ws from 8.16.0 to 8.17.1 [#67](https://github.com/trungleduc/jupyterview/pull/67) ([@trungleduc](https://github.com/trungleduc))
+- Bump tar from 6.2.0 to 6.2.1 [#65](https://github.com/trungleduc/jupyterview/pull/65) ([@trungleduc](https://github.com/trungleduc))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/trungleduc/jupyterview/graphs/contributors?from=2024-02-04&to=2026-01-24&type=c))
+
+@trungleduc ([activity](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Atrungleduc+updated%3A2024-02-04..2026-01-24&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.7.0
 
 ([Full Changelog](https://github.com/trungleduc/jupyterview/compare/v0.6.0...24dd94d80b687adbf5728b0a0c7f8118caa26021))
@@ -24,8 +52,6 @@
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterview/graphs/contributors?from=2023-05-29&to=2024-02-04&type=c))
 
 [@dependabot](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Adependabot+updated%3A2023-05-29..2024-02-04&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Agithub-actions+updated%3A2023-05-29..2024-02-04&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterview+involves%3Atrungleduc+updated%3A2023-05-29..2024-02-04&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.6.0
 
