@@ -733,7 +733,7 @@
             "@mui/material": {},
             "uuid": {},
             "jupyterview": {
-              "version": "0.7.0",
+              "version": "0.8.0",
               "singleton": true,
               "import": "/home/runner/work/jupyterview/jupyterview/lib/index.js"
             }
