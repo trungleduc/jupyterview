@@ -12,6 +12,11 @@ on:
         description: "Comma separated list of steps to skip"
         required: false
 
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish_release:
     runs-on: ubuntu-latest
@@ -23,7 +28,6 @@ jobs:
         uses: jupyter-server/jupyter_releaser/.github/actions/populate-release@v2
         with:
           token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-          target: ${{ github.event.inputs.target }}
           branch: ${{ github.event.inputs.branch }}
           release_url: ${{ github.event.inputs.release_url }}
           steps_to_skip: ${{ github.event.inputs.steps_to_skip }}
@@ -32,13 +36,10 @@ jobs:
         id: finalize-release
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-          PYPI_TOKEN_MAP: ${{ secrets.PYPI_TOKEN_MAP }}
           TWINE_USERNAME: __token__
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         uses: jupyter-server/jupyter-releaser/.github/actions/finalize-release@v2
         with:
           token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-          target: ${{ github.event.inputs.target }}
           release_url: ${{ steps.populate-release.outputs.release_url }}
 
       - name: "** Next Step **"
