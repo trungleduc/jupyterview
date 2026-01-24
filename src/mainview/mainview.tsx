@@ -53,6 +53,7 @@ import {
   ROTATION_STEP,
   THEME_TYPE
 } from './utils';
+import { PathExt } from '@jupyterlab/coreutils';
 
 interface IProps {
   context: DocumentRegistry.IContext<JupyterViewModel>;
@@ -192,11 +193,11 @@ export class MainView extends React.Component<IProps, IStates> {
         const fileList = Object.keys(contentPromises);
         for (const [path, promise] of entries) {
           const name = path.split('::')[0];
-
+          const fileNameOnly = PathExt.basename(name);
           promise.then(vtkParsedContent => {
             this.stringToPolyData(
               vtkParsedContent.binary,
-              `${name}.${vtkParsedContent.type}`
+              `${fileNameOnly}.${vtkParsedContent.type}`
             )
               .then(polyResult => {
                 counter = Math.round(counter + 100 / totalItems);
