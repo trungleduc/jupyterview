@@ -56,7 +56,7 @@
         "@kitware/vtk.js": "^22.4.0",
         "@mui/icons-material": "^5.3.1",
         "@mui/material": "^5.3.1",
-        "uuid": "^8.3.2",
+        "uuid": "^14.0.0",
         "yjs": "^13.5.0"
     },
     "devDependencies": {
